@@ -19,6 +19,9 @@ public class ApplicationConfig extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> resources = new java.util.HashSet<>();
         addRestResourceClasses(resources);
+        /* aqui para asegurarse que siempre los agregue */
+        resources.add(cimav.restrh.services.RESTCorsRequestFilter.class);
+        resources.add(cimav.restrh.services.RESTCorsResponseFilter.class);
         return resources;
     }
 
