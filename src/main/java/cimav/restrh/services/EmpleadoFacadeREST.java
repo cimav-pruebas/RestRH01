@@ -56,14 +56,7 @@ public class EmpleadoFacadeREST extends AbstractFacade<Empleado> {
     @Override
     public Empleado insert(Empleado entity) {
         this.setName(entity);
-        super.insert(entity); // <-- regresa con el Id nuevo
-        
-        Query query = getEntityManager().createQuery("SELECT NEW cimav.restrh.entities.Empleado(e.id, e.code, e.name, e.cuentaCimav) FROM Empleado AS e WHERE e.id = :p_id", Empleado.class);
-        query.setParameter("p_id", entity.getId());
-        Empleado empNuevo = (Empleado) query.getSingleResult();
-        
-        entity.setCode(empNuevo.getCode());
-        
+        super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
         return entity; 
     }
     

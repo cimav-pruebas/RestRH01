@@ -26,7 +26,7 @@ public abstract class AbstractFacade<T> {
         try {
             getEntityManager().persist(entity);
             getEntityManager().flush(); // The ID is only guaranteed to be generated at flush time. 
-            // con el Flus se le inyecta el Id y cualquier otro campo
+            getEntityManager().refresh(entity); // actualiza todos los campos incluyento code y consecutivo; los q nos interesan regresar.
         } catch (Exception e) {
             System.out.println(" >>> " + e.getMessage());
         }
