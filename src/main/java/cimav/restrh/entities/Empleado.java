@@ -51,8 +51,6 @@ import org.apache.commons.lang3.text.WordUtils;
     @NamedQuery(name = "Empleado.findByApellidoMaterno", query = "SELECT e FROM Empleado e WHERE e.apellidoMaterno = :apellidoMaterno"),
     @NamedQuery(name = "Empleado.findByNombre", query = "SELECT e FROM Empleado e WHERE e.nombre = :nombre"),
     @NamedQuery(name = "Empleado.findByIdClinica", query = "SELECT e FROM Empleado e WHERE e.idClinica = :idClinica"),
-    @NamedQuery(name = "Empleado.findByHasCredito", query = "SELECT e FROM Empleado e WHERE e.hasCredito = :hasCredito"),
-    @NamedQuery(name = "Empleado.findByNumCredito", query = "SELECT e FROM Empleado e WHERE e.numCredito = :numCredito"),
     @NamedQuery(name = "Empleado.findByCuentaCimav", query = "SELECT e FROM Empleado e WHERE e.cuentaCimav = :cuentaCimav"),
     @NamedQuery(name = "Empleado.findByIdBanco", query = "SELECT e FROM Empleado e WHERE e.idBanco = :idBanco"),
     @NamedQuery(name = "Empleado.findByIdSede", query = "SELECT e FROM Empleado e WHERE e.idSede = :idSede"),
@@ -112,13 +110,6 @@ public class Empleado extends BaseEntity implements Serializable {
     
     @Column(name = "id_clinica")
     private Integer idClinica;
-    
-    @Column(name = "has_credito")
-    private Boolean hasCredito;
-    
-    @Size(max = 30)
-    @Column(name = "num_credito")
-    private String numCredito;
     
     @Size(max = 60)
     @Column(name = "cuenta_cimav")
@@ -320,22 +311,6 @@ public class Empleado extends BaseEntity implements Serializable {
 
     public void setIdClinica(Integer idClinica) {
         this.idClinica = idClinica;
-    }
-
-    public Boolean getHasCredito() {
-        return hasCredito;
-    }
-
-    public void setHasCredito(Boolean hasCredito) {
-        this.hasCredito = hasCredito;
-    }
-
-    public String getNumCredito() {
-        return numCredito;
-    }
-
-    public void setNumCredito(String numCredito) {
-        this.numCredito = numCredito;
     }
 
     public String getCuentaCimav() {
