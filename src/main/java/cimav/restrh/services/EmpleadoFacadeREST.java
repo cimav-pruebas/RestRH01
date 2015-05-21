@@ -140,10 +140,10 @@ public class EmpleadoFacadeREST extends AbstractFacade<Empleado> {
         Departamento depto = null;
         try {
             depto = (Departamento) query.getSingleResult();
-            results.add((Empleado) depto.getEmpleadoCollection());
+            results.addAll((List<Empleado>)depto.getEmpleadoCollection());
             //Sorting by name
             Collections.sort(results, new Comparator<Empleado>() { @Override public int compare(Empleado  emp1, Empleado  emp2) { return  emp1.getName().compareTo(emp2.getName()); }});
-        } catch (NoResultException nr) {
+        } catch (Exception nr) {
             
         }
         return results;
