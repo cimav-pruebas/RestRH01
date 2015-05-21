@@ -33,13 +33,22 @@ public class DepartamentoFacadeREST extends AbstractFacade<Departamento> {
         super(Departamento.class);
     }
 
-    @POST
-    @Override
-    @Consumes("application/json")
-    public void create(Departamento entity) {
-        super.create(entity);
-    }
+//    @POST
+//    @Override
+//    @Consumes("application/json")
+//    public void create(Departamento entity) {
+//        super.create(entity);
+//    }
 
+    @POST
+    @Consumes("application/json")
+    @Produces("application/json")
+    @Override
+    public Departamento insert(Departamento entity) {
+        super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
+        return entity; 
+    }
+    
     @PUT
     @Path("{id}")
     @Consumes("application/json")
