@@ -7,15 +7,15 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.Departamento;
 import cimav.restrh.entities.Empleado;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -133,14 +133,19 @@ public class EmpleadoFacadeREST extends AbstractFacade<Empleado> {
     @Produces("application/json")
     public List<Empleado> findAllByDepto(@PathParam("idDepto") Integer idDepto) {
         
+        List<Empleado> results = new ArrayList<>();
+        
         Query query = getEntityManager().createQuery("SELECT d FROM Departamento d WHERE d.id = :id", Departamento.class);
         query.setParameter("id", idDepto);
-        Departamento depto = (Departamento) query.getSingleResult();
-        List<Empleado> results = (List<Empleado>) depto.getEmpleadoCollection(); //query.getResultList();
-        
-        //Sorting by name
-        Collections.sort(results, new Comparator<Empleado>() { @Override public int compare(Empleado  emp1, Empleado  emp2) { return  emp1.getName().compareTo(emp2.getName()); }
-    });        
+        Departamento depto = null;
+        try {
+            depto = (Departamento) query.getSingleResult();
+            results.add((Empleado) depto.getEmpleadoCollection());
+            //Sorting by name
+            Collections.sort(results, new Comparator<Empleado>() { @Override public int compare(Empleado  emp1, Empleado  emp2) { return  emp1.getName().compareTo(emp2.getName()); }});
+        } catch (NoResultException nr) {
+            
+        }
         return results;
     }
     
