@@ -5,6 +5,7 @@
  */
 package cimav.restrh.services;
 
+import cimav.restrh.entities.Departamento;
 import cimav.restrh.entities.Empleado;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,6 +14,8 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -118,6 +121,22 @@ public class EmpleadoFacadeREST extends AbstractFacade<Empleado> {
         // usa SELECT NEW CONSTRUCTOR en lugar del @JsonView que no funcionó
         Query query = getEntityManager().createQuery("SELECT NEW cimav.restrh.entities.Empleado(e.id, e.code, e.name, e.cuentaCimav) FROM Empleado AS e", Empleado.class);
         List<Empleado> results = query.getResultList();
+        
+        //Sorting by name
+        Collections.sort(results, new Comparator<Empleado>() { @Override public int compare(Empleado  emp1, Empleado  emp2) { return  emp1.getName().compareTo(emp2.getName()); }
+    });        
+        return results;
+    }
+
+    @GET
+    @Path("by_depto/{idDepto}")
+    @Produces("application/json")
+    public List<Empleado> findAllByDepto(@PathParam("idDepto") Integer idDepto) {
+        
+        Query query = getEntityManager().createQuery("SELECT d FROM Departamento d WHERE d.id = :id", Departamento.class);
+        query.setParameter("id", idDepto);
+        Departamento depto = (Departamento) query.getSingleResult();
+        List<Empleado> results = (List<Empleado>) depto.getEmpleadoCollection(); //query.getResultList();
         
         //Sorting by name
         Collections.sort(results, new Comparator<Empleado>() { @Override public int compare(Empleado  emp1, Empleado  emp2) { return  emp1.getName().compareTo(emp2.getName()); }
