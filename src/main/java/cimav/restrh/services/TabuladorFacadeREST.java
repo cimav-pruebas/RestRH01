@@ -64,7 +64,8 @@ public class TabuladorFacadeREST extends AbstractFacade<Tabulador> {
     @Override
     @Produces("application/json")
     public List<Tabulador> findAll() {
-        return super.findAll();
+        List<Tabulador> result = super.findAll();
+        return result;
     }
 
     @GET
