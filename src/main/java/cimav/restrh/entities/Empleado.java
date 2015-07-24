@@ -196,7 +196,7 @@ public class Empleado extends BaseEntity implements Serializable {
     private String direccionCalle;
     
     @Column(name = "direccion_colonia")
-    private String direccion_colonia;
+    private String direccionColonia;
     
     @Column(name = "direccion_cp")
     private String direccionCP;
@@ -523,12 +523,12 @@ public class Empleado extends BaseEntity implements Serializable {
         this.direccionCalle = direccionCalle;
     }
 
-    public String getDireccion_colonia() {
-        return direccion_colonia;
+    public String getDireccionColonia() {
+        return direccionColonia;
     }
 
-    public void setDireccion_colonia(String direccion_colonia) {
-        this.direccion_colonia = direccion_colonia;
+    public void setDireccionColonia(String direccionColonia) {
+        this.direccionColonia = direccionColonia;
     }
 
     public String getDireccionCP() {
