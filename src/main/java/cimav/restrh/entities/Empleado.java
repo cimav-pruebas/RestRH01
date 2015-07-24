@@ -181,7 +181,32 @@ public class Empleado extends BaseEntity implements Serializable {
     @JoinColumn(name = "id_departamento", referencedColumnName = "id")
     @ManyToOne
     private Departamento departamento;
+    
+    @Column(name = "fecha_nacimiento")
+    @Temporal(TemporalType.DATE)
+    private Date fechaNacimiento;
 
+    @Column(name = "id_sexo")
+    private Integer idSexo;
+    
+    @Column(name = "id_edo_civil")
+    private Integer idEdoCivil;
+    
+    @Column(name = "direccion_calle")
+    private String direccionCalle;
+    
+    @Column(name = "direccion_colonia")
+    private String direccion_colonia;
+    
+    @Column(name = "direccion_cp")
+    private String direccionCP;
+    
+    @Column(name = "telefono")
+    private String telefono;
+    
+    @Column(name = "email")
+    private String emailPersonal;
+    
     @PostLoad
     public void reduceJefe() {
         // TODO Buscar best approach de reducción profundidad de Entidad en Empleado.Jefe
@@ -466,4 +491,69 @@ public class Empleado extends BaseEntity implements Serializable {
         this.departamento = departamento;
     }
 
+    public Date getFechaNacimiento() {
+        return fechaNacimiento;
+    }
+
+    public void setFechaNacimiento(Date fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
+    }
+
+    public Integer getIdSexo() {
+        return idSexo;
+    }
+
+    public void setIdSexo(Integer idSexo) {
+        this.idSexo = idSexo;
+    }
+
+    public Integer getIdEdoCivil() {
+        return idEdoCivil;
+    }
+
+    public void setIdEdoCivil(Integer idEdoCivil) {
+        this.idEdoCivil = idEdoCivil;
+    }
+
+    public String getDireccionCalle() {
+        return direccionCalle;
+    }
+
+    public void setDireccionCalle(String direccionCalle) {
+        this.direccionCalle = direccionCalle;
+    }
+
+    public String getDireccion_colonia() {
+        return direccion_colonia;
+    }
+
+    public void setDireccion_colonia(String direccion_colonia) {
+        this.direccion_colonia = direccion_colonia;
+    }
+
+    public String getDireccionCP() {
+        return direccionCP;
+    }
+
+    public void setDireccionCP(String direccionCP) {
+        this.direccionCP = direccionCP;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getEmailPersonal() {
+        return emailPersonal;
+    }
+
+    public void setEmailPersonal(String emailPersonal) {
+        this.emailPersonal = emailPersonal;
+    }
+
+    
 }
