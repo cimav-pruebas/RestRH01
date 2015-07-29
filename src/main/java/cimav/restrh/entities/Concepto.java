@@ -10,14 +10,10 @@ import javax.persistence.Basic;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -42,6 +38,11 @@ public class Concepto extends BaseEntity implements Serializable {
     @Column(name = "tipo_mvto")
     private Character tipoMvto;
 
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "tipo_calculo")
+    private Character tipoCalculo;
+
     @Column(name = "status")
     private Short status;
 
@@ -61,6 +62,14 @@ public class Concepto extends BaseEntity implements Serializable {
         this.tipoMvto = tipoMvto;
     }
 
+    public Character getTipoCalculo() {
+        return tipoCalculo;
+    }
+
+    public void setTipoCalculo(Character tipoCalculo) {
+        this.tipoCalculo = tipoCalculo;
+    }
+
     public Short getStatus() {
         return status;
     }
@@ -68,6 +77,5 @@ public class Concepto extends BaseEntity implements Serializable {
     public void setStatus(Short status) {
         this.status = status;
     }
-
     
 }
