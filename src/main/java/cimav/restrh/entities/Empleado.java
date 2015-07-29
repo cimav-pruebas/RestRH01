@@ -207,6 +207,10 @@ public class Empleado extends BaseEntity implements Serializable {
     @Column(name = "email")
     private String emailPersonal;
     
+    @OneToMany(mappedBy = "empleado")
+    private Collection<NominaQuincenal> nominaQuincenalCollection;
+
+    
     @PostLoad
     public void reduceJefe() {
         // TODO Buscar best approach de reducción profundidad de Entidad en Empleado.Jefe
@@ -555,5 +559,13 @@ public class Empleado extends BaseEntity implements Serializable {
         this.emailPersonal = emailPersonal;
     }
 
-    
+    @XmlTransient
+    public Collection<NominaQuincenal> getNominaQuincenalCollection() {
+        return nominaQuincenalCollection;
+    }
+
+    public void setNominaQuincenalCollection(Collection<NominaQuincenal> nominaQuincenalCollection) {
+        this.nominaQuincenalCollection = nominaQuincenalCollection;
+    }
+
 }
