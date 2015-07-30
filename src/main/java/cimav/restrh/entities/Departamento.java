@@ -32,17 +32,17 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Departamento extends BaseEntity implements Serializable {
 
     @OneToMany(mappedBy = "departamento")
-    private Collection<Empleado> empleadoCollection;
+    private Collection<EmpleadoBase> empleadoCollection;
 
     public Departamento() {
     }
 
     @XmlTransient
-    public Collection<Empleado> getEmpleadoCollection() {
+    public Collection<EmpleadoBase> getEmpleadoCollection() {
         return empleadoCollection;
     }
 
-    public void setEmpleadoCollection(Collection<Empleado> empleadoCollection) {
+    public void setEmpleadoCollection(Collection<EmpleadoBase> empleadoCollection) {
         this.empleadoCollection = empleadoCollection;
     }
 

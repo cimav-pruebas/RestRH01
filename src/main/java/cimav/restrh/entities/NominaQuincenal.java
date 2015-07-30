@@ -47,7 +47,7 @@ public class NominaQuincenal implements Serializable {
     
     @JoinColumn(name = "id_empleado", referencedColumnName = "id")
     @ManyToOne
-    private Empleado empleado;
+    private EmpleadoBase empleadoBase;
     
     @JoinColumn(name = "id_concepto", referencedColumnName = "id")
     @ManyToOne
@@ -101,20 +101,20 @@ public class NominaQuincenal implements Serializable {
         this.numQuincenas = numQuincenas;
     }
 
-    public Empleado getEmpleado() {
-        return empleado;
-    }
-
-    public void setEmpleado(Empleado empleado) {
-        this.empleado = empleado;
-    }
-
     public Concepto getConcepto() {
         return concepto;
     }
 
     public void setConcepto(Concepto concepto) {
         this.concepto = concepto;
+    }
+
+    public EmpleadoBase getEmpleadoBase() {
+        return empleadoBase;
+    }
+
+    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
+        this.empleadoBase = empleadoBase;
     }
     
     @Override

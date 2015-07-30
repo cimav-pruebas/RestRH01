@@ -49,7 +49,7 @@ public class Tabulador extends BaseEntity implements Serializable {
     private BigDecimal cargaAdmin;
     
     @OneToMany(mappedBy = "nivel")
-    private Collection<Empleado> empleadoCollection;
+    private Collection<EmpleadoBase> empleadoCollection;
 
     public Tabulador() {
     }
@@ -95,11 +95,11 @@ public class Tabulador extends BaseEntity implements Serializable {
     }
     
     @XmlTransient
-    public Collection<Empleado> getEmpleadoCollection() {
+    public Collection<EmpleadoBase> getEmpleadoCollection() {
         return empleadoCollection;
     }
 
-    public void setEmpleadoCollection(Collection<Empleado> empleadoCollection) {
+    public void setEmpleadoCollection(Collection<EmpleadoBase> empleadoCollection) {
         this.empleadoCollection = empleadoCollection;
     }
 

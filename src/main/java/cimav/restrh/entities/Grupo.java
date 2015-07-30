@@ -38,7 +38,7 @@ public class Grupo extends BaseEntity implements Serializable {
     @Column(name = "descripcion")
     private String descripcion;
     @OneToMany(mappedBy = "grupo")
-    private Collection<Empleado> empleadoCollection;
+    private Collection<EmpleadoBase> empleadoCollection;
 
     public Grupo() {
     }
@@ -52,11 +52,11 @@ public class Grupo extends BaseEntity implements Serializable {
     }
 
     @XmlTransient
-    public Collection<Empleado> getEmpleadoCollection() {
+    public Collection<EmpleadoBase> getEmpleadoCollection() {
         return empleadoCollection;
     }
 
-    public void setEmpleadoCollection(Collection<Empleado> empleadoCollection) {
+    public void setEmpleadoCollection(Collection<EmpleadoBase> empleadoCollection) {
         this.empleadoCollection = empleadoCollection;
     }
 

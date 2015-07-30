@@ -5,16 +5,11 @@
  */
 package cimav.restrh.services;
 
-import cimav.restrh.entities.Departamento;
 import cimav.restrh.entities.Empleado;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -44,13 +39,6 @@ public class EmpleadoFacadeREST extends AbstractFacade<Empleado> {
         return em;
     }
     
-    
-//    @POST
-//    @Override
-//    @Consumes("application/json")
-//    public void create(Empleado entity) {
-//        super.create(entity);
-//    }
     
     @POST
     @Consumes("application/json")
@@ -111,41 +99,20 @@ public class EmpleadoFacadeREST extends AbstractFacade<Empleado> {
         return String.valueOf(super.count());
     }
 
-    @GET
-    @Path("base")
-    // @JsonView(View.Base.class) no funciona
-    @Produces("application/json")
-    public List<Empleado> findAllBase() {
-        
-        // usa SELECT NEW CONSTRUCTOR en lugar del @JsonView que no funcionó
-        Query query = getEntityManager().createQuery("SELECT NEW cimav.restrh.entities.Empleado(e.id, e.code, e.name, e.cuentaCimav) FROM Empleado AS e", Empleado.class);
-        List<Empleado> results = query.getResultList();
-        
-        //Sorting by name
-        Collections.sort(results, new Comparator<Empleado>() { @Override public int compare(Empleado  emp1, Empleado  emp2) { return  emp1.getName().compareTo(emp2.getName()); }
-    });        
-        return results;
-    }
+//    @GET
+//    @Path("base")
+//    // @JsonView(View.Base.class) no funciona
+//    @Produces("application/json")
+//    public List<EmpleadoOld> findAllBase() {
+//        
+//        // usa SELECT NEW CONSTRUCTOR en lugar del @JsonView que no funcionó
+//        Query query = getEntityManager().createQuery("SELECT NEW cimav.restrh.entities.Empleado(e.id, e.code, e.name, e.cuentaCimav) FROM Empleado AS e", EmpleadoOld.class);
+//        List<EmpleadoOld> results = query.getResultList();
+//        
+//        //Sorting by name
+//        Collections.sort(results, new Comparator<EmpleadoOld>() { @Override public int compare(EmpleadoOld  emp1, EmpleadoOld  emp2) { return  emp1.getName().compareTo(emp2.getName()); }
+//    });        
+//        return results;
+//    }
 
-    @GET
-    @Path("by_depto/{idDepto}")
-    @Produces("application/json")
-    public List<Empleado> findAllByDepto(@PathParam("idDepto") Integer idDepto) {
-        
-        List<Empleado> results = new ArrayList<>();
-        
-        Query query = getEntityManager().createQuery("SELECT d FROM Departamento d WHERE d.id = :id", Departamento.class);
-        query.setParameter("id", idDepto);
-        Departamento depto = null;
-        try {
-            depto = (Departamento) query.getSingleResult();
-            results.addAll((List<Empleado>)depto.getEmpleadoCollection());
-            //Sorting by name
-            Collections.sort(results, new Comparator<Empleado>() { @Override public int compare(Empleado  emp1, Empleado  emp2) { return  emp1.getName().compareTo(emp2.getName()); }});
-        } catch (Exception nr) {
-            
-        }
-        return results;
-    }
-    
 }
