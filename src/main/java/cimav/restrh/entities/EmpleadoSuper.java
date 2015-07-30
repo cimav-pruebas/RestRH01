@@ -20,8 +20,8 @@ import javax.xml.bind.annotation.XmlElement;
 @MappedSuperclass
 public class EmpleadoSuper extends BaseEntity implements Serializable {
     
-    @Column(name = "status")
-    private Short status;
+    @Column(name = "id_status")
+    private Short idStatus;
     
     @Size(max = 300)
     @Column(name = "url_photo")
@@ -65,12 +65,12 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
         super();
     }
 
-    public Short getStatus() {
-        return status;
+    public Short getIdStatus() {
+        return idStatus;
     }
 
-    public void setStatus(Short status) {
-        this.status = status;
+    public void setIdStatus(Short idStatus) {
+        this.idStatus = idStatus;
     }
 
     public String getUrlPhoto() {
