@@ -45,9 +45,13 @@ public class NominaQuincenal implements Serializable {
     @Column(name = "id")
     private Integer id;
     
-    @JoinColumn(name = "id_empleado", referencedColumnName = "id")
+    // No tiene Get/Set y No Insertable ni Updatable; es decir, es OnlyRead y sirve como mappedBy en EmpleadoNomina
+    @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne
     private EmpleadoBase empleadoBase;
+    
+    @Column(name = "id_empleado")
+    private Integer idEmpleado;
     
     @JoinColumn(name = "id_concepto", referencedColumnName = "id")
     @ManyToOne
@@ -75,6 +79,14 @@ public class NominaQuincenal implements Serializable {
         this.id = id;
         this.cantidad = cantidad;
         this.numQuincenas = numQuincenas;
+    }
+
+    public Integer getIdEmpleado() {
+        return idEmpleado;
+    }
+
+    public void setIdEmpleado(Integer idEmpleado) {
+        this.idEmpleado = idEmpleado;
     }
 
     public Integer getId() {
@@ -109,13 +121,13 @@ public class NominaQuincenal implements Serializable {
         this.concepto = concepto;
     }
 
-    public EmpleadoBase getEmpleadoBase() {
-        return empleadoBase;
-    }
-
-    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
-        this.empleadoBase = empleadoBase;
-    }
+//    public EmpleadoBase getEmpleadoBase() {
+//        return empleadoBase;
+//    }
+//
+//    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
+//        this.empleadoBase = empleadoBase;
+//    }
     
     @Override
     public int hashCode() {

@@ -34,7 +34,7 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date fechaAntiguedad;
     
-    @OneToMany(mappedBy = "empleadoBase")
+    @OneToMany(mappedBy = "EmpleadoBase")
     private Collection<NominaQuincenal> nominaQuincenalCollection;
 
     public EmpleadoNomina() {
