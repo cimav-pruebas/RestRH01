@@ -24,52 +24,41 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Cacheable(false)
 @Table(name = "conceptos", catalog = "rh_development", schema = "public")
 @XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Concepto.findAll", query = "SELECT c FROM Concepto c"),
-    @NamedQuery(name = "Concepto.findById", query = "SELECT c FROM Concepto c WHERE c.id = :id"),
-    @NamedQuery(name = "Concepto.findByCode", query = "SELECT c FROM Concepto c WHERE c.code = :code"),
-    @NamedQuery(name = "Concepto.findByName", query = "SELECT c FROM Concepto c WHERE c.name = :name"),
-    @NamedQuery(name = "Concepto.findByTipoMvto", query = "SELECT c FROM Concepto c WHERE c.tipoMvto = :tipoMvto"),
-    @NamedQuery(name = "Concepto.findByStatus", query = "SELECT c FROM Concepto c WHERE c.status = :status")})
 public class Concepto extends BaseEntity implements Serializable {
 
     @Basic(optional = false)
     @NotNull
-    @Column(name = "tipo_mvto")
-    private Character tipoMvto;
+    @Column(name = "id_tipo_mvto")
+    private Character idTipoMvto;
 
     @Basic(optional = false)
     @NotNull
-    @Column(name = "tipo_calculo")
-    private Character tipoCalculo;
+    @Column(name = "id_tipo_calculo")
+    private Character idTipoCalculo;
 
     @Column(name = "status")
     private Short status;
 
     public Concepto() {
+        super();
     }
 
-    public Concepto(Integer id, String code, String name, Character tipoMvto) {
-        super(id, code, name);
-        this.tipoMvto = tipoMvto;
+    public Character getIdTipoMvto() {
+        return idTipoMvto;
     }
 
-    public Character getTipoMvto() {
-        return tipoMvto;
+    public void setIdTipoMvto(Character idTipoMvto) {
+        this.idTipoMvto = idTipoMvto;
     }
 
-    public void setTipoMvto(Character tipoMvto) {
-        this.tipoMvto = tipoMvto;
+    public Character getIdTipoCalculo() {
+        return idTipoCalculo;
     }
 
-    public Character getTipoCalculo() {
-        return tipoCalculo;
+    public void setIdTipoCalculo(Character idTipoCalculo) {
+        this.idTipoCalculo = idTipoCalculo;
     }
-
-    public void setTipoCalculo(Character tipoCalculo) {
-        this.tipoCalculo = tipoCalculo;
-    }
-
+    
     public Short getStatus() {
         return status;
     }
