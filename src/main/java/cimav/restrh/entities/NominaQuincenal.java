@@ -81,9 +81,6 @@ public class NominaQuincenal implements Serializable {
     @Column(name = "saldo_restante")
     private BigDecimal saldoRestante;
     
-    @Column(name = "id_tipo_movimiento")
-    private Character idTipoMovimiento;    
-    
     public NominaQuincenal() {
     }
 
@@ -175,14 +172,6 @@ public class NominaQuincenal implements Serializable {
 
     public void setSaldoRestante(BigDecimal saldoRestante) {
         this.saldoRestante = saldoRestante;
-    }
-
-    public Character getIdTipoMovimiento() {
-        return idTipoMovimiento;
-    }
-
-    public void setIdTipoMovimiento(Character idTipoMovimiento) {
-        this.idTipoMovimiento = idTipoMovimiento;
     }
 
     @Override
