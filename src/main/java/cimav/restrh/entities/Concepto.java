@@ -10,8 +10,6 @@ import javax.persistence.Basic;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -28,8 +26,8 @@ public class Concepto extends BaseEntity implements Serializable {
 
     @Basic(optional = false)
     @NotNull
-    @Column(name = "id_tipo_mvto")
-    private Character idTipoMvto;
+    @Column(name = "id_tipo_concepto")
+    private Character idTipoConcepto;
 
     @Basic(optional = false)
     @NotNull
@@ -43,14 +41,14 @@ public class Concepto extends BaseEntity implements Serializable {
         super();
     }
 
-    public Character getIdTipoMvto() {
-        return idTipoMvto;
+    public Character getIdTipoConcepto() {
+        return idTipoConcepto;
     }
 
-    public void setIdTipoMvto(Character idTipoMvto) {
-        this.idTipoMvto = idTipoMvto;
+    public void setIdTipoConcepto(Character idTipoConcepto) {
+        this.idTipoConcepto = idTipoConcepto;
     }
-
+    
     public Character getIdTipoCalculo() {
         return idTipoCalculo;
     }

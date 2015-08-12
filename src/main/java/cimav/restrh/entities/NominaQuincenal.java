@@ -16,8 +16,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -30,11 +28,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Cacheable(false)
 @Table(name = "nominaquincenal", catalog = "rh_development", schema = "public")
 @XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "NominaQuincenal.findAll", query = "SELECT n FROM NominaQuincenal n"),
-    @NamedQuery(name = "NominaQuincenal.findById", query = "SELECT n FROM NominaQuincenal n WHERE n.id = :id"),
-    @NamedQuery(name = "NominaQuincenal.findByCantidad", query = "SELECT n FROM NominaQuincenal n WHERE n.cantidad = :cantidad"),
-    @NamedQuery(name = "NominaQuincenal.findByNumQuincenas", query = "SELECT n FROM NominaQuincenal n WHERE n.numQuincenas = :numQuincenas")})
 public class NominaQuincenal implements Serializable {
     
     private static final long serialVersionUID = 1L;
@@ -68,6 +61,29 @@ public class NominaQuincenal implements Serializable {
     @Column(name = "num_quincenas")
     private short numQuincenas;
 
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "pago_unico")
+    private BigDecimal pagoUnico;
+    
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "pago_permanente")
+    private BigDecimal pagoPermanente;
+    
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "saldo_descuento")
+    private BigDecimal saldo_descuento;
+    
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "saldo_restante")
+    private BigDecimal saldoRestante;
+    
+    @Column(name = "id_tipo_movimiento")
+    private Character idTipoMovimiento;    
+    
     public NominaQuincenal() {
     }
 
@@ -128,7 +144,47 @@ public class NominaQuincenal implements Serializable {
 //    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
 //        this.empleadoBase = empleadoBase;
 //    }
-    
+
+    public BigDecimal getPagoUnico() {
+        return pagoUnico;
+    }
+
+    public void setPagoUnico(BigDecimal pagoUnico) {
+        this.pagoUnico = pagoUnico;
+    }
+
+    public BigDecimal getPagoPermanente() {
+        return pagoPermanente;
+    }
+
+    public void setPagoPermanente(BigDecimal pagoPermanente) {
+        this.pagoPermanente = pagoPermanente;
+    }
+
+    public BigDecimal getSaldo_descuento() {
+        return saldo_descuento;
+    }
+
+    public void setSaldo_descuento(BigDecimal saldo_descuento) {
+        this.saldo_descuento = saldo_descuento;
+    }
+
+    public BigDecimal getSaldoRestante() {
+        return saldoRestante;
+    }
+
+    public void setSaldoRestante(BigDecimal saldoRestante) {
+        this.saldoRestante = saldoRestante;
+    }
+
+    public Character getIdTipoMovimiento() {
+        return idTipoMovimiento;
+    }
+
+    public void setIdTipoMovimiento(Character idTipoMovimiento) {
+        this.idTipoMovimiento = idTipoMovimiento;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;

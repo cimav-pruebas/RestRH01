@@ -79,22 +79,6 @@ public class ConceptoFacadeREST extends AbstractFacade<Concepto> {
     }
 
     @GET
-    @Path("base")
-    // @JsonView(View.Base.class) no funciona
-    @Produces("application/json")
-    public List<Concepto> findAllBase() {
-        
-        // usa SELECT NEW CONSTRUCTOR en lugar del @JsonView que no funcionó
-        Query query = getEntityManager().createQuery("SELECT NEW cimav.restrh.entities.Concepto(c.id, c.code, c.name, c.tipoMvto) FROM Concepto AS c", Concepto.class);
-        List<Concepto> results = query.getResultList();
-        
-        //Sorting by code
-        Collections.sort(results, new Comparator<Concepto>() { @Override public int compare(Concepto  emp1, Concepto  emp2) { return  emp1.getCode().compareTo(emp2.getCode()); }});        
-        
-        return results;
-    }
-    
-    @GET
     @Path("count")
     @Produces("text/plain")
     public String countREST() {
