@@ -74,7 +74,7 @@ public class NominaQuincenal implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(name = "saldo_descuento")
-    private BigDecimal saldo_descuento;
+    private BigDecimal saldoDescuento;
     
     @Basic(optional = false)
     @NotNull
@@ -158,14 +158,22 @@ public class NominaQuincenal implements Serializable {
         this.pagoPermanente = pagoPermanente;
     }
 
-    public BigDecimal getSaldo_descuento() {
-        return saldo_descuento;
+    public EmpleadoBase getEmpleadoBase() {
+        return empleadoBase;
     }
 
-    public void setSaldo_descuento(BigDecimal saldo_descuento) {
-        this.saldo_descuento = saldo_descuento;
+    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
+        this.empleadoBase = empleadoBase;
     }
 
+    public BigDecimal getSaldoDescuento() {
+        return saldoDescuento;
+    }
+
+    public void setSaldoDescuento(BigDecimal saldoDescuento) {
+        this.saldoDescuento = saldoDescuento;
+    }
+    
     public BigDecimal getSaldoRestante() {
         return saldoRestante;
     }
