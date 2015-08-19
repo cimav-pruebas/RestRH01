@@ -31,6 +31,10 @@ import javax.ws.rs.Produces;
 @Path("calculo")
 public class CalculoREST {
     
+    // http://stackoverflow.com/questions/1359817/using-bigdecimal-to-work-with-currencies
+    
+    public final int BIG_SCALE = 5;
+    
     @PersistenceContext(unitName = "PU_JPA")
     private EntityManager em;
 
@@ -55,8 +59,9 @@ public class CalculoREST {
         
         BigDecimal sueldo_ordinario = BigDecimal.ZERO;
         BigDecimal sueldo_dias_descanso = BigDecimal.ONE;
-        
+
         try {
+            
             EmpleadoNomina empleadoNomina = getEntityManager().find(EmpleadoNomina.class, idEmpleado);
             if(empleadoNomina == null) throw new NullPointerException("EMPLEADO");
 
@@ -66,7 +71,7 @@ public class CalculoREST {
             BigDecimal sueldo_base_mes = nivel.getSueldo();
             if (sueldo_base_mes == null) throw new NullPointerException("SUELD_BASE_MES");
 
-            BigDecimal sueldo_base_dia = sueldo_base_mes.divide(new BigDecimal(DIAS_MES), RoundingMode.HALF_UP);
+            BigDecimal sueldo_base_dia = sueldo_base_mes.divide(new BigDecimal(DIAS_MES), BIG_SCALE, RoundingMode.HALF_UP);
 
             sueldo_ordinario = sueldo_base_dia.multiply(new BigDecimal(DIAS_ORDINARIOS), MathContext.UNLIMITED);
             sueldo_dias_descanso = sueldo_base_dia.multiply(new BigDecimal(DIAS_DESCANSO), MathContext.UNLIMITED);
