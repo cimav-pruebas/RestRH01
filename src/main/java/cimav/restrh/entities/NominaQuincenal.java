@@ -16,6 +16,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -28,6 +30,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Cacheable(false)
 @Table(name = "nominaquincenal", catalog = "rh_development", schema = "public")
 @XmlRootElement
+@NamedQueries({
+    @NamedQuery(name = "NominaQuincenal.findBy_IdEmpleado_Concepto", query = "SELECT t FROM NominaQuincenal t WHERE t.idEmpleado = :id_empleado AND t.concepto = :concepto")})
 public class NominaQuincenal implements Serializable {
     
     private static final long serialVersionUID = 1L;
@@ -82,8 +86,21 @@ public class NominaQuincenal implements Serializable {
     private BigDecimal saldoRestante;
     
     public NominaQuincenal() {
+        idEmpleado = 0;
+        numQuincenas = 1;
+        cantidad = BigDecimal.ZERO;
+        pagoUnico = BigDecimal.ZERO;
+        pagoPermanente = BigDecimal.ZERO;
+        saldoDescuento = BigDecimal.ZERO;
+        saldoRestante = BigDecimal.ZERO;
     }
 
+    public NominaQuincenal(int idEmpleado, Concepto concepto, BigDecimal cantidad) {
+        this();
+        this.idEmpleado = idEmpleado;
+        this.concepto = concepto;
+        this.cantidad = cantidad;
+    }
     public NominaQuincenal(Integer id) {
         this.id = id;
     }

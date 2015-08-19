@@ -32,6 +32,7 @@ public class ApplicationConfig extends Application {
      * If required, comment out calling this method in getClasses().
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
+        resources.add(cimav.restrh.services.CalculoREST.class);
         resources.add(cimav.restrh.services.ConceptoFacadeREST.class);
         resources.add(cimav.restrh.services.DepartamentoFacadeREST.class);
         resources.add(cimav.restrh.services.EmpleadoBaseFacadeREST.class);
