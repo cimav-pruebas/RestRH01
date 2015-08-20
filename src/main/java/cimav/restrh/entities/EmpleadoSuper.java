@@ -35,9 +35,8 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     @ManyToOne
     private Tabulador nivel;
     
-    @JoinColumn(name = "id_grupo", referencedColumnName = "id")
-    @ManyToOne
-    private Grupo grupo;
+    @Column(name = "id_grupo")
+    private Integer idGrupo;
     
     @XmlElement(name = "departamento")
     @JoinColumn(name = "id_departamento", referencedColumnName = "id")
@@ -97,14 +96,6 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
         this.nivel = nivel;
     }
 
-    public Grupo getGrupo() {
-        return grupo;
-    }
-
-    public void setGrupo(Grupo grupo) {
-        this.grupo = grupo;
-    }
-
     public Departamento getDepartamento() {
         return departamento;
     }
@@ -119,6 +110,14 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
 
     public void setIdSede(Short idSede) {
         this.idSede = idSede;
+    }
+
+    public Integer getIdGrupo() {
+        return idGrupo;
+    }
+
+    public void setIdGrupo(Integer idGrupo) {
+        this.idGrupo = idGrupo;
     }
     
     
