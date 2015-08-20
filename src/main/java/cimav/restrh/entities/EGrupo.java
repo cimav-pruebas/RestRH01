@@ -10,22 +10,22 @@ package cimav.restrh.entities;
  * @author juan.calderon
  */
 public enum EGrupo {
-    CYT(1),
-    MMS(2),
-    AYA(3),
+    AYA(1),
+    CYT(2),
+    MMS(3),
     HON(4);
     
-    private int id;
+    private Integer id;
     
-    EGrupo(int id){
+    EGrupo(Integer id){
         this.id = id;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
     
