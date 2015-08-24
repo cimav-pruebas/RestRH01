@@ -12,6 +12,7 @@ import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -36,6 +37,9 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
     
     @OneToMany(mappedBy = "EmpleadoBase")
     private Collection<NominaQuincenal> nominaQuincenalCollection;
+    
+    @OneToOne(mappedBy = "empleadoNomina")
+    private Falta falta;
 
     public EmpleadoNomina() {
         super();
@@ -65,5 +69,13 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
         this.nominaQuincenalCollection = nominaQuincenalCollection;
     }
 
+    public Falta getFalta() {
+        return falta;
+    }
+
+    public void setFalta(Falta falta) {
+        this.falta = falta;
+    }
     
+
 }

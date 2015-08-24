@@ -13,6 +13,7 @@ import cimav.restrh.entities.Tabulador;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.Objects;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -25,6 +26,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.joda.time.DateTime;
 import org.joda.time.Years;
+
 
 /**
  *
@@ -140,22 +142,26 @@ public class CalculoREST {
                 sueldo_quincenal = sueldo_ordinario.add(sueldo_dias_descanso);
             }
 
+            // TODO dias trabajados
+            Date finDeQuincena = new Date(); // o donde cumple los años
+            // y separa en dos si tiene diferencia
             if (isCYT) {
-                //TODO usar la fecha de Fin De Quincena
-                int anios = Years.yearsBetween(new DateTime(empleadoNomina.getFechaAntiguedad()), new DateTime()).getYears();
-                if (anios >= 5) {
+
+                //TODO BUG Muy Lento y problema con JodaTime Resource not found: "org/joda/time/tz/data/ZoneInfoMap"
+                int years = Years.yearsBetween(new DateTime(empleadoNomina.getFechaAntiguedad()), new DateTime(finDeQuincena)).getYears();
+                if (years >= 5) {
                     prima_antiguedad = sueldo_quincenal.multiply(new BigDecimal(PORCEN_FONDO_AHORRO_CYT));
-                    prima_antiguedad = prima_antiguedad.multiply(new BigDecimal(anios));
+                    prima_antiguedad = prima_antiguedad.multiply(new BigDecimal(years));
                 }
                 
                 materiales = sueldo_quincenal.multiply(new BigDecimal(PORCEN_MATERIALES));
                 
             } else if (isAYA) {
                 //TODO usar la fecha de Fin De Quincena
-                int anios = Years.yearsBetween(new DateTime(empleadoNomina.getFechaAntiguedad()), new DateTime()).getYears();
-                if (anios >= 5) {
+                int years = Years.yearsBetween(new DateTime(empleadoNomina.getFechaAntiguedad()), new DateTime(finDeQuincena)).getYears();
+                if (years >= 5) {
                     prima_antiguedad = sueldo_quincenal.multiply(new BigDecimal(PORCEN_FONDO_AHORRO_AYA));
-                    prima_antiguedad = prima_antiguedad.multiply(new BigDecimal(anios));
+                    prima_antiguedad = prima_antiguedad.multiply(new BigDecimal(years));
                 }
             }
 
@@ -189,6 +195,11 @@ public class CalculoREST {
         }
 
         try {
+            
+            // Eliminar los Calculos Previos para evitar conceptos rezagados
+            // no incluidos en el este proceso
+            this.vaciarCalculos(idEmpleado);
+            
             // sueldo ordinario
             insertarMov(SUELDO_ORDINARIO, sueldo_ordinario);
 
@@ -263,6 +274,17 @@ public class CalculoREST {
                     .setParameter("id_empleado", idEmpleado).setParameter("concepto", concepto).getSingleResult();
         } catch (NoResultException e) {
             return null;
+        }
+    }
+    
+    public void vaciarCalculos(int idEmpleado) {
+        // Elimina todos los calculos del empleado de NominaQuincenal
+        // Solo calculos; no movimientos (saldos y pagos).
+        try {
+            String query = "DELETE FROM NominaQuincenal n WHERE n.idEmpleado = :id_empleado AND n.concepto.idTipoMovimiento = :id_tipo_mov";
+            getEntityManager().createQuery(query).setParameter("id_empleado", idEmpleado).setParameter("id_tipo_mov", 'C').executeUpdate();
+        } catch (Exception e) {
+            System.out.println("vaciarCalculos ::> " + e.getMessage());
         }
     }
 

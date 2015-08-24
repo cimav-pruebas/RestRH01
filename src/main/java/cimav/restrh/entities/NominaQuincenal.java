@@ -174,7 +174,7 @@ public class NominaQuincenal implements Serializable {
     public void setPagoPermanente(BigDecimal pagoPermanente) {
         this.pagoPermanente = pagoPermanente;
     }
-
+/*
     public EmpleadoBase getEmpleadoBase() {
         return empleadoBase;
     }
@@ -182,7 +182,7 @@ public class NominaQuincenal implements Serializable {
     public void setEmpleadoBase(EmpleadoBase empleadoBase) {
         this.empleadoBase = empleadoBase;
     }
-
+*/
     public BigDecimal getSaldoDescuento() {
         return saldoDescuento;
     }
