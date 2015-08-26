@@ -8,11 +8,9 @@ package cimav.restrh.services;
 import cimav.restrh.entities.Concepto;
 import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
-import cimav.restrh.entities.Falta;
 import cimav.restrh.entities.NominaQuincenal;
 import cimav.restrh.entities.Tabulador;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Date;
@@ -112,11 +110,11 @@ public class CalculoREST {
                 throw new NullPointerException("EMPLEADO");
             }
 
-            Falta falta = empleadoNomina.getFalta();
-            if (empleadoNomina == null) {
-                throw new NullPointerException("FALTA");
-            }
-            Integer faltas = falta.getFaltas();
+//            Falta falta = empleadoNomina.getFalta();
+//            if (empleadoNomina == null) {
+//                throw new NullPointerException("FALTA");
+//            }
+            Integer faltas = 0; //falta.getFaltas();
             faltas = faltas != null && faltas >= 0 && faltas <= 15 ? faltas : 0;
             dias_trabajados = new BigDecimal(DIAS_QUINCENA - faltas);
             dias_ordinarios_trabajados = new BigDecimal(DIAS_ORDINARIOS - faltas);

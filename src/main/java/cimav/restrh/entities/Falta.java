@@ -6,18 +6,19 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -38,21 +39,30 @@ public class Falta implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "faltas")
-    private Integer faltas;
+    @Column(name = "tipo")
+    private String tipo;
 
-    @Column(name = "razon")
-    private String razon;
+    @Column(name = "dias")
+    private Integer dias;
 
-    @OneToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
-    @JoinColumn(name="id_empleado", referencedColumnName = "id", insertable = false, updatable = false) 
+    @Column(name = "fecha_inicio")
+    @Temporal(TemporalType.DATE)
+    private Date fechaInicio;
+    
+    @Column(name = "folio")
+    private String folio;
+
+    @JoinColumn(name="id_empleado", referencedColumnName = "id", 
+            insertable = false, updatable = false)
+    @ManyToOne
     private EmpleadoNomina empleadoNomina;
     
-    @Column(name="id_empleado")
+    @Column(name = "id_empleado") 
     private Integer idEmpleado;
-
+    
     public Falta() {
-        faltas = 0;
+        dias = 0;
+        tipo = "AI";
     }
 
     public Integer getId() {
@@ -63,28 +73,45 @@ public class Falta implements Serializable {
         this.id = id;
     }
 
-    public Integer getFaltas() {
-        return faltas;
+    public String getTipo() {
+        return tipo;
     }
 
-    public void setFaltas(Integer faltas) {
-        this.faltas = faltas;
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
 
-    public String getRazon() {
-        return razon;
+    public Integer getDias() {
+        return dias;
     }
 
-    public void setRazon(String razon) {
-        this.razon = razon;
+    public void setDias(Integer dias) {
+        this.dias = dias;
     }
 
-    public Integer getIdEmpleado() {
-        return idEmpleado;
+    public Date getFechaInicio() {
+        return fechaInicio;
     }
 
-    public void setIdEmpleado(Integer idEmpleado) {
-        this.idEmpleado = idEmpleado;
+    public void setFechaInicio(Date fechaInicio) {
+        this.fechaInicio = fechaInicio;
     }
 
+    public String getFolio() {
+        return folio;
+    }
+
+    public void setFolio(String folio) {
+        this.folio = folio;
+    }
+
+//    public Integer getIdEmpleado() {
+//        return idEmpleado;
+//    }
+//
+//    public void setIdEmpleado(Integer idEmpleado) {
+//        this.idEmpleado = idEmpleado;
+//    }
+
+    
 }

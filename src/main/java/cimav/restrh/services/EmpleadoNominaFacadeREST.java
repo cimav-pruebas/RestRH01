@@ -6,7 +6,6 @@
 package cimav.restrh.services;
 
 import cimav.restrh.entities.EmpleadoNomina;
-import cimav.restrh.entities.Falta;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -40,15 +39,7 @@ public class EmpleadoNominaFacadeREST extends AbstractFacade<EmpleadoNomina> {
     @Path("{id}")
     @Produces("application/json")
     public EmpleadoNomina find(@PathParam("id") Integer id) {
-        EmpleadoNomina empleadoNomina = super.find(id);
-        if (empleadoNomina != null && empleadoNomina.getFalta() == null) {
-            // asegurar que el empleado tiene registro de falta
-            Falta falta = new Falta();
-            falta.setIdEmpleado(empleadoNomina.getId());
-            getEntityManager().persist(falta);
-            empleadoNomina.setFalta(falta);
-        }
-        return empleadoNomina;    
+        return super.find(id);
     }
 
     @GET
