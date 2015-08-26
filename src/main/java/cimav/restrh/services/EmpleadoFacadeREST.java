@@ -6,6 +6,7 @@
 package cimav.restrh.services;
 
 import cimav.restrh.entities.Empleado;
+import cimav.restrh.entities.Falta;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -47,6 +48,12 @@ public class EmpleadoFacadeREST extends AbstractFacade<Empleado> {
     public Empleado insert(Empleado entity) {
         this.setName(entity);
         super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
+        
+        // Todos los empleados tiene registro en Faltas
+        Falta falta = new Falta();
+        falta.setId(entity.getId());
+        getEntityManager().persist(falta);
+        
         return entity; 
     }
     

@@ -52,6 +52,7 @@ public class Falta implements Serializable {
     private Integer idEmpleado;
 
     public Falta() {
+        faltas = 0;
     }
 
     public Integer getId() {

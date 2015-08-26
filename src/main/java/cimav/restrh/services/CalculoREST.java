@@ -8,9 +8,11 @@ package cimav.restrh.services;
 import cimav.restrh.entities.Concepto;
 import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
+import cimav.restrh.entities.Falta;
 import cimav.restrh.entities.NominaQuincenal;
 import cimav.restrh.entities.Tabulador;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Date;
@@ -99,6 +101,9 @@ public class CalculoREST {
         BigDecimal fondo_ahorro_exento = BigDecimal.ZERO;
         BigDecimal fondo_ahorro_gravado = BigDecimal.ZERO;
         BigDecimal fondo_ahorro = BigDecimal.ZERO;
+        
+        BigDecimal dias_trabajados;
+        BigDecimal dias_ordinarios_trabajados;
 
         try {
 
@@ -107,6 +112,15 @@ public class CalculoREST {
                 throw new NullPointerException("EMPLEADO");
             }
 
+            Falta falta = empleadoNomina.getFalta();
+            if (empleadoNomina == null) {
+                throw new NullPointerException("FALTA");
+            }
+            Integer faltas = falta.getFaltas();
+            faltas = faltas != null && faltas >= 0 && faltas <= 15 ? faltas : 0;
+            dias_trabajados = new BigDecimal(DIAS_QUINCENA - faltas);
+            dias_ordinarios_trabajados = new BigDecimal(DIAS_ORDINARIOS - faltas);
+            
             Tabulador nivel = empleadoNomina.getNivel();
             if (nivel == null) {
                 throw new NullPointerException("NIVEL");
@@ -126,7 +140,7 @@ public class CalculoREST {
 
                 sueldo_base_dia = sueldo_base_mes.divide(new BigDecimal(DIAS_MES), BIG_SCALE, RoundingMode.HALF_DOWN);
 
-                sueldo_honorarios = sueldo_base_dia.multiply(new BigDecimal(DIAS_QUINCENA), MathContext.UNLIMITED);
+                sueldo_honorarios = sueldo_base_dia.multiply(dias_trabajados, MathContext.UNLIMITED);
             } else {
                 // CYT, MMS, AYA
                 sueldo_base_mes = nivel.getSueldo();
@@ -136,7 +150,8 @@ public class CalculoREST {
 
                 sueldo_base_dia = sueldo_base_mes.divide(new BigDecimal(DIAS_MES), BIG_SCALE, RoundingMode.HALF_DOWN);
 
-                sueldo_ordinario = sueldo_base_dia.multiply(new BigDecimal(DIAS_ORDINARIOS), MathContext.UNLIMITED);
+                sueldo_ordinario = sueldo_base_dia.multiply(dias_ordinarios_trabajados, MathContext.UNLIMITED);
+                // TODO Dias descanso y Dias ordinarios se les quita Faltas ¿?
                 sueldo_dias_descanso = sueldo_base_dia.multiply(new BigDecimal(DIAS_DESCANSO), MathContext.UNLIMITED);
                 
                 sueldo_quincenal = sueldo_ordinario.add(sueldo_dias_descanso);
@@ -181,13 +196,15 @@ public class CalculoREST {
             }
             
             if(nivel.getCompGarantizada() != null && nivel.getCompGarantizada().compareTo(BigDecimal.ZERO) > 0) {
-                // TODO ¿Dias trabajados?
-                compensa_garantiza = nivel.getCompGarantizada().divide(new BigDecimal(2), BIG_SCALE, RoundingMode.HALF_DOWN);
+                // TODO ¿Compensacion Dias trabajados?
+                compensa_garantiza = nivel.getCompGarantizada().divide(new BigDecimal(DIAS_MES), BIG_SCALE, RoundingMode.HALF_DOWN);
+                compensa_garantiza = compensa_garantiza.multiply(dias_trabajados);
             }
             
             if(nivel.getCargaAdmin() != null && nivel.getCargaAdmin().compareTo(BigDecimal.ZERO) > 0) {
-                // TODO ¿dias trabajado?
-                carga_admin = nivel.getCargaAdmin().divide(new BigDecimal(2), BIG_SCALE, RoundingMode.HALF_DOWN);
+                // TODO ¿Carga dias trabajado?
+                carga_admin = nivel.getCargaAdmin().divide(new BigDecimal(DIAS_MES), BIG_SCALE, RoundingMode.HALF_DOWN);
+                carga_admin = carga_admin.multiply(dias_trabajados);
             }
             
         } catch (NullPointerException e) {
