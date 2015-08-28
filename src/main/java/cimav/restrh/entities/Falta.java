@@ -40,10 +40,13 @@ public class Falta implements Serializable {
     private Integer id;
 
     @Column(name = "tipo")
-    private String tipo;
+    private String idTipo;
 
     @Column(name = "dias")
     private Integer dias;
+
+    @Column(name = "faltas")
+    private Integer faltas;
 
     @Column(name = "fecha_inicio")
     @Temporal(TemporalType.DATE)
@@ -62,7 +65,7 @@ public class Falta implements Serializable {
     
     public Falta() {
         dias = 0;
-        tipo = "AI";
+        idTipo = "AI";
     }
 
     public Integer getId() {
@@ -73,12 +76,12 @@ public class Falta implements Serializable {
         this.id = id;
     }
 
-    public String getTipo() {
-        return tipo;
+    public String getIdTipo() {
+        return idTipo;
     }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
+    public void setIdTipo(String idTipo) {
+        this.idTipo = idTipo;
     }
 
     public Integer getDias() {
@@ -105,13 +108,20 @@ public class Falta implements Serializable {
         this.folio = folio;
     }
 
-//    public Integer getIdEmpleado() {
-//        return idEmpleado;
-//    }
-//
-//    public void setIdEmpleado(Integer idEmpleado) {
-//        this.idEmpleado = idEmpleado;
-//    }
+    public Integer getFaltas() {
+        return faltas;
+    }
 
-    
+    public void setFaltas(Integer faltas) {
+        this.faltas = faltas;
+    }
+
+    public Integer getIdEmpleado() {
+        return idEmpleado;
+    }
+
+    public void setIdEmpleado(Integer idEmpleado) {
+        this.idEmpleado = idEmpleado;
+    }
+
 }
