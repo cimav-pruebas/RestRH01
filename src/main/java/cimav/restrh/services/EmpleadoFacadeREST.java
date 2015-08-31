@@ -6,7 +6,6 @@
 package cimav.restrh.services;
 
 import cimav.restrh.entities.Empleado;
-import cimav.restrh.entities.Falta;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
