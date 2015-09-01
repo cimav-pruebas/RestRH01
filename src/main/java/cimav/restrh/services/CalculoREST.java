@@ -16,10 +16,12 @@ import java.math.RoundingMode;
 import java.util.Date;
 import java.util.Objects;
 import javax.ejb.Stateless;
+import javax.json.JsonArray;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.RollbackException;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -62,6 +64,9 @@ public class CalculoREST {
     private final String FONDO_AHORRO               = "00111";
     private final String APORTACION_FONDO_AHORRO    = "00112";
     
+    private final String BASE_GRAVABLE              = "BG";
+    private final String BASE_GRAVABLE_EXENTA       = "BGE";
+    
     
     private final String PORCEN_FONDO_AHORRO_CYT    = "0.02";
     private final String PORCEN_FONDO_AHORRO_AYA    = "0.018";
@@ -103,6 +108,9 @@ public class CalculoREST {
         BigDecimal dias_trabajados;
         BigDecimal dias_ordinarios_trabajados;
 
+        BigDecimal base_gravable= BigDecimal.ZERO;
+        BigDecimal base_exenta = BigDecimal.ZERO;
+        
         try {
 
             EmpleadoNomina empleadoNomina = getEntityManager().find(EmpleadoNomina.class, this.idEmpleado);
@@ -208,6 +216,17 @@ public class CalculoREST {
         } catch (NullPointerException e) {
             return "-1";
         }
+        
+        base_gravable = base_gravable.add(sueldo_ordinario);
+        base_gravable = base_gravable.add(sueldo_dias_descanso);
+        base_gravable = base_gravable.add(sueldo_honorarios);
+        base_gravable = base_gravable.add(prima_antiguedad);
+        base_gravable = base_gravable.add(materiales);
+        base_gravable = base_gravable.add(carga_admin);
+        base_gravable = base_gravable.add(compensa_garantiza);
+        base_gravable = base_gravable.add(fondo_ahorro_gravado);
+        
+        base_exenta = base_exenta.add(fondo_ahorro_exento);
 
         try {
             
@@ -217,33 +236,32 @@ public class CalculoREST {
             
             // sueldo ordinario
             insertarMov(SUELDO_ORDINARIO, sueldo_ordinario);
-
             // sueldo dias descanso
             insertarMov(SUELDO_DIAS_DESCANSO, sueldo_dias_descanso);
-
             // sueldo dias descanso
             insertarMov(HONORARIOS_ASIMILABLES, sueldo_honorarios);
-
             // prima antiguedad
             insertarMov(PRIMA_ANTIGUEDAD, prima_antiguedad);
-
             // materiales
             insertarMov(MATERIALES, materiales);
-
             // cargada admin
             insertarMov(CARGA_ADMINISTRATIVA, carga_admin);
-
             // compesa garantizada
             insertarMov(COMPENSA_GARANTIZADA, compensa_garantiza);
-
             // fondo ahorro exento
             insertarMov(FONDO_AHORRO_EXENTO, fondo_ahorro_exento);
             // fondo ahorro gravado
             insertarMov(FONDO_AHORRO_GRAVADO, fondo_ahorro_gravado);
+
             // fondo ahorro 
             insertarMov(FONDO_AHORRO, fondo_ahorro);
             // aportación fondo ahorro 
             insertarMov(APORTACION_FONDO_AHORRO, fondo_ahorro);
+            
+            // base gravada
+            insertarMov(BASE_GRAVABLE, base_gravable);
+            // base exenta
+            insertarMov(BASE_GRAVABLE_EXENTA, base_exenta);
 
         } catch (NullPointerException | RollbackException ex) {
             return "-2";
@@ -252,6 +270,14 @@ public class CalculoREST {
         return "0";
     }
 
+    @GET
+    @Consumes("application/json")
+    @Produces("application/json")
+    public String calcularAll(JsonArray ids) {
+        
+        return "0";
+    }
+    
     private void insertarMov(String strConcepto, BigDecimal monto) {
         if (monto == null || monto.compareTo(BigDecimal.ZERO) == 0) {
             // insertar solo los mayores a cero
