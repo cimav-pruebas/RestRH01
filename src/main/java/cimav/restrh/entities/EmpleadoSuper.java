@@ -6,10 +6,13 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 
@@ -19,33 +22,37 @@ import javax.xml.bind.annotation.XmlElement;
  */
 @MappedSuperclass
 public class EmpleadoSuper extends BaseEntity implements Serializable {
-    
+
     @Column(name = "id_status")
     private Short idStatus;
-    
+
     @Size(max = 300)
     @Column(name = "url_photo")
     private String urlPhoto;
-    
+
     @Size(max = 60)
     @Column(name = "cuenta_cimav")
     private String cuentaCimav;
-    
+
     @JoinColumn(name = "id_tabulador", referencedColumnName = "id")
     @ManyToOne
     private Tabulador nivel;
-    
+
     @Column(name = "id_grupo")
     private Integer idGrupo;
-    
+
     @XmlElement(name = "departamento")
     @JoinColumn(name = "id_departamento", referencedColumnName = "id")
     @ManyToOne
     private Departamento departamento;
-    
+
     @Column(name = "id_sede")
     private Short idSede;
-    
+
+    @Column(name = "fecha_antiguedad")
+    @Temporal(TemporalType.DATE)
+    private Date fechaAntiguedad;
+
 //    @PostLoad
 //    public void reduceJefe() {
 //        // TODO Buscar best approach de reducción profundidad de Entidad en EmpleadoOld.Jefe
@@ -59,7 +66,6 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
 //            this.setJefe(miniJefe);
 //        }
 //    }
-    
     public EmpleadoSuper() {
         super();
     }
@@ -119,6 +125,13 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     public void setIdGrupo(Integer idGrupo) {
         this.idGrupo = idGrupo;
     }
-    
-    
+
+    public Date getFechaAntiguedad() {
+        return fechaAntiguedad;
+    }
+
+    public void setFechaAntiguedad(Date fechaAntiguedad) {
+        this.fechaAntiguedad = fechaAntiguedad;
+    }
+
 }
