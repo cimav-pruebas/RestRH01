@@ -16,12 +16,10 @@ import java.math.RoundingMode;
 import java.util.Date;
 import java.util.Objects;
 import javax.ejb.Stateless;
-import javax.json.JsonArray;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.RollbackException;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -65,7 +63,7 @@ public class CalculoREST {
     private final String APORTACION_FONDO_AHORRO    = "00112";
     
     private final String BASE_GRAVABLE              = "BG";
-    private final String BASE_GRAVABLE_EXENTA       = "BGE";
+    private final String BASE_EXENTA                = "BE";
     
     
     private final String PORCEN_FONDO_AHORRO_CYT    = "0.02";
@@ -75,10 +73,10 @@ public class CalculoREST {
     private final String PORCEN_FONDO_AHORRO_EXENTO = "1.3";
     private final String SALARIO_ZONA_B             = "68.28";
     
-    private final Integer DIAS_MES = 30;
-    private final Integer DIAS_QUINCENA = 15;
-    private final Integer DIAS_ORDINARIOS = 11;
-    private final Integer DIAS_DESCANSO = 4;
+    private final Integer DIAS_MES          = 30;
+    private final Integer DIAS_QUINCENA     = 15;
+    private final Integer DIAS_ORDINARIOS   = 11;
+    private final Integer DIAS_DESCANSO     = 4;
     
     private int idEmpleado;
 
@@ -118,12 +116,8 @@ public class CalculoREST {
                 throw new NullPointerException("EMPLEADO");
             }
 
-//            Falta falta = empleadoNomina.getFalta();
-//            if (empleadoNomina == null) {
-//                throw new NullPointerException("FALTA");
-//            }
             Integer faltas = 0; //falta.getFaltas();
-            faltas = faltas != null && faltas >= 0 && faltas <= 15 ? faltas : 0;
+            faltas = faltas >= 0 && faltas <= 15 ? faltas : 0;
             dias_trabajados = new BigDecimal(DIAS_QUINCENA - faltas);
             dias_ordinarios_trabajados = new BigDecimal(DIAS_ORDINARIOS - faltas);
             
@@ -261,7 +255,7 @@ public class CalculoREST {
             // base gravada
             insertarMov(BASE_GRAVABLE, base_gravable);
             // base exenta
-            insertarMov(BASE_GRAVABLE_EXENTA, base_exenta);
+            insertarMov(BASE_EXENTA, base_exenta);
 
         } catch (NullPointerException | RollbackException ex) {
             return "-2";
@@ -270,14 +264,6 @@ public class CalculoREST {
         return "0";
     }
 
-    @GET
-    @Consumes("application/json")
-    @Produces("application/json")
-    public String calcularAll(JsonArray ids) {
-        
-        return "0";
-    }
-    
     private void insertarMov(String strConcepto, BigDecimal monto) {
         if (monto == null || monto.compareTo(BigDecimal.ZERO) == 0) {
             // insertar solo los mayores a cero
