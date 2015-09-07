@@ -13,6 +13,7 @@ import cimav.restrh.entities.Tabulador;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 import javax.ejb.Stateless;
@@ -315,4 +316,82 @@ public class CalculoREST {
         }
     }
 
+    @GET
+    @Path("fechas/{quincena}")
+    @Produces("application/json")
+    public String calcularDias(@PathParam("quincena") int quincena) {
+        String result = prnFechas(quincena);
+        return result;
+    }
+    
+    @GET
+    @Path("fechas")
+    @Produces("application/json")
+    public String fechas() {
+        String result = "";
+        for(int i=1; i<=24; i++) {
+            result = result + prnFechas(i) +",\n";
+        }
+        return result;
+    }
+    
+    private String prnFechas(int quincena) {
+        String result;
+        boolean isPar = (quincena & 1) == 0;
+        int year = 2015;
+        int mes = (int)Math.ceil(quincena/2.0);
+        int diaInicio = isPar ? 16 : 1;
+        
+        Calendar fechaInicio = Calendar.getInstance();
+        fechaInicio.set(year, mes-1, diaInicio);
+        
+        // si es quincena non, dia real y topado coinciden en 15
+        int diaFinalReal = 15;
+        int diaFinalFiscal = 15;
+        if (isPar) {
+            // último día real del mes
+            diaFinalReal = fechaInicio.getActualMaximum(Calendar.DAY_OF_MONTH);
+            // maximo llegan al día treinta
+            diaFinalFiscal = diaFinalReal > 30 ? 30 : diaFinalReal; 
+        }
+        
+        Calendar fechaFinReal = Calendar.getInstance();
+        fechaFinReal.set(year, mes-1, diaFinalReal);
+        
+        Calendar fechaFinFiscal = Calendar.getInstance();
+        fechaFinFiscal.set(year, mes-1, diaFinalFiscal);
+        
+        Calendar fechaAvanza = Calendar.getInstance();
+        fechaAvanza.set(year, mes-1, diaInicio); //igual a la de inicio
+            
+        int diasOrdinarios = 0;
+        int diasDescanso = 0;
+        while (fechaFinFiscal.after(fechaAvanza) || fechaFinFiscal.equals(fechaAvanza)) {
+            if (fechaAvanza.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || fechaAvanza.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                diasDescanso++;
+            } else {
+                diasOrdinarios++;
+            }
+            fechaAvanza.add(Calendar.DATE, 1);
+        }
+        
+        String fi = "\"" + fechaInicio.get(Calendar.DATE) + "/" +(fechaInicio.get(Calendar.MONTH)+1) +"/"+fechaInicio.get(Calendar.YEAR) + "\"";
+        String ffr = "\"" + fechaFinReal.get(Calendar.DATE) + "/" +(fechaFinReal.get(Calendar.MONTH)+1) +"/"+fechaFinReal.get(Calendar.YEAR) + "\"";
+        String fff = "\"" + fechaFinFiscal.get(Calendar.DATE) + "/" +(fechaFinFiscal.get(Calendar.MONTH)+1) +"/"+fechaFinFiscal.get(Calendar.YEAR) + "\"";
+        
+        //result = String.format("%02d%15s%15s%15s%5s%5s%5s", quincena, fi, ffr, fff, diasOrdinarios, diasDescanso, diasOrdinarios+diasDescanso);
+        
+        result = 
+                "{ " + "\"quincena\": " + quincena + "," +
+                "\t" + "\"fecha_inicio\": " + fi + "," +
+                "\t" + "\"fecha_fin_calendario\": " + ffr + "," +
+                "\t" + "\"fecha_fin_calculo\": " + fff + "," +
+                "\t" + "\"dias_ordinarios\": " + diasOrdinarios + "," +
+                "\t" + "\"dias_descando\": " + diasDescanso + "," +
+                "\t" + "\"dias_totales\": " + (diasOrdinarios + diasDescanso) + "" +
+                "}";
+                
+        
+        return result;
+    }
 }
