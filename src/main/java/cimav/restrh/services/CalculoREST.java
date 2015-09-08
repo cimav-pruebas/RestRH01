@@ -26,6 +26,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Days;
+import org.joda.time.Duration;
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.joda.time.Years;
 
 
@@ -375,6 +380,15 @@ public class CalculoREST {
             fechaAvanza.add(Calendar.DATE, 1);
         }
         
+        DateTime start = new DateTime(year, mes, fechaInicio.get(Calendar.DATE), 0, 0, 0, DateTimeZone.UTC).minusDays(1);
+        DateTime end = new DateTime(year, mes, fechaFinReal.get(Calendar.DATE), 0, 0, 0, DateTimeZone.UTC);
+        
+        long diasImss = Days.daysBetween(start, end).getDays();
+        
+        //Duration duration = new Duration(start, end);
+        //long diasImss = duration.getStandardDays();
+        
+        
         String fi = "\"" + fechaInicio.get(Calendar.DATE) + "/" +(fechaInicio.get(Calendar.MONTH)+1) +"/"+fechaInicio.get(Calendar.YEAR) + "\"";
         String ffr = "\"" + fechaFinReal.get(Calendar.DATE) + "/" +(fechaFinReal.get(Calendar.MONTH)+1) +"/"+fechaFinReal.get(Calendar.YEAR) + "\"";
         String fff = "\"" + fechaFinFiscal.get(Calendar.DATE) + "/" +(fechaFinFiscal.get(Calendar.MONTH)+1) +"/"+fechaFinFiscal.get(Calendar.YEAR) + "\"";
@@ -388,7 +402,8 @@ public class CalculoREST {
                 "\t" + "\"fecha_fin_calculo\": " + fff + "," +
                 "\t" + "\"dias_ordinarios\": " + diasOrdinarios + "," +
                 "\t" + "\"dias_descando\": " + diasDescanso + "," +
-                "\t" + "\"dias_totales\": " + (diasOrdinarios + diasDescanso) + "" +
+                "\t" + "\"dias_calculo\": " + (diasOrdinarios + diasDescanso) + "," +
+                "\t" + "\"dias_imss\": " + diasImss + "" +
                 "}";
                 
         
