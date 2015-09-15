@@ -11,6 +11,7 @@ import cimav.restrh.entities.EmpleadoNomina;
 import cimav.restrh.entities.NominaQuincenal;
 import cimav.restrh.entities.Tabulador;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Calendar;
@@ -81,9 +82,9 @@ public class CalculoREST {
     
     private final Integer DIAS_MES          = 30;
     private final Integer DIAS_QUINCENA     = 15;
-    private final Integer DIAS_ORDINARIOS   = 11;
-    private final Integer DIAS_DESCANSO     = 4;
-    
+//    private final Integer DIAS_ORDINARIOS   = 11;
+//    private final Integer DIAS_DESCANSO     = 4;
+
     private int idEmpleado;
 
     @GET
@@ -91,8 +92,6 @@ public class CalculoREST {
     @Produces("application/json")
     public String calcular(@PathParam("idEmpleado") int idEmpleado) {
 
-        // TODO conviene vaciar el NominaQuincenal para evitar conceptos rezagados
-        
         this.idEmpleado = idEmpleado;
 
         BigDecimal sueldo_base_mes;
@@ -111,7 +110,8 @@ public class CalculoREST {
         
         BigDecimal dias_trabajados;
         BigDecimal dias_ordinarios_trabajados;
-
+        BigDecimal dias_descanso;
+        
         BigDecimal base_gravable= BigDecimal.ZERO;
         BigDecimal base_exenta = BigDecimal.ZERO;
         
@@ -122,10 +122,13 @@ public class CalculoREST {
                 throw new NullPointerException("EMPLEADO");
             }
 
-            Integer faltas = 0; //falta.getFaltas();
-            faltas = faltas >= 0 && faltas <= 15 ? faltas : 0;
-            dias_trabajados = new BigDecimal(DIAS_QUINCENA - faltas);
-            dias_ordinarios_trabajados = new BigDecimal(DIAS_ORDINARIOS - faltas);
+            // TODO Faltas e Incapacidades de la DB
+            Integer faltas = 0; 
+            Integer incapacidades = 0; 
+            dias_trabajados = new BigDecimal(Quincena.get().getDiasCalculo() - faltas - incapacidades);
+            dias_ordinarios_trabajados = new BigDecimal(Quincena.get().getDiasOrdinarios() - faltas - incapacidades);
+            dias_descanso = new BigDecimal(Quincena.get().getDiasDescanso());
+            // TODO faltan dias de asueto
             
             Tabulador nivel = empleadoNomina.getNivel();
             if (nivel == null) {
@@ -158,7 +161,7 @@ public class CalculoREST {
 
                 sueldo_ordinario = sueldo_base_dia.multiply(dias_ordinarios_trabajados, MathContext.UNLIMITED);
                 // TODO Dias descanso y Dias ordinarios se les quita Faltas ¿?
-                sueldo_dias_descanso = sueldo_base_dia.multiply(new BigDecimal(DIAS_DESCANSO), MathContext.UNLIMITED);
+                sueldo_dias_descanso = sueldo_base_dia.multiply(dias_descanso, MathContext.UNLIMITED);
                 
                 sueldo_quincenal = sueldo_ordinario.add(sueldo_dias_descanso);
             }
@@ -341,6 +344,9 @@ public class CalculoREST {
     }
     
     private String prnFechas(int quincena) {
+        
+        // TODO Fechas, falta días de asueto
+        
         String result;
         boolean isPar = (quincena & 1) == 0;
         int year = 2015;
