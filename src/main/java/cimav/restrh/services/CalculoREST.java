@@ -22,7 +22,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.RollbackException;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -86,7 +88,20 @@ public class CalculoREST {
 //    private final Integer DIAS_DESCANSO     = 4;
 
     private int idEmpleado;
+    
+    private String  calculoJSON;
 
+    @POST
+    @Path("/romper")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public String romper(String string) {
+        
+        System.out.println(">> " + string);
+        
+        return "{}";
+    }
+    
     @GET
     @Path("{idEmpleado}")
     @Produces("application/json")
@@ -233,6 +248,8 @@ public class CalculoREST {
 
         try {
             
+            this.calculoJSON = "";
+            
             // Eliminar los Calculos Previos para evitar conceptos rezagados
             // no incluidos en el este proceso
             this.vaciarCalculos(idEmpleado);
@@ -270,7 +287,9 @@ public class CalculoREST {
             return "-2";
         }
 
-        return "0";
+        this.calculoJSON = ("{" + this.calculoJSON + "}").replace(",}", "}");
+        
+        return this.calculoJSON;
     }
 
     private void insertarMov(String strConcepto, BigDecimal monto) {
@@ -294,6 +313,8 @@ public class CalculoREST {
         }
         // persistirlo
         getEntityManager().persist(nomQuin);
+        
+        this.calculoJSON = this.calculoJSON + "\"" + strConcepto + "\": " + monto + ",";
     }
 
     public Concepto finConceptoByCode(String code) {
