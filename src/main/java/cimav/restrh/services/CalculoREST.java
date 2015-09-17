@@ -11,13 +11,16 @@ import cimav.restrh.entities.EmpleadoNomina;
 import cimav.restrh.entities.NominaQuincenal;
 import cimav.restrh.entities.Tabulador;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
+import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -28,12 +31,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Days;
-import org.joda.time.Duration;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.joda.time.Years;
 
 
@@ -92,21 +94,35 @@ public class CalculoREST {
     private String  calculoJSON;
 
     @POST
-    @Path("/romper")
-    @Consumes("application/json")
-    @Produces("application/json")
-    public String romper(String string) {
+    @Consumes(value = "application/json")
+    @Produces(value = "application/json")
+    @Asynchronous
+    public void calcularTodos(@Suspended final AsyncResponse asyncResponse, final JsonArray ids) {
+        asyncResponse.resume(doCalculo(ids));
+    }
+
+    private String doCalculo(JsonArray ids) {
+        String resultJson = "[";
         
-        System.out.println(">> " + string);
+        for (JsonValue idVal : ids) {
+            int id = ((JsonObject)idVal).getInt("id");
+            resultJson = resultJson + this.calcular(id) + ",";
+        }
+        resultJson = (resultJson + "]").replace(",]", "]");
         
-        return "{}";
+        return resultJson;
     }
     
     @GET
     @Path("{idEmpleado}")
     @Produces("application/json")
-    public String calcular(@PathParam("idEmpleado") int idEmpleado) {
+    public String calcularUno(@PathParam("idEmpleado") int idEmpleado) {
+        String resultJson = this.calcular(idEmpleado);
+        return resultJson;
+    }
 
+    private String calcular(int idEmpleado) {
+        
         this.idEmpleado = idEmpleado;
 
         BigDecimal sueldo_base_mes;
@@ -287,11 +303,11 @@ public class CalculoREST {
             return "-2";
         }
 
-        this.calculoJSON = ("{" + this.calculoJSON + "}").replace(",}", "}");
+        this.calculoJSON = ("{" + "\"id\":" + this.idEmpleado +"," + this.calculoJSON + "}").replace(",}", "}");
         
         return this.calculoJSON;
     }
-
+    
     private void insertarMov(String strConcepto, BigDecimal monto) {
         if (monto == null || monto.compareTo(BigDecimal.ZERO) == 0) {
             // insertar solo los mayores a cero
@@ -436,4 +452,5 @@ public class CalculoREST {
         
         return result;
     }
+
 }
