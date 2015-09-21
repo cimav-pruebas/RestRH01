@@ -39,6 +39,9 @@ public class Concepto extends BaseEntity implements Serializable {
     @Column(name = "id_tipo_movimiento")
     private Character idTipoMovimiento;    
         
+    @Column(name = "suma")
+    private Boolean suma;
+
     public Concepto() {
         super();
     }
@@ -65,6 +68,14 @@ public class Concepto extends BaseEntity implements Serializable {
 
     public void setIdTipoMovimiento(Character idTipoMovimiento) {
         this.idTipoMovimiento = idTipoMovimiento;
+    }
+
+    public Boolean getSuma() {
+        return suma;
+    }
+
+    public void setSuma(Boolean suma) {
+        this.suma = suma;
     }
     
 }

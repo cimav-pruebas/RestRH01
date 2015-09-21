@@ -143,7 +143,10 @@ public class Quincena {
         return diasDescanso;
     }
 
-    public Integer getDiasCalculo() {
+    /**
+     * Días de la Quincena
+     */
+    public Integer getDiasLaborables() {
         return diasOrdinarios + diasDescanso;
     }
     

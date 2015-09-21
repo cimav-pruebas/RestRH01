@@ -66,6 +66,7 @@ public class CalculoREST {
     private final String PRIMA_ANTIGUEDAD           = "00005";
     private final String CARGA_ADMINISTRATIVA       = "00007";
     private final String COMPENSA_GARANTIZADA       = "00010";
+    private final String VALES_DESPENSA             = "00014";
     private final String HONORARIOS_ASIMILABLES     = "00027"; // sueldo
     private final String MATERIALES                 = "00012";
     private final String FONDO_AHORRO_EXENTO        = "00021";
@@ -74,8 +75,7 @@ public class CalculoREST {
     private final String APORTACION_FONDO_AHORRO    = "00112";
     
     private final String BASE_GRAVABLE              = "BG";
-    private final String BASE_EXENTA                = "BE";
-    
+    private final String BASE_EXENTA                = "BE";    
     
     private final String PORCEN_FONDO_AHORRO_CYT    = "0.02";
     private final String PORCEN_FONDO_AHORRO_AYA    = "0.018";
@@ -91,8 +91,6 @@ public class CalculoREST {
 
     private int idEmpleado;
     
-    private String  calculoJSON;
-
     @POST
     @Consumes(value = "application/json")
     @Produces(value = "application/json")
@@ -104,11 +102,16 @@ public class CalculoREST {
     private String doCalculo(JsonArray ids) {
         String resultJson = "[";
         
+        long startTime = System.currentTimeMillis();
+        
         for (JsonValue idVal : ids) {
             int id = ((JsonObject)idVal).getInt("id");
             resultJson = resultJson + this.calcular(id) + ",";
         }
         resultJson = (resultJson + "]").replace(",]", "]");
+        
+        long estimatedTime = System.currentTimeMillis() - startTime;
+        System.out.println("TE> " + estimatedTime);
         
         return resultJson;
     }
@@ -138,6 +141,7 @@ public class CalculoREST {
         BigDecimal fondo_ahorro_exento = BigDecimal.ZERO;
         BigDecimal fondo_ahorro_gravado = BigDecimal.ZERO;
         BigDecimal fondo_ahorro = BigDecimal.ZERO;
+        BigDecimal despensa = BigDecimal.ZERO;
         
         BigDecimal dias_trabajados;
         BigDecimal dias_ordinarios_trabajados;
@@ -145,6 +149,10 @@ public class CalculoREST {
         
         BigDecimal base_gravable= BigDecimal.ZERO;
         BigDecimal base_exenta = BigDecimal.ZERO;
+        
+        BigDecimal sal_diario_integrado = BigDecimal.ZERO; // Salario Diario Integrado (todas las percepciones fijas)
+        BigDecimal sal_diario_cotizado = BigDecimal.ZERO; // Salario Diario de Cotización (SDI + todss las percepciones variables)
+        BigDecimal sal_diario_cotizado_topado = BigDecimal.ZERO;
         
         try {
 
@@ -156,10 +164,10 @@ public class CalculoREST {
             // TODO Faltas e Incapacidades de la DB
             Integer faltas = 0; 
             Integer incapacidades = 0; 
-            dias_trabajados = new BigDecimal(Quincena.get().getDiasCalculo() - faltas - incapacidades);
+            dias_trabajados = new BigDecimal(Quincena.get().getDiasLaborables() - faltas - incapacidades);
             dias_ordinarios_trabajados = new BigDecimal(Quincena.get().getDiasOrdinarios() - faltas - incapacidades);
-            dias_descanso = new BigDecimal(Quincena.get().getDiasDescanso());
-            // TODO faltan dias de asueto
+            dias_descanso = new BigDecimal(Quincena.get().getDiasDescanso()); // TODO ¿dias_descanso no se le quitan faltas ni incapacidades?
+            // TODO faltan dias de asueto (16 Sept, etc.)
             
             Tabulador nivel = empleadoNomina.getNivel();
             if (nivel == null) {
@@ -247,9 +255,21 @@ public class CalculoREST {
                 carga_admin = carga_admin.multiply(dias_trabajados);
             }
             
+            if (isAYA || isCYT) {
+                // TODO constantes de Vales no HARD CODE
+                despensa = new BigDecimal(621.00).divide(new BigDecimal("2"), BIG_SCALE, RoundingMode.HALF_DOWN);
+            } else if (isMMS) {
+                despensa = new BigDecimal(77.00).divide(new BigDecimal("2"), BIG_SCALE, RoundingMode.HALF_DOWN);
+            } 
+
+            
         } catch (NullPointerException e) {
             return "-1";
         }
+        
+        // TODO Al termino del ejercicio fiscal (última quincena de dic) se acumulan todos los pagos 
+        // por concepto de previsión social para gravar la diferencia y / o integrar la diferencia de vales 
+        // como variable para integración del IMSS en enero y febrero del siguiente año.
         
         base_gravable = base_gravable.add(sueldo_ordinario);
         base_gravable = base_gravable.add(sueldo_dias_descanso);
@@ -259,59 +279,78 @@ public class CalculoREST {
         base_gravable = base_gravable.add(carga_admin);
         base_gravable = base_gravable.add(compensa_garantiza);
         base_gravable = base_gravable.add(fondo_ahorro_gravado);
+        base_gravable = base_gravable.add(despensa); // TODO DEspensa ¿Grava / Excenta?
         
         base_exenta = base_exenta.add(fondo_ahorro_exento);
 
+        // TODO verificar que integra al SDI
+        sal_diario_integrado = sal_diario_integrado.add(sueldo_ordinario);
+        sal_diario_integrado = sal_diario_integrado.add(sueldo_dias_descanso);
+        sal_diario_integrado = sal_diario_integrado.add(sueldo_honorarios); // TODO ¿honorarios tienen/suman SDI?
+        sal_diario_integrado = sal_diario_integrado.add(prima_antiguedad);
+        sal_diario_integrado = sal_diario_integrado.add(materiales);
+        sal_diario_integrado = sal_diario_integrado.add(carga_admin);
+        sal_diario_integrado = sal_diario_integrado.add(compensa_garantiza);
+        sal_diario_integrado = sal_diario_integrado.add(fondo_ahorro_gravado);
+        sal_diario_integrado = sal_diario_integrado.add(despensa);
+        
+        // TODO verificar que cotiza y que exenta
+        sal_diario_cotizado = sal_diario_integrado;
+        
+        // TODO falta ver donde van el SDI, SDC y SDCTopado (Repercución o Interno)
+        
+        String resultJSON = "";
+        
         try {
-            
-            this.calculoJSON = "";
             
             // Eliminar los Calculos Previos para evitar conceptos rezagados
             // no incluidos en el este proceso
             this.vaciarCalculos(idEmpleado);
             
             // sueldo ordinario
-            insertarMov(SUELDO_ORDINARIO, sueldo_ordinario);
+            resultJSON += insertarMov(SUELDO_ORDINARIO, sueldo_ordinario);
             // sueldo dias descanso
-            insertarMov(SUELDO_DIAS_DESCANSO, sueldo_dias_descanso);
+            resultJSON += insertarMov(SUELDO_DIAS_DESCANSO, sueldo_dias_descanso);
             // sueldo dias descanso
-            insertarMov(HONORARIOS_ASIMILABLES, sueldo_honorarios);
+            resultJSON += insertarMov(HONORARIOS_ASIMILABLES, sueldo_honorarios);
             // prima antiguedad
-            insertarMov(PRIMA_ANTIGUEDAD, prima_antiguedad);
+            resultJSON += insertarMov(PRIMA_ANTIGUEDAD, prima_antiguedad);
             // materiales
-            insertarMov(MATERIALES, materiales);
+            resultJSON += insertarMov(MATERIALES, materiales);
             // cargada admin
-            insertarMov(CARGA_ADMINISTRATIVA, carga_admin);
+            resultJSON += insertarMov(CARGA_ADMINISTRATIVA, carga_admin);
             // compesa garantizada
-            insertarMov(COMPENSA_GARANTIZADA, compensa_garantiza);
+            resultJSON += insertarMov(COMPENSA_GARANTIZADA, compensa_garantiza);
+            // despensa
+            resultJSON += insertarMov(VALES_DESPENSA, despensa); //TODO la Despensa no suma puesto que se paga con Vales
             // fondo ahorro exento
-            insertarMov(FONDO_AHORRO_EXENTO, fondo_ahorro_exento);
+            resultJSON += insertarMov(FONDO_AHORRO_EXENTO, fondo_ahorro_exento);
             // fondo ahorro gravado
-            insertarMov(FONDO_AHORRO_GRAVADO, fondo_ahorro_gravado);
+            resultJSON += insertarMov(FONDO_AHORRO_GRAVADO, fondo_ahorro_gravado);
 
             // fondo ahorro 
-            insertarMov(FONDO_AHORRO, fondo_ahorro);
+            resultJSON += insertarMov(FONDO_AHORRO, fondo_ahorro);
             // aportación fondo ahorro 
-            insertarMov(APORTACION_FONDO_AHORRO, fondo_ahorro);
+            resultJSON += insertarMov(APORTACION_FONDO_AHORRO, fondo_ahorro);
             
             // base gravada
-            insertarMov(BASE_GRAVABLE, base_gravable);
+            resultJSON += insertarMov(BASE_GRAVABLE, base_gravable);
             // base exenta
-            insertarMov(BASE_EXENTA, base_exenta);
-
+            resultJSON += insertarMov(BASE_EXENTA, base_exenta);
+            
         } catch (NullPointerException | RollbackException ex) {
             return "-2";
         }
 
-        this.calculoJSON = ("{" + "\"id\":" + this.idEmpleado +"," + this.calculoJSON + "}").replace(",}", "}");
+        resultJSON = ("{" + "\"id\":" + this.idEmpleado +"," + resultJSON + "}").replace(",}", "}");
         
-        return this.calculoJSON;
+        return resultJSON;
     }
     
-    private void insertarMov(String strConcepto, BigDecimal monto) {
+    private String insertarMov(String strConcepto, BigDecimal monto) {
         if (monto == null || monto.compareTo(BigDecimal.ZERO) == 0) {
             // insertar solo los mayores a cero
-            return;
+            return "";
         }
         // obtener concepto
         Concepto concepto = finConceptoByCode(strConcepto);
@@ -330,7 +369,7 @@ public class CalculoREST {
         // persistirlo
         getEntityManager().persist(nomQuin);
         
-        this.calculoJSON = this.calculoJSON + "\"" + strConcepto + "\": " + monto + ",";
+        return "\"" + strConcepto + "\": " + monto + ",";
     }
 
     public Concepto finConceptoByCode(String code) {
