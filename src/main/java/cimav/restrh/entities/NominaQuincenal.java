@@ -66,33 +66,24 @@ public class NominaQuincenal implements Serializable {
     private short numQuincenas;
 
     @Basic(optional = false)
-    @NotNull
-    @Column(name = "pago_unico")
-    private BigDecimal pagoUnico;
+    @Column(name = "pago")
+    private BigDecimal pago;
     
     @Basic(optional = false)
-    @NotNull
-    @Column(name = "pago_permanente")
-    private BigDecimal pagoPermanente;
+    @Column(name = "saldo")
+    private BigDecimal saldo;
     
     @Basic(optional = false)
-    @NotNull
-    @Column(name = "saldo_descuento")
-    private BigDecimal saldoDescuento;
-    
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "saldo_restante")
-    private BigDecimal saldoRestante;
+    @Column(name = "permanente")
+    private Boolean permanente;
     
     public NominaQuincenal() {
         idEmpleado = 0;
         numQuincenas = 1;
         cantidad = BigDecimal.ZERO;
-        pagoUnico = BigDecimal.ZERO;
-        pagoPermanente = BigDecimal.ZERO;
-        saldoDescuento = BigDecimal.ZERO;
-        saldoRestante = BigDecimal.ZERO;
+        saldo = BigDecimal.ZERO;
+        pago = BigDecimal.ZERO;
+        permanente = false;
     }
 
     public NominaQuincenal(int idEmpleado, Concepto concepto, BigDecimal cantidad) {
@@ -151,52 +142,28 @@ public class NominaQuincenal implements Serializable {
         this.concepto = concepto;
     }
 
-//    public EmpleadoBase getEmpleadoBase() {
-//        return empleadoBase;
-//    }
-//
-//    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
-//        this.empleadoBase = empleadoBase;
-//    }
-
-    public BigDecimal getPagoUnico() {
-        return pagoUnico;
+    public BigDecimal getPago() {
+        return pago;
     }
 
-    public void setPagoUnico(BigDecimal pagoUnico) {
-        this.pagoUnico = pagoUnico;
+    public void setPago(BigDecimal pago) {
+        this.pago = pago;
     }
 
-    public BigDecimal getPagoPermanente() {
-        return pagoPermanente;
+    public BigDecimal getSaldo() {
+        return saldo;
     }
 
-    public void setPagoPermanente(BigDecimal pagoPermanente) {
-        this.pagoPermanente = pagoPermanente;
-    }
-/*
-    public EmpleadoBase getEmpleadoBase() {
-        return empleadoBase;
+    public void setSaldo(BigDecimal saldo) {
+        this.saldo = saldo;
     }
 
-    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
-        this.empleadoBase = empleadoBase;
-    }
-*/
-    public BigDecimal getSaldoDescuento() {
-        return saldoDescuento;
+    public Boolean getPermanente() {
+        return permanente;
     }
 
-    public void setSaldoDescuento(BigDecimal saldoDescuento) {
-        this.saldoDescuento = saldoDescuento;
-    }
-    
-    public BigDecimal getSaldoRestante() {
-        return saldoRestante;
-    }
-
-    public void setSaldoRestante(BigDecimal saldoRestante) {
-        this.saldoRestante = saldoRestante;
+    public void setPermanente(Boolean permanente) {
+        this.permanente = permanente;
     }
 
     @Override
