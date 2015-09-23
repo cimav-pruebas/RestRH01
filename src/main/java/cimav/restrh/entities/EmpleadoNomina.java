@@ -35,7 +35,7 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
     private Collection<NominaQuincenal> nominaQuincenalCollection;
     
     @OneToMany(mappedBy = "empleadoNomina")
-    private Collection<Falta> faltaCollection;
+    private Collection<Incidencia> incidencias;
 
     public EmpleadoNomina() {
         super();
@@ -65,12 +65,12 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
         this.nominaQuincenalCollection = nominaQuincenalCollection;
     }
 
-    public Collection<Falta> getFaltaCollection() {
-        return faltaCollection;
+    public Collection<Incidencia> getIncidencias() {
+        return incidencias;
     }
 
-    public void setFaltaCollection(Collection<Falta> faltaCollection) {
-        this.faltaCollection = faltaCollection;
+    public void setIncidencias(Collection<Incidencia> incidencias) {
+        this.incidencias = incidencias;
     }
     
 }

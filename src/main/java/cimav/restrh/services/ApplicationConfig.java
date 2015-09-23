@@ -38,7 +38,7 @@ public class ApplicationConfig extends Application {
         resources.add(cimav.restrh.services.EmpleadoBaseFacadeREST.class);
         resources.add(cimav.restrh.services.EmpleadoFacadeREST.class);
         resources.add(cimav.restrh.services.EmpleadoNominaFacadeREST.class);
-        resources.add(cimav.restrh.services.FaltaFacadeREST.class);
+        resources.add(cimav.restrh.services.IncidenciaFacadeREST.class);
         resources.add(cimav.restrh.services.NominaQuincenalFacadeREST.class);
         resources.add(cimav.restrh.services.TabuladorFacadeREST.class);
     }

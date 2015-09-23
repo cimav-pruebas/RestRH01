@@ -5,7 +5,7 @@
  */
 package cimav.restrh.services;
 
-import cimav.restrh.entities.Falta;
+import cimav.restrh.entities.Incidencia;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -24,20 +24,20 @@ import javax.ws.rs.Produces;
  * @author juan.calderon
  */
 @Stateless
-@Path("falta")
-public class FaltaFacadeREST extends AbstractFacade<Falta> {
+@Path("incidencias")
+public class IncidenciaFacadeREST extends AbstractFacade<Incidencia> {
     @PersistenceContext(unitName = "PU_JPA")
     private EntityManager em;
 
-    public FaltaFacadeREST() {
-        super(Falta.class);
+    public IncidenciaFacadeREST() {
+        super(Incidencia.class);
     }
 
     @POST
     @Consumes("application/json")
     @Produces("application/json")
     @Override
-    public Falta insert(Falta entity) {
+    public Incidencia insert(Incidencia entity) {
         super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
         return entity; 
     }
@@ -45,7 +45,7 @@ public class FaltaFacadeREST extends AbstractFacade<Falta> {
     @PUT
     @Path("{id}")
     @Consumes("application/json")
-    public void edit(@PathParam("id") Integer id, Falta entity) {
+    public void edit(@PathParam("id") Integer id, Incidencia entity) {
         super.edit(entity);
     }
 
@@ -58,21 +58,21 @@ public class FaltaFacadeREST extends AbstractFacade<Falta> {
     @GET
     @Path("{id}")
     @Produces("application/json")
-    public Falta find(@PathParam("id") Integer id) {
+    public Incidencia find(@PathParam("id") Integer id) {
         return super.find(id);
     }
 
     @GET
     @Override
     @Produces("application/json")
-    public List<Falta> findAll() {
+    public List<Incidencia> findAll() {
         return super.findAll();
     }
 
     @GET
     @Path("{from}/{to}")
     @Produces("application/json")
-    public List<Falta> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
+    public List<Incidencia> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
         return super.findRange(new int[]{from, to});
     }
 

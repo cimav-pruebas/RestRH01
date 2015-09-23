@@ -8,6 +8,7 @@ package cimav.restrh.services;
 import cimav.restrh.entities.Concepto;
 import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
+import cimav.restrh.entities.Incidencia;
 import cimav.restrh.entities.NominaQuincenal;
 import cimav.restrh.entities.Tabulador;
 import java.math.BigDecimal;
@@ -161,9 +162,8 @@ public class CalculoREST {
                 throw new NullPointerException("EMPLEADO");
             }
 
-            // TODO Faltas e Incapacidades de la DB
-            Integer faltas = 0; 
-            Integer incapacidades = 0; 
+            Integer faltas = this.findIncidencias(idEmpleado, Incidencia.FALTA);
+            Integer incapacidades = this.findIncidencias(idEmpleado, Incidencia.INCAPACIDAD);
             dias_trabajados = new BigDecimal(Quincena.get().getDiasLaborables() - faltas - incapacidades);
             dias_ordinarios_trabajados = new BigDecimal(Quincena.get().getDiasOrdinarios() - faltas - incapacidades);
             dias_descanso = new BigDecimal(Quincena.get().getDiasDescanso()); // TODO ¿dias_descanso no se le quitan faltas ni incapacidades?
@@ -387,6 +387,17 @@ public class CalculoREST {
         } catch (NoResultException e) {
             return null;
         }
+    }
+    
+    public int findIncidencias(Integer idEmpleado, String clase) {
+        int result = 0;
+        try {
+            Long incidencias = (Long)getEntityManager().createQuery("SELECT SUM(i.incidencias) FROM Incidencia i WHERE i.idEmpleado = :id_empleado AND i.clase = :clase")
+                    .setParameter("id_empleado", idEmpleado).setParameter("clase", clase).getSingleResult();
+            result = incidencias != null ? incidencias.intValue() : 0;
+        } catch (NoResultException e) {
+        }
+        return result;
     }
     
     public void vaciarCalculos(int idEmpleado) {

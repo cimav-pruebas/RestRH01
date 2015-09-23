@@ -27,11 +27,15 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "faltas", catalog = "rh_development", schema = "public")
+@Table(name = "incidencias", catalog = "rh_development", schema = "public")
 @XmlRootElement
-public class Falta implements Serializable {
+public class Incidencia implements Serializable {
     
     private static final long serialVersionUID = 1L;
+    
+    public static String FALTA          = "F";
+    public static String INCAPACIDAD    = "I";
+    public static String PERMISO        = "P";
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,14 +43,17 @@ public class Falta implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "tipo")
-    private String idTipo;
+    @Column(name = "code")
+    private String code;
+
+    @Column(name = "clase")
+    private String clase;
 
     @Column(name = "dias")
     private Integer dias;
 
-    @Column(name = "faltas")
-    private Integer faltas;
+    @Column(name = "incidencias")
+    private Integer incidencias;
 
     @Column(name = "fecha_inicio")
     @Temporal(TemporalType.DATE)
@@ -62,10 +69,8 @@ public class Falta implements Serializable {
     
     @Column(name = "id_empleado") 
     private Integer idEmpleado;
-    
-    public Falta() {
-        dias = 0;
-        idTipo = "AI";
+
+    public Incidencia() {
     }
 
     public Integer getId() {
@@ -76,12 +81,12 @@ public class Falta implements Serializable {
         this.id = id;
     }
 
-    public String getIdTipo() {
-        return idTipo;
+    public String getCode() {
+        return code;
     }
 
-    public void setIdTipo(String idTipo) {
-        this.idTipo = idTipo;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public Integer getDias() {
@@ -90,6 +95,14 @@ public class Falta implements Serializable {
 
     public void setDias(Integer dias) {
         this.dias = dias;
+    }
+
+    public Integer getIncidencias() {
+        return incidencias;
+    }
+
+    public void setIncidencias(Integer incidencias) {
+        this.incidencias = incidencias;
     }
 
     public Date getFechaInicio() {
@@ -108,14 +121,6 @@ public class Falta implements Serializable {
         this.folio = folio;
     }
 
-    public Integer getFaltas() {
-        return faltas;
-    }
-
-    public void setFaltas(Integer faltas) {
-        this.faltas = faltas;
-    }
-
     public Integer getIdEmpleado() {
         return idEmpleado;
     }
@@ -124,4 +129,13 @@ public class Falta implements Serializable {
         this.idEmpleado = idEmpleado;
     }
 
+    public String getClase() {
+        return clase;
+    }
+
+    public void setClase(String clase) {
+        this.clase = clase;
+    }
+    
+    
 }
