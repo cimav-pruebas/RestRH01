@@ -67,13 +67,14 @@ public class CalculoREST {
     private final String PRIMA_ANTIGUEDAD           = "00005";
     private final String CARGA_ADMINISTRATIVA       = "00007";
     private final String COMPENSA_GARANTIZADA       = "00010";
-    private final String VALES_DESPENSA             = "00014";
+    //private final String VALES_DESPENSA             = "00014";
     private final String HONORARIOS_ASIMILABLES     = "00027"; // sueldo
     private final String MATERIALES                 = "00012";
     private final String FONDO_AHORRO_EXENTO        = "00021";
     private final String FONDO_AHORRO_GRAVADO       = "00022";
     private final String FONDO_AHORRO               = "00111";
     private final String APORTACION_FONDO_AHORRO    = "00112";
+    private final String MONEDERO_DESPENSA          = "00092";
     
     private final String BASE_GRAVABLE              = "BG";
     private final String BASE_EXENTA                = "BE";    
@@ -322,7 +323,7 @@ public class CalculoREST {
             // compesa garantizada
             resultJSON += insertarMov(COMPENSA_GARANTIZADA, compensa_garantiza);
             // despensa
-            resultJSON += insertarMov(VALES_DESPENSA, despensa); //TODO la Despensa no suma puesto que se paga con Vales
+            resultJSON += insertarMov(MONEDERO_DESPENSA, despensa); //TODO la Despensa no suma puesto que se paga con Vales
             // fondo ahorro exento
             resultJSON += insertarMov(FONDO_AHORRO_EXENTO, fondo_ahorro_exento);
             // fondo ahorro gravado
