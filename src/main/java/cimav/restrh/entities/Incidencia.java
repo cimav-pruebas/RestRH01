@@ -52,8 +52,11 @@ public class Incidencia implements Serializable {
     @Column(name = "dias")
     private Integer dias;
 
-    @Column(name = "incidencias")
-    private Integer incidencias;
+    @Column(name = "dias_habiles")
+    private Integer diasHabiles;
+
+    @Column(name = "dias_inhabiles")
+    private Integer diasInhabiles;
 
     @Column(name = "fecha_inicio")
     @Temporal(TemporalType.DATE)
@@ -97,12 +100,20 @@ public class Incidencia implements Serializable {
         this.dias = dias;
     }
 
-    public Integer getIncidencias() {
-        return incidencias;
+    public Integer getDiasHabiles() {
+        return diasHabiles;
     }
 
-    public void setIncidencias(Integer incidencias) {
-        this.incidencias = incidencias;
+    public void setDiasHabiles(Integer diasHabiles) {
+        this.diasHabiles = diasHabiles;
+    }
+
+    public Integer getDiasInhabiles() {
+        return diasInhabiles;
+    }
+
+    public void setDiasInhabiles(Integer diasInhabiles) {
+        this.diasInhabiles = diasInhabiles;
     }
 
     public Date getFechaInicio() {

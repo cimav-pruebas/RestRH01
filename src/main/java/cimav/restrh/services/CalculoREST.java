@@ -14,7 +14,6 @@ import cimav.restrh.entities.Tabulador;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 import javax.ejb.Asynchronous;
@@ -35,8 +34,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Days;
 import org.joda.time.Years;
 
 
@@ -163,6 +160,27 @@ public class CalculoREST {
                 throw new NullPointerException("EMPLEADO");
             }
 
+            /*
+            Faltas:
+            Restar los días faltados de los días ordinarios. 
+            Los días de descanso no 'causan' faltas.
+            Todas las faltas son dentro de la misma quincena
+            Se supone que máximo son 3 faltas por quincena.
+
+            Incapacidades:
+            Para cuestión de pagos (SB, etc.) tomar los días 'financieros' (15, 28, 29 o 30).
+            Restas los días de los ordinarios (hábiles) y también de los inhábiles (descanso) 
+            porque ambos se los paga el Imss.
+            Excepcion: los días 31 se deben capturar pero no afectan los cálculos.
+            Tomar los días calendario para contabilizarlos al final de año (ajuste).
+            Para el ajuste hace regla de tres: por 365(6) le tocaban 5 días ... cuanto le toca por 354?
+
+            Faltas e Incapacidades no se traslapan.
+            
+            //TODO Falta incluir días de Asueto
+            
+            */
+            
             Integer faltas = this.findIncidencias(idEmpleado, Incidencia.FALTA);
             Integer incapacidades = this.findIncidencias(idEmpleado, Incidencia.INCAPACIDAD);
             dias_trabajados = new BigDecimal(Quincena.get().getDiasLaborables() - faltas - incapacidades);
@@ -411,7 +429,7 @@ public class CalculoREST {
             System.out.println("vaciarCalculos ::> " + e.getMessage());
         }
     }
-
+/*
     @GET
     @Path("fechas/{quincena}")
     @Produces("application/json")
@@ -460,18 +478,17 @@ public class CalculoREST {
         Calendar fechaFinFiscal = Calendar.getInstance();
         fechaFinFiscal.set(year, mes-1, diaFinalFiscal);
         
-        Calendar fechaAvanza = Calendar.getInstance();
-        fechaAvanza.set(year, mes-1, diaInicio); //igual a la de inicio
-            
         int diasOrdinarios = 0;
         int diasDescanso = 0;
-        while (fechaFinFiscal.after(fechaAvanza) || fechaFinFiscal.equals(fechaAvanza)) {
-            if (fechaAvanza.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || fechaAvanza.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+        Calendar fechaAux = Calendar.getInstance();
+        fechaAux.set(year, mes-1, diaInicio); //igual a la de inicio
+        while (fechaFinFiscal.after(fechaAux) || fechaFinFiscal.equals(fechaAux)) {
+            if (fechaAux.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || fechaAux.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
                 diasDescanso++;
             } else {
                 diasOrdinarios++;
             }
-            fechaAvanza.add(Calendar.DATE, 1);
+            fechaAux.add(Calendar.DATE, 1);
         }
         
         DateTime start = new DateTime(year, mes, fechaInicio.get(Calendar.DATE), 0, 0, 0, DateTimeZone.UTC).minusDays(1);
@@ -492,16 +509,34 @@ public class CalculoREST {
         result = 
                 "{ " + "\"quincena\": " + quincena + "," +
                 "\t" + "\"fecha_inicio\": " + fi + "," +
+                "\t" + "\"fecha_fin\": " + fff + "," +
                 "\t" + "\"fecha_fin_calendario\": " + ffr + "," +
-                "\t" + "\"fecha_fin_calculo\": " + fff + "," +
+                "\t" + "\"dias\": " + (diasOrdinarios + diasDescanso) + "," +
                 "\t" + "\"dias_ordinarios\": " + diasOrdinarios + "," +
                 "\t" + "\"dias_descando\": " + diasDescanso + "," +
-                "\t" + "\"dias_calculo\": " + (diasOrdinarios + diasDescanso) + "," +
+                "\t" + "\"dias_asueto\": " + 0 + "," +
                 "\t" + "\"dias_imss\": " + diasImss + "" +
                 "}";
                 
         
         return result;
     }
+*/
 
+    @GET
+    @Path("quincena")
+    @Produces("application/json")
+    public String quincena() {
+        Quincena.get().getAsJSON();
+        String result = Quincena.get().getAsJSON();
+        return result;
+    }
+    
+    @GET
+    @Path("quincena/{year}/{quincena}")
+    @Produces("application/json")
+    public String quincena(@PathParam("year") int year, @PathParam("quincena") int quincena) {
+        String result = Quincena.get(year, quincena).getAsJSON();
+        return result;
+    }
 }
