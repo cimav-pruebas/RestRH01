@@ -6,6 +6,7 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Cacheable;
@@ -20,6 +21,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.apache.commons.lang3.time.DateUtils;
+import sun.util.calendar.CalendarUtils;
 
 /**
  *
@@ -60,7 +63,7 @@ public class Incidencia implements Serializable {
 
     @Column(name = "fecha_inicio")
     @Temporal(TemporalType.DATE)
-    private Date fechaInicio;
+    private Date fechaInicial;
     
     @Column(name = "folio")
     private String folio;
@@ -116,12 +119,13 @@ public class Incidencia implements Serializable {
         this.diasInhabiles = diasInhabiles;
     }
 
-    public Date getFechaInicio() {
-        return fechaInicio;
+    public Date getFechaInicial() {
+        return fechaInicial;
     }
 
-    public void setFechaInicio(Date fechaInicio) {
-        this.fechaInicio = fechaInicio;
+    public void setFechaInicial(Date fechaInicial) {
+        this.fechaInicial = fechaInicial;
+        this.fechaInicial = DateUtils.truncate(fechaInicial, Calendar.DAY_OF_MONTH);
     }
 
     public String getFolio() {

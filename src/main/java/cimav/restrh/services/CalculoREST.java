@@ -5,6 +5,7 @@
  */
 package cimav.restrh.services;
 
+import cimav.restrh.entities.Quincena;
 import cimav.restrh.entities.Concepto;
 import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
@@ -23,6 +24,7 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.RollbackException;
 import javax.ws.rs.Consumes;
@@ -181,11 +183,14 @@ public class CalculoREST {
             
             */
             
-            Integer faltas = this.findIncidencias(idEmpleado, Incidencia.FALTA);
-            Integer incapacidades = this.findIncidencias(idEmpleado, Incidencia.INCAPACIDAD);
-            dias_trabajados = new BigDecimal(Quincena.get().getDiasLaborables() - faltas - incapacidades);
-            dias_ordinarios_trabajados = new BigDecimal(Quincena.get().getDiasOrdinarios() - faltas - incapacidades);
-            dias_descanso = new BigDecimal(Quincena.get().getDiasDescanso()); // TODO ¿dias_descanso no se le quitan faltas ni incapacidades?
+            Integer faltas = this.findIncidencias(idEmpleado, Incidencia.FALTA)[0];
+            Integer[] incapacidades = this.findIncidencias(idEmpleado, Incidencia.INCAPACIDAD);
+            Integer incapacidadesHabiles = incapacidades[0];
+            Integer incapacidadesInhabiles = incapacidades[1];
+            // TODO verificar bien calculos con los dias respectivos
+            dias_trabajados = new BigDecimal(Quincena.get().getDiasLaborables() - faltas - incapacidadesHabiles - incapacidadesInhabiles);
+            dias_ordinarios_trabajados = new BigDecimal(Quincena.get().getDiasOrdinarios() - faltas - incapacidadesHabiles);
+            dias_descanso = new BigDecimal(Quincena.get().getDiasDescanso() - incapacidadesInhabiles); 
             // TODO faltan dias de asueto (16 Sept, etc.)
             
             Tabulador nivel = empleadoNomina.getNivel();
@@ -408,13 +413,18 @@ public class CalculoREST {
         }
     }
     
-    public int findIncidencias(Integer idEmpleado, String clase) {
-        int result = 0;
+    public Integer[] findIncidencias(Integer idEmpleado, String clase) {
+        Integer[] result = new Integer[2];
+        result[0] = 0;
+        result[1] = 0;
         try {
-            Long incidencias = (Long)getEntityManager().createQuery("SELECT SUM(i.incidencias) FROM Incidencia i WHERE i.idEmpleado = :id_empleado AND i.clase = :clase")
+            Object[] tmp = (Object[])getEntityManager().createQuery("SELECT SUM(i.diasHabiles), SUM(i.diasInhabiles) FROM Incidencia i WHERE i.idEmpleado = :id_empleado AND i.clase = :clase")
                     .setParameter("id_empleado", idEmpleado).setParameter("clase", clase).getSingleResult();
-            result = incidencias != null ? incidencias.intValue() : 0;
-        } catch (NoResultException e) {
+            if (tmp != null) {
+                result[0] = tmp[0] == null ? 0 : ((Long)tmp[0]).intValue();
+                result[1] = tmp[1] == null ? 0 : ((Long)tmp[1]).intValue();
+            }
+        } catch (NonUniqueResultException | NoResultException e) {
         }
         return result;
     }

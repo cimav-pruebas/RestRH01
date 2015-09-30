@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cimav.restrh.services;
+package cimav.restrh.entities;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -43,7 +43,7 @@ public class Quincena {
     public static Quincena get() {
         if (instance == null) {
             // TODO quincena y año deben venir desde la DB
-            int pquincena = 1;
+            int pquincena = 18;
             int pyear = 2015;
             instance = new Quincena(pyear, pquincena);
         }
@@ -64,7 +64,7 @@ public class Quincena {
         int diaInicio = isQuincenaPar ? 16 : 1;
         
         Calendar fechaInicioCal = Calendar.getInstance();
-        fechaInicioCal.set(year, mes-1, diaInicio);
+        fechaInicioCal.set(year, mes-1, diaInicio, 0, 0, 0);
         
         // si es quincena non, dia real y topado coinciden en 15
         int diaFinalCalendario = 15;
@@ -77,13 +77,13 @@ public class Quincena {
         }
         
         Calendar fechaFinCalendarioCal = Calendar.getInstance();
-        fechaFinCalendarioCal.set(year, mes-1, diaFinalCalendario);
+        fechaFinCalendarioCal.set(year, mes-1, diaFinalCalendario, 0, 0, 0);
         
         Calendar fechaFinCalculoCal = Calendar.getInstance();
-        fechaFinCalculoCal.set(year, mes-1, diaFinal);
+        fechaFinCalculoCal.set(year, mes-1, diaFinal, 0, 0, 0);
         
         Calendar fechaAvanzaCal = Calendar.getInstance();
-        fechaAvanzaCal.set(year, mes-1, diaInicio); //igual a la de inicio
+        fechaAvanzaCal.set(year, mes-1, diaInicio, 0, 0, 0); //igual a la de inicio
             
         int diasOrdinariosCount = 0;
         int diasDescansoCount = 0;
@@ -101,7 +101,7 @@ public class Quincena {
         
         int diasImssCount = Days.daysBetween(start, end).getDays();
         
-        this.fechaInicio = fechaInicioCal.getTime();
+        this.fechaInicio = fechaInicioCal.getTime(); 
         this.fechaFinCalendario = fechaFinCalendarioCal.getTime();
         this.fechaFin = fechaFinCalculoCal.getTime();
         this.diasOrdinarios = diasOrdinariosCount;

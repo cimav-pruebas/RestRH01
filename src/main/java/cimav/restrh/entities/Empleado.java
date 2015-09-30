@@ -6,6 +6,7 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
@@ -19,6 +20,7 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 /**
  *
@@ -270,7 +272,8 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     }
 
     public void setFechaInicioContrato(Date fechaInicioContrato) {
-        this.fechaInicioContrato = fechaInicioContrato;
+        //this.fechaInicioContrato = fechaInicioContrato;
+        this.fechaInicioContrato = DateUtils.truncate(fechaInicioContrato, Calendar.DAY_OF_MONTH);
     }
 
     public Date getFechaFinContrato() {
@@ -278,7 +281,8 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     }
 
     public void setFechaFinContrato(Date fechaFinContrato) {
-        this.fechaFinContrato = fechaFinContrato;
+        //this.fechaFinContrato = fechaFinContrato;
+        this.fechaFinContrato = DateUtils.truncate(fechaFinContrato, Calendar.DAY_OF_MONTH);
     }
 
     public Date getFechaBaja() {
@@ -286,7 +290,8 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     }
 
     public void setFechaBaja(Date fechaBaja) {
-        this.fechaBaja = fechaBaja;
+        //this.fechaBaja = fechaBaja;
+        this.fechaBaja = DateUtils.truncate(fechaBaja, Calendar.DAY_OF_MONTH);
     }
 
     public Short getIdTipoAntiguedad() {
@@ -297,12 +302,15 @@ public class Empleado extends EmpleadoSuper implements Serializable {
         this.idTipoAntiguedad = idTipoAntiguedad;
     }
 
+    @Override
     public Date getFechaAntiguedad() {
         return fechaAntiguedad;
     }
 
+    @Override
     public void setFechaAntiguedad(Date fechaAntiguedad) {
-        this.fechaAntiguedad = fechaAntiguedad;
+        //this.fechaAntiguedad = fechaAntiguedad;
+        this.fechaAntiguedad = DateUtils.truncate(fechaAntiguedad, Calendar.DAY_OF_MONTH);
     }
 
     public Short getIdTipoSni() {
@@ -326,7 +334,8 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     }
 
     public void setFechaSni(Date fechaSni) {
-        this.fechaSni = fechaSni;
+        //this.fechaSni = fechaSni;
+        this.fechaSni = DateUtils.truncate(fechaSni, Calendar.DAY_OF_MONTH);
     }
 
     public EmpleadoBase getJefe() {
@@ -342,7 +351,8 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     }
 
     public void setFechaNacimiento(Date fechaNacimiento) {
-        this.fechaNacimiento = fechaNacimiento;
+        //this.fechaNacimiento = fechaNacimiento;
+        this.fechaNacimiento = DateUtils.truncate(fechaNacimiento, Calendar.DAY_OF_MONTH);
     }
 
     public Integer getIdSexo() {
