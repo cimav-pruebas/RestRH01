@@ -54,6 +54,9 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     @Column(name = "fecha_antiguedad")
     @Temporal(TemporalType.DATE)
     private Date fechaAntiguedad;
+    
+    @Column(name = "estimulos_productividad")
+    private Double estimulosProductividad;
 
 //    @PostLoad
 //    public void reduceJefe() {
@@ -135,6 +138,14 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     public void setFechaAntiguedad(Date fechaAntiguedad) {
         //this.fechaAntiguedad = fechaAntiguedad;
         this.fechaAntiguedad = DateUtils.truncate(fechaAntiguedad, Calendar.DAY_OF_MONTH);
+    }
+
+    public Double getEstimulosProductividad() {
+        return estimulosProductividad;
+    }
+
+    public void setEstimulosProductividad(Double estimulosProductividad) {
+        this.estimulosProductividad = estimulosProductividad;
     }
 
 }

@@ -7,9 +7,11 @@ package cimav.restrh.entities;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import javax.money.MonetaryAmount;
 import javax.persistence.Basic;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,8 +21,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.javamoney.moneta.Money;
 
 /**
  *
@@ -58,7 +62,15 @@ public class NominaQuincenal implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(name = "cantidad")
-    private BigDecimal cantidad;
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount cantidad;
+
+    // aliasCantidad (tipo BigDecimal) es alias de cantidad (tipo MonetaryaAmount)
+    // porque el constructor usado en el query de NominaQuincenalFacadeREST.doFindByIds 
+    // no entiende el tipo MonetaryAmount
+    @Basic(optional = false)
+    @Column(name = "cantidad", updatable = false, insertable = false)
+    private BigDecimal aliasCantidad;
     
     @Basic(optional = false)
     @NotNull
@@ -67,11 +79,13 @@ public class NominaQuincenal implements Serializable {
 
     @Basic(optional = false)
     @Column(name = "pago")
-    private BigDecimal pago;
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount pago;
     
     @Basic(optional = false)
     @Column(name = "saldo")
-    private BigDecimal saldo;
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount saldo;
     
     @Basic(optional = false)
     @Column(name = "permanente")
@@ -80,13 +94,22 @@ public class NominaQuincenal implements Serializable {
     public NominaQuincenal() {
         idEmpleado = 0;
         numQuincenas = 1;
-        cantidad = BigDecimal.ZERO;
-        saldo = BigDecimal.ZERO;
-        pago = BigDecimal.ZERO;
+        cantidad = Money.of(0.00, "MXN");
+        saldo = Money.of(0.00, "MXN");
+        pago = Money.of(0.00, "MXN");
         permanente = false;
     }
 
-    public NominaQuincenal(int idEmpleado, Concepto concepto, BigDecimal cantidad) {
+    // constructor usado con aliasCantidad (en lugar de con cantidad)
+    // porque el constructor usado en el query de NominaQuincenalFacadeREST.doFindByIds 
+    // no entiende el tipo MonetaryAmount
+    public NominaQuincenal(int idEmpleado, Concepto concepto, BigDecimal aliasCantidad) {
+        this();
+        this.idEmpleado = idEmpleado;
+        this.concepto = concepto;
+        this.cantidad = Money.of(aliasCantidad, "MXN");
+    }
+    public NominaQuincenal(int idEmpleado, Concepto concepto, MonetaryAmount cantidad) {
         this();
         this.idEmpleado = idEmpleado;
         this.concepto = concepto;
@@ -96,7 +119,7 @@ public class NominaQuincenal implements Serializable {
         this.id = id;
     }
 
-    public NominaQuincenal(Integer id, BigDecimal cantidad, short numQuincenas) {
+    public NominaQuincenal(Integer id, MonetaryAmount cantidad, short numQuincenas) {
         this.id = id;
         this.cantidad = cantidad;
         this.numQuincenas = numQuincenas;
@@ -118,14 +141,30 @@ public class NominaQuincenal implements Serializable {
         this.id = id;
     }
 
-    public BigDecimal getCantidad() {
+    public MonetaryAmount getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(BigDecimal cantidad) {
+    public void setCantidad(MonetaryAmount cantidad) {
         this.cantidad = cantidad;
     }
 
+    public EmpleadoBase getEmpleadoBase() {
+        return empleadoBase;
+    }
+
+    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
+        this.empleadoBase = empleadoBase;
+    }
+
+//    public BigDecimal getAliasCantidad() {
+//        return aliasCantidad;
+//    }
+//
+//    public void setAliasCantidad(BigDecimal aliasCantidad) {
+//        this.aliasCantidad = aliasCantidad;
+//    }
+    
     public short getNumQuincenas() {
         return numQuincenas;
     }
@@ -142,19 +181,19 @@ public class NominaQuincenal implements Serializable {
         this.concepto = concepto;
     }
 
-    public BigDecimal getPago() {
+    public MonetaryAmount getPago() {
         return pago;
     }
 
-    public void setPago(BigDecimal pago) {
+    public void setPago(MonetaryAmount pago) {
         this.pago = pago;
     }
 
-    public BigDecimal getSaldo() {
+    public MonetaryAmount getSaldo() {
         return saldo;
     }
 
-    public void setSaldo(BigDecimal saldo) {
+    public void setSaldo(MonetaryAmount saldo) {
         this.saldo = saldo;
     }
 

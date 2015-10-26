@@ -6,10 +6,11 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Collection;
+import javax.money.MonetaryAmount;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -22,7 +23,7 @@ import javax.xml.bind.annotation.XmlTransient;
  *
  * @author juan.calderon
  */
-@Entity
+@Entity(name = "Tabulador")
 @Cacheable(false)
 @Table(name = "tabulador", catalog = "rh_development", schema = "public")
 @XmlRootElement
@@ -34,63 +35,81 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Tabulador extends BaseEntity implements Serializable {
 
     @Column(name = "sueldo")
-    private BigDecimal sueldo;
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount sueldo;
 
     @Column(name = "mat_didacticos")
-    private BigDecimal matDidacticos;
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount matDidacticos;
 
     @Column(name = "comp_garantizada")
-    private BigDecimal compGarantizada;
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount compGarantizada;
 
     @Column(name = "honorarios")
-    private BigDecimal honorarios;
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount honorarios;
 
     @Column(name = "carga_admin")
-    private BigDecimal cargaAdmin;
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount cargaAdmin;
     
     @OneToMany(mappedBy = "nivel")
     private Collection<EmpleadoBase> empleadoCollection;
 
+    @Column(name = "extra")
+    @Convert(converter = MonetaryAmountConverter.class)
+    //@XmlJavaTypeAdapter(MonedaAdapter.class)
+    private MonetaryAmount extra;
+
+    public MonetaryAmount getExtra() {
+        return extra;
+    }
+
+    public void setExtra(MonetaryAmount extra) {
+        this.extra = extra;
+    }
+    
     public Tabulador() {
     }
 
-    public BigDecimal getSueldo() {
+    public MonetaryAmount getSueldo() {
         return sueldo;
     }
 
-    public void setSueldo(BigDecimal sueldo) {
+    public void setSueldo(MonetaryAmount sueldo) {
         this.sueldo = sueldo;
     }
 
-    public BigDecimal getMatDidacticos() {
+    public MonetaryAmount getMatDidacticos() {
         return matDidacticos;
     }
 
-    public void setMatDidacticos(BigDecimal matDidacticos) {
+    public void setMatDidacticos(MonetaryAmount matDidacticos) {
         this.matDidacticos = matDidacticos;
     }
 
-    public BigDecimal getCompGarantizada() {
+    public MonetaryAmount getCompGarantizada() {
         return compGarantizada;
     }
 
-    public void setCompGarantizada(BigDecimal compGarantizada) {
+    public void setCompGarantizada(MonetaryAmount compGarantizada) {
         this.compGarantizada = compGarantizada;
     }
 
-    public BigDecimal getHonorarios() {
+    public MonetaryAmount getHonorarios() {
         return honorarios;
     }
 
-    public void setHonorarios(BigDecimal honorarios) {
+    public void setHonorarios(MonetaryAmount honorarios) {
         this.honorarios = honorarios;
     }
 
-    public BigDecimal getCargaAdmin() {
+    public MonetaryAmount getCargaAdmin() {
         return cargaAdmin;
     }
 
-    public void setCargaAdmin(BigDecimal cargaAdmin) {
+    public void setCargaAdmin(MonetaryAmount cargaAdmin) {
         this.cargaAdmin = cargaAdmin;
     }
     

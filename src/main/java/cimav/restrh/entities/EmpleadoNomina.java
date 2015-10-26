@@ -11,6 +11,7 @@ import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -37,6 +38,9 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
     @OneToMany(mappedBy = "empleadoNomina")
     private Collection<Incidencia> incidencias;
 
+    @OneToOne(mappedBy = "empleadoNomina")
+    private EmpleadoQuincenal empleadoQuincenal;
+    
     public EmpleadoNomina() {
         super();
     }
@@ -72,5 +76,14 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
     public void setIncidencias(Collection<Incidencia> incidencias) {
         this.incidencias = incidencias;
     }
+
+    public EmpleadoQuincenal getEmpleadoQuincenal() {
+        return empleadoQuincenal;
+    }
+
+    public void setEmpleadoQuincenal(EmpleadoQuincenal empleadoQuincenal) {
+        this.empleadoQuincenal = empleadoQuincenal;
+    }
+
     
 }

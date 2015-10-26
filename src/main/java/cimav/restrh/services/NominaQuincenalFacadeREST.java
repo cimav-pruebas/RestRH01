@@ -8,6 +8,7 @@ package cimav.restrh.services;
 import cimav.restrh.entities.NominaQuincenal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -31,6 +32,9 @@ import javax.ws.rs.Produces;
 @Stateless
 @Path("nomina_quincenal")
 public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
+    
+    private final static Logger logger = Logger.getLogger(NominaQuincenalFacadeREST.class.getName() ); 
+    
     @PersistenceContext(unitName = "PU_JPA")
     private EntityManager em;
 
@@ -45,27 +49,17 @@ public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
     public List<NominaQuincenal> doFindByIds(JsonArray ids) {
         List<NominaQuincenal> result = new ArrayList<>();
         List<Integer> idList = new ArrayList<>();
-        for (JsonValue idVal : ids) {
-            int i = ((JsonObject)idVal).getInt("id");
+        ids.stream().map((idVal) -> ((JsonObject)idVal).getInt("id")).forEach((i) -> {
             idList.add(i);
-        }
+        });
         if (idList.size() > 0) {
-            String qlString = "SELECT NEW cimav.restrh.entities.NominaQuincenal(0, nq.concepto, SUM(nq.cantidad)) FROM NominaQuincenal AS nq " +
+            // el constructor usa el aliasCantidad porque es del tipo BigDecimal.
+            // No usa directamente cantidad porque es del tipo MonetaryAmount que no es reconocido por el JPA
+            String qlString = "SELECT NEW cimav.restrh.entities.NominaQuincenal(0, nq.concepto, SUM(nq.aliasCantidad)) FROM NominaQuincenal AS nq " +
                     " WHERE nq.idEmpleado IN :idList GROUP BY nq.concepto ORDER BY nq.concepto.id";
             Query query = getEntityManager().createQuery(qlString, NominaQuincenal.class);
             query.setParameter("idList", idList);
             result.addAll(query.getResultList());
-            
-//            String sql = "SELECT t FROM NominaQuincenal t WHERE t.idEmpleado IN :idList GROUP BY t.concepto";
-//            result.addAll(getEntityManager().createQuery(sql , NominaQuincenal.class)
-//                    .setParameter("idList", idList).getResultList());
-            
-            
-//        Query query = getEntityManager().createQuery("SELECT NEW cimav.restrh.entities.Empleado(e.id, e.code, e.name, e.cuentaCimav) FROM Empleado AS e", EmpleadoOld.class);
-//        List<EmpleadoOld> results = query.getResultList();
-
-            
-            
         }
         return result;
     }

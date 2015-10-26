@@ -22,7 +22,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.lang3.time.DateUtils;
-import sun.util.calendar.CalendarUtils;
 
 /**
  *
