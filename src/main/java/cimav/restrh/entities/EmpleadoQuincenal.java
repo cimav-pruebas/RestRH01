@@ -16,7 +16,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -46,6 +45,11 @@ public class EmpleadoQuincenal implements Serializable {
     @OneToOne
     private EmpleadoNomina empleadoNomina; /* Read Only */
     
+    // Conexion con el Empleado
+    @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
+    @OneToOne
+    private EmpleadoBase empleadoBase; /* Read Only */
+    
     // Faltas, Incapacidades, Ordinarios y Descanso se modifican junto
     // a las Incidencias
     private Integer faltas;
@@ -61,6 +65,11 @@ public class EmpleadoQuincenal implements Serializable {
     // diasPAntDos corresponde a los dias con los años nuevos
     @Column(name = "years_pant")
     private Integer yearPAnt;
+    @Column(name = "months_pant")
+    private Integer monthsPAnt;
+    @Column(name = "days_pant")
+    private Integer daysPAnt;
+    
     @Column(name = "dias_pant_uno") 
     private Integer diasPAntUno;
     @Column(name = "dias_pant_dos")
@@ -148,5 +157,25 @@ public class EmpleadoQuincenal implements Serializable {
     public void setDiasPAntDos(Integer diasPAntDos) {
         this.diasPAntDos = diasPAntDos;
     }
+
+    public String getDayMonthYear() {
+        return daysPAnt + " día(s), " + monthsPAnt + " mese(s), " + yearPAnt + " año(s)";
+    }
+
+    public Integer getMonthsPAnt() {
+        return monthsPAnt;
+    }
+
+    public void setMonthsPAnt(Integer monthsPAnt) {
+        this.monthsPAnt = monthsPAnt;
+    }
+
+    public Integer getDaysPAnt() {
+        return daysPAnt;
+    }
+
+    public void setDaysPAnt(Integer daysPAnt) {
+        this.daysPAnt = daysPAnt;
+    }    
     
 }

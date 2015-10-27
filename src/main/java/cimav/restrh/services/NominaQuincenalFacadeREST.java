@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import javax.json.JsonValue;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;

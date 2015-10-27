@@ -113,14 +113,16 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
                 
 //                int yearsCumplidos = Period.between(lfAnt, lfFin).getYears();
                     
-                    int yearsCumplidos = Period.between(localDateFechaAntiguedad, localDateFinQuincena).getYears();
+                    Period period = Period.between(localDateFechaAntiguedad, localDateFinQuincena);
                     
                     Integer diasPAntAnterior = 0;
                     Integer diasPAntActual = quincena.getDiasLaborables();
                     
                     EmpleadoQuincenal empleadoQuincenal = new EmpleadoQuincenal();
                     empleadoQuincenal.setIdEmpleado(empleadoNomina.getId());
-                    empleadoQuincenal.setYearPAnt(yearsCumplidos);
+                    empleadoQuincenal.setYearPAnt(period.getYears());
+                    empleadoQuincenal.setMonthsPAnt(period.getMonths());
+                    empleadoQuincenal.setDaysPAnt(period.getDays());
                     empleadoQuincenal.setDescanso(quincena.getDiasDescanso());
                     empleadoQuincenal.setOrdinarios(quincena.getDiasOrdinarios());
                     empleadoQuincenal.setDiasPAntUno(diasPAntAnterior);
