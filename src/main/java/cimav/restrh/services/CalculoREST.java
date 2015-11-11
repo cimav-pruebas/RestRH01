@@ -12,11 +12,14 @@ import cimav.restrh.entities.EmpleadoNomina;
 import cimav.restrh.entities.Incidencia;
 import cimav.restrh.entities.NominaQuincenal;
 import cimav.restrh.entities.Tabulador;
+import cimav.restrh.entities.TarifaAnual;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +30,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.money.MonetaryAmount;
+import javax.money.MonetaryOperator;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -41,6 +45,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import org.javamoney.moneta.Money;
+import org.javamoney.moneta.function.MonetaryUtil;
 
 
 /**
@@ -97,6 +102,7 @@ public class CalculoREST {
     // internos
     private final String BASE_GRAVABLE              = "BG";
     private final String BASE_EXENTA                = "BE";    
+    private final String ISR                        = "00101";
     private final String SALARIO_DIARIO_FIJO            = "SDF";
     private final String SALARIO_DIARIO_VARIABLE        = "SDV";
     private final String SALARIO_DIARIO_COTIZADO        = "SDC";
@@ -119,6 +125,8 @@ public class CalculoREST {
     private final Integer DIAS_AJUSTE_5         = 5;
 
     private int idEmpleado;
+    
+    private List<TarifaAnual> listTarifaAnual;
     
     //private Quincena quincena;
     @Inject
@@ -241,6 +249,8 @@ public class CalculoREST {
         MonetaryAmount base_gravable= Money.of(0.00, "MXN");
         MonetaryAmount base_exenta = Money.of(0.00, "MXN");
         
+        MonetaryAmount impuesto_antes_subsidio = Money.of(0.00, "MXN");
+        
         MonetaryAmount salario_diario_fijo = Money.of(0.00, "MXN"); // Salario Diario Integrado (todas las percepciones fijas)
         MonetaryAmount salario_diario_variable = Money.of(0.00, "MXN"); // Remanente, EstimulosAYA, etc.
         MonetaryAmount salario_diario_cotizado = Money.of(0.00, "MXN"); // Salario Diario de CotizaciÃ³n (SDI + todss las percepciones variables)
@@ -256,8 +266,13 @@ public class CalculoREST {
         try {
 
             EmpleadoNomina empleadoNomina = getEntityManager().find(EmpleadoNomina.class, this.idEmpleado);
-            if (empleadoNomina == null) {
+            if (empleadoNomina == null ) {
                 throw new NullPointerException("EMPLEADO");
+            }
+            if (empleadoNomina.getEmpleadoQuincenal() == null ) {
+                throw new NullPointerException("EMPLEADO -- QUINCENAL");
+                // se tiene que haber executado antes (al inicio de quincena).
+                // http://localhost:8080/RestRH01/api/empleado_quincenal/init/155
             }
 
             /*
@@ -555,12 +570,15 @@ public class CalculoREST {
         base_gravable = base_gravable.add(sueldo_honorarios);
         base_gravable = base_gravable.add(prima_antiguedad);
         base_gravable = base_gravable.add(materiales);
+        base_gravable = base_gravable.add(estimulos_cyt);
         base_gravable = base_gravable.add(carga_admin);
         base_gravable = base_gravable.add(compensa_garantiza);
         base_gravable = base_gravable.add(fondo_ahorro_gravado);
         base_gravable = base_gravable.add(mondero_despensa); // TODO Despensa Â¿Grava / Excenta?
         
         base_exenta = base_exenta.add(fondo_ahorro_exento);
+        
+        impuesto_antes_subsidio = calcularImpuesto(base_gravable);
 
         try {
             
@@ -585,6 +603,8 @@ public class CalculoREST {
 
             insertarMov(BASE_GRAVABLE, base_gravable);
             insertarMov(BASE_EXENTA, base_exenta);
+            
+            insertarMov(ISR, impuesto_antes_subsidio);
             
             insertarMov(SALARIO_DIARIO_FIJO, salario_diario_fijo);
             insertarMov(SALARIO_DIARIO_VARIABLE, salario_diario_variable);
@@ -616,6 +636,7 @@ public class CalculoREST {
         resultJSON = resultJSON + " }";
         
         resultJSON = resultJSON + ",\"DEDUCCION\": {";
+            resultJSON = resultJSON + "\"" + ISR + "\": " + impuesto_antes_subsidio.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + IMSS + "\": " + imss_obrero.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + APORTACION_FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString();
@@ -751,6 +772,34 @@ public class CalculoREST {
         } catch (Exception e) {
             System.out.println("vaciarCalculos ::> " + e.getMessage());
         }
+    }
+    
+    private TarifaAnual getTarifaAnual(MonetaryAmount base_gravable) {
+        TarifaAnual result = null;
+        if (listTarifaAnual == null) {
+            listTarifaAnual = new ArrayList<>();
+            List<TarifaAnual> tarifas = getEntityManager().createNamedQuery("TarifaAnual.findAll").getResultList();
+            if (tarifas != null) {
+                listTarifaAnual.addAll(tarifas);
+            }
+        }
+        for(TarifaAnual tarifa : listTarifaAnual) {
+            if (tarifa.getLimiteInferior().isLessThanOrEqualTo(base_gravable) && tarifa.getLimiteSuperior().isGreaterThanOrEqualTo(base_gravable)) {
+                result = tarifa;
+                break;
+            }
+        }
+        return result;
+    }
+    
+    private MonetaryAmount calcularImpuesto(MonetaryAmount base_gravable) {
+        TarifaAnual tarifaAnual = getTarifaAnual(base_gravable);
+        MonetaryAmount excedente = base_gravable.subtract(tarifaAnual.getLimiteInferior());
+        MonetaryOperator opePercen = MonetaryUtil.percent(tarifaAnual.getPorcentaje());
+        MonetaryAmount porcen = excedente.with(opePercen);
+        MonetaryAmount impAntesSubsidio = porcen.add(tarifaAnual.getCuota());
+        
+        return impAntesSubsidio;
     }
 /*
     @GET
