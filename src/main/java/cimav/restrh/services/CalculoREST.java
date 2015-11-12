@@ -179,31 +179,6 @@ public class CalculoREST {
         return resultJson;
     }
     
-    @POST
-    @Path("/extra")
-    @Produces("application/json")
-    @Consumes("text/plain")
-    public String extra2(String value) {
-        Number number = Float.valueOf(value);
-        MonetaryAmount monetaryAmount = Money.of(number, "MXN");
-        try {
-            getEntityManager().createQuery("UPDATE Tabulador t SET t.extra = :value").setParameter("value", monetaryAmount).executeUpdate(); 
-        } catch (Exception e) {
-            System.out.println("extra2 ::> " + e.getMessage());
-        }
-        
-        EmpleadoNomina empleadoNomina = getEntityManager().find(EmpleadoNomina.class, 155);
-        if (empleadoNomina == null) {
-            throw new NullPointerException("EMPLEADO");
-        }
-        Tabulador nivel = empleadoNomina.getNivel();
-        if (nivel == null) {
-            throw new NullPointerException("NIVEL");
-        }
-        MonetaryAmount cant = nivel.getExtra();
-        return "{\"extra\": " + cant.getNumber().toString() + " }";
-    }
-    
     private String calcular(int idEmpleado) {
         
         this.idEmpleado = idEmpleado;

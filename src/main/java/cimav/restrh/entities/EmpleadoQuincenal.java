@@ -52,12 +52,15 @@ public class EmpleadoQuincenal implements Serializable {
     
     // Faltas, Incapacidades, Ordinarios y Descanso se modifican junto
     // a las Incidencias
+    @Column(name = "faltas")
     private Integer faltas;
     @Column(name = "incapacidad_habiles")
     private Integer incapacidadHabiles;
     @Column(name = "incapacidad_inhabiles")
     private Integer incapacidadInhabiles;
+    @Column(name = "ordinarios")
     private Integer ordinarios;
+    @Column(name = "descanso")
     private Integer descanso;
     
     // Si cumple años durante la quicena la PAnt es proporcional.

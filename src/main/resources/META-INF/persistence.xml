@@ -4,6 +4,7 @@
     <jta-data-source>JNDI_RH_DEV</jta-data-source>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <shared-cache-mode>DISABLE_SELECTIVE</shared-cache-mode>
-    <properties/>
+    <properties>
+    </properties>
   </persistence-unit>
 </persistence>

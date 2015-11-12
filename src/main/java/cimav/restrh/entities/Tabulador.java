@@ -57,19 +57,6 @@ public class Tabulador extends BaseEntity implements Serializable {
     @OneToMany(mappedBy = "nivel")
     private Collection<EmpleadoBase> empleadoCollection;
 
-    @Column(name = "extra")
-    @Convert(converter = MonetaryAmountConverter.class)
-    //@XmlJavaTypeAdapter(MonedaAdapter.class)
-    private MonetaryAmount extra;
-
-    public MonetaryAmount getExtra() {
-        return extra;
-    }
-
-    public void setExtra(MonetaryAmount extra) {
-        this.extra = extra;
-    }
-    
     public Tabulador() {
     }
 

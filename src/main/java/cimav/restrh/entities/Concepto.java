@@ -33,9 +33,6 @@ public class Concepto extends BaseEntity implements Serializable {
     @Column(name = "id_tipo_concepto")
     private Character idTipoConcepto;
 
-    @Column(name = "status")
-    private Short status;
-
     @Column(name = "id_tipo_movimiento")
     private Character idTipoMovimiento;    
         
@@ -54,14 +51,6 @@ public class Concepto extends BaseEntity implements Serializable {
         this.idTipoConcepto = idTipoConcepto;
     }
     
-    public Short getStatus() {
-        return status;
-    }
-
-    public void setStatus(Short status) {
-        this.status = status;
-    }
-
     public Character getIdTipoMovimiento() {
         return idTipoMovimiento;
     }
