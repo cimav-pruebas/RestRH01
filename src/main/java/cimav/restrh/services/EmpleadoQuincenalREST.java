@@ -54,95 +54,86 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     }
 
     @GET
-    @Path("init/{id_emp}")
+    @Path("init")
     @Produces("text/plain")
-    public String init(@PathParam("id_emp") Integer idEmp) {
-        String r ="Oka";
-        
-        
-        LocalDate localDateInicioQuincena = Quincena.convert(quincena.getFechaInicio());
-        // TODO Excepcionalmente damos por hecho que ningún empleado cumple años el día 28 o 29 o 31
-        LocalDate localDateFinQuincena = Quincena.convert(quincena.getFechaFin());
-        
+    public String init() {
         try {
+            // Inicializa a todos
+            quincena.init();
+            
             // vaciar
             getEntityManager().createQuery("DELETE FROM EmpleadoQuincenal").executeUpdate();
             getEntityManager().createNativeQuery("ALTER SEQUENCE empleadoquincenal_id_seq RESTART WITH 1").executeUpdate(); 
-            
-            //getEntityManager().createQuery(query).executeUpdate();
+
+            // TODO Filtrar que solo inicialize a los empleados activos.
+            List<EmpleadoNomina> empleadosNomina = empleadoNominaFacadeREST.findAll();
+            empleadosNomina.stream().forEach((empleadoNomina) -> {
+                this.inicializar(empleadoNomina);
+            });
+
         } catch (Exception er){
             logger.log(Level.INFO, er.getMessage());
         }
-        
-        try{
-            // probar que fecha tiene la quincena correcta
-            logger.log(Level.INFO, "---------------------------------------------------------");
-            logger.log(Level.INFO, "1> \n" + quincena.toJSON());
-            quincena.init();
-            logger.log(Level.INFO, "2> \n" + quincena.toJSON());
-            
-            // recorrer todos los empleados activos
-            // TODO falta condicion para solo los activos y solo los CYT y AYA en caso de PAnt
-            List<EmpleadoNomina> empleadosNomina = empleadoNominaFacadeREST.findAll();
-            
-            for(EmpleadoNomina empleadoNomina : empleadosNomina) {
-                
-                boolean isCYT = empleadoNomina.getIdGrupo().equals(EGrupo.CYT.getId());
-                boolean isAYA = empleadoNomina.getIdGrupo().equals(EGrupo.AYA.getId());
-                if (/*empleadoNomina.getId() == 155 &&*/ (isCYT || isAYA)) {
-                    
-                    LocalDate localDateFechaAntiguedad = Quincena.convert(empleadoNomina.getFechaAntiguedad());
-                    
-                    logger.log(Level.INFO, empleadoNomina.getId() + " | " + empleadoNomina.getName() 
-                            + " | " + empleadoNomina.getNivel() + " | " + empleadoNomina.getFechaAntiguedad() + " | " + localDateFechaAntiguedad);
-                    // TODO Para cuando la PAnt se cumpla en la quincena, no consideramos incidencias (faltas e incapacidades);
-                    // se debe corregir.
-                    
-                    //TODO BUG Muy Lento y problema con JodaTime Resource not found: "org/joda/time/tz/data/ZoneInfoMap"
-                    // TODO Checar que incluya el dia Inicial.
-                    // Se da por hecho q nadie cumple el 28, 29 o 31 
-                    // Se calculan los años en base al último día de la quincena 
-                    
-                    
-//                Date fAnt = empleadoNomina.getFechaAntiguedad() == null ? new Date() : empleadoNomina.getFechaAntiguedad();
-//                Instant instant = Instant.ofEpochMilli(fAnt.getTime());
-//                LocalDate lfAnt = LocalDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDate();
-//                
-//                instant = Instant.ofEpochMilli(quincena.getFechaFin().getTime());
-//                LocalDate lfFin = LocalDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDate();
-                
-//                int yearsCumplidos = Period.between(lfAnt, lfFin).getYears();
-                    
-                    Period period = Period.between(localDateFechaAntiguedad, localDateFinQuincena);
-                    
-                    Integer diasPAntAnterior = 0;
-                    Integer diasPAntActual = quincena.getDiasLaborables();
-                    
-                    EmpleadoQuincenal empleadoQuincenal = new EmpleadoQuincenal();
-                    empleadoQuincenal.setIdEmpleado(empleadoNomina.getId());
-                    empleadoQuincenal.setYearPAnt(period.getYears());
-                    empleadoQuincenal.setMonthsPAnt(period.getMonths());
-                    empleadoQuincenal.setDaysPAnt(period.getDays());
-                    empleadoQuincenal.setDescanso(quincena.getDiasDescanso());
-                    empleadoQuincenal.setOrdinarios(quincena.getDiasOrdinarios());
-                    empleadoQuincenal.setDiasPAntUno(diasPAntAnterior);
-                    empleadoQuincenal.setDiasPAntDos(diasPAntActual);
-                    empleadoQuincenal.setFaltas(0);
-                    empleadoQuincenal.setIncapacidadHabiles(0);
-                    empleadoQuincenal.setIncapacidadInhabiles(0);
-                    
-                    getEntityManager().persist(empleadoQuincenal);
-                            
-                }
-            }
-            
-        } catch (Exception e) {
-            logger.log(Level.INFO, e.getMessage());
-        }
-        
-        return r;
+        return "";
     }
+    
+    @GET
+    @Path("init/{id_emp}")
+    @Produces("text/plain")
+    public String init(@PathParam("id_emp") Integer idEmp) {
+        // inicializa un empleado
+        String result = "";
+        try {
+            quincena.init();
+            EmpleadoNomina empleadoNomina = empleadoNominaFacadeREST.find(idEmp);
+            result = this.inicializar(empleadoNomina);
+        } catch (Exception er){
+            logger.log(Level.INFO, er.getMessage());
+        }
+        return result;
+    }
+    
+    private String inicializar(EmpleadoNomina empNom) {
+        LocalDate localDateFinQuincena = Quincena.convert(quincena.getFechaFin());
+        boolean isCYT = empNom.getIdGrupo().equals(EGrupo.CYT.getId());
+        boolean isAYA = empNom.getIdGrupo().equals(EGrupo.AYA.getId());
+        if (true || /*empleadoNomina.getId() == 155 &&*/ (isCYT || isAYA)) {
 
+            LocalDate localDateFechaAntiguedad = Quincena.convert(empNom.getFechaAntiguedad());
+
+            logger.log(Level.INFO, empNom.getId() + " | " + empNom.getName() 
+                    + " | " + empNom.getNivel() + " | " + empNom.getFechaAntiguedad() + " | " + localDateFechaAntiguedad);
+            // TODO Para cuando la PAnt se cumpla en la quincena, no consideramos incidencias (faltas e incapacidades);
+            // se debe corregir.
+
+            //TODO BUG Muy Lento y problema con JodaTime Resource not found: "org/joda/time/tz/data/ZoneInfoMap"
+            // TODO Checar que incluya el dia Inicial.
+            // Se da por hecho q nadie cumple el 28, 29 o 31 
+            // Se calculan los años en base al último día de la quincena 
+
+            Period period = Period.between(localDateFechaAntiguedad, localDateFinQuincena);
+
+            Integer diasPAntAnterior = 0;
+            Integer diasPAntActual = quincena.getDiasLaborables();
+
+            EmpleadoQuincenal empleadoQuincenal = new EmpleadoQuincenal();
+            empleadoQuincenal.setIdEmpleado(empNom.getId());
+            empleadoQuincenal.setYearPAnt(period.getYears());
+            empleadoQuincenal.setMonthsPAnt(period.getMonths());
+            empleadoQuincenal.setDaysPAnt(period.getDays());
+            empleadoQuincenal.setDescanso(quincena.getDiasDescanso());
+            empleadoQuincenal.setOrdinarios(quincena.getDiasOrdinarios());
+            empleadoQuincenal.setDiasPAntUno(diasPAntAnterior);
+            empleadoQuincenal.setDiasPAntDos(diasPAntActual);
+            empleadoQuincenal.setFaltas(0);
+            empleadoQuincenal.setIncapacidadHabiles(0);
+            empleadoQuincenal.setIncapacidadInhabiles(0);
+
+            getEntityManager().persist(empleadoQuincenal);
+        }
+        return "";
+    }
+    
     private int daysBetween(Date d1, Date d2){
       return (int)( (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
     }    

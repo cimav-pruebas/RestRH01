@@ -5,12 +5,16 @@
  */
 package cimav.restrh.entities;
 
+import cimav.restrh.services.ParametrosREST;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
@@ -21,6 +25,8 @@ import javax.ejb.Startup;
 @Singleton
 @Startup
 public class Quincena {
+    
+    private final static Logger logger = Logger.getLogger(Quincena.class.getName() ); 
     
     private Integer year;
     private Integer bimestre;
@@ -35,16 +41,16 @@ public class Quincena {
     private Integer diasImss = null;
     private Integer diasAsueto = null;
     
-    //private static Quincena instance;
-    
     private String asJson = null;
     
-//    private boolean isQuincenaPar;
     private int mes;
     private int diaInicio;    
-//    private int diaFinalCalendario;
     private int diaFinal;
 
+    @EJB
+    private ParametrosREST parametrosREST;
+    
+    
     public Quincena() {
     }
     
@@ -54,8 +60,9 @@ public class Quincena {
      */
     @PostConstruct
     public void init() {
-        // TODO quincena y año deben venir desde la DB
-        this.set(2015, 19);
+        Parametros parametros = parametrosREST.get();
+        //logger.log(Level.INFO, "%%>> " + quin);
+        this.set(2015, parametros.getQuincenaActual());
     }
     
     public static LocalDate convert(Date date) {

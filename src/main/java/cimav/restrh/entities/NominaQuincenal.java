@@ -204,6 +204,15 @@ public class NominaQuincenal implements Serializable {
         this.permanente = permanente;
     }
 
+    public BigDecimal getAliasCantidad() {
+        return aliasCantidad;
+    }
+
+    public void setAliasCantidad(BigDecimal aliasCantidad) {
+        this.aliasCantidad = aliasCantidad;
+    }
+    
+
     @Override
     public int hashCode() {
         int hash = 0;

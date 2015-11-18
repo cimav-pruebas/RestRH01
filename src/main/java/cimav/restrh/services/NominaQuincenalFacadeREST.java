@@ -93,6 +93,17 @@ public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
     }
 
     @GET
+    @Path("/by_empleado/{id}")
+    @Produces("application/json")
+    public List<NominaQuincenal> findByIdEmpleado(@PathParam("id") Integer idEmpleado) {
+        
+            String query = "SELECT nq FROM NominaQuincenal nq WHERE nq.idEmpleado = :id_empleado";
+            List<NominaQuincenal>  result = getEntityManager().createQuery(query).setParameter("id_empleado", idEmpleado).getResultList();
+        
+        return result;
+    }
+
+    @GET
     @Override
     @Produces("application/json")
     public List<NominaQuincenal> findAll() {

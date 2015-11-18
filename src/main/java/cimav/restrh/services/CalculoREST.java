@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Asynchronous;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.json.JsonArray;
@@ -67,6 +68,9 @@ public class CalculoREST {
     @PersistenceContext(unitName = "PU_JPA")
     private EntityManager em;
 
+    @EJB
+    private EmpleadoQuincenalREST empleadoQuincenalREST;
+    
     public CalculoREST() {
     }
 
@@ -88,6 +92,7 @@ public class CalculoREST {
     private final String ESTIMULOS_PRODUCTIVIDAD_CYT    = "00019";
     private final String FONDO_AHORRO_EXENTO            = "00021";
     private final String FONDO_AHORRO_GRAVADO           = "00022";
+    private final String APOYO_MANTENIMIENTO_VEHICULAR  = "00035";
     private final String PRIMA_QUINQUENAL               = "00067";
     private final String FONDO_AHORRO                   = "00111";
     private final String APORTACION_FONDO_AHORRO        = "00112";
@@ -166,20 +171,21 @@ public class CalculoREST {
     @Produces("application/json")
     public String calcularUno(@PathParam("idEmpleado") int idEmpleado) {
         
-        Instant a = Instant.now();
+        //Instant a = Instant.now();
         
         // TODO Siempre verificar que el quincena corresponde a la actual
         quincena.init();
 
         String resultJson = this.calcular(idEmpleado);
         
-        logger.log(Level.INFO, "Calculo en: " + Duration.between(a, Instant.now()).toMillis());
-        
+        //logger.log(Level.INFO, "Calculo en: " + Duration.between(a, Instant.now()).toMillis());
         
         return resultJson;
     }
     
     private String calcular(int idEmpleado) {
+
+        Instant a = Instant.now();
         
         this.idEmpleado = idEmpleado;
 
@@ -202,7 +208,11 @@ public class CalculoREST {
         MonetaryAmount estimulos_cyt_diario = Money.of(0.00, "MXN");
         MonetaryAmount estimulos_cyt = Money.of(0.00, "MXN");
         
+        MonetaryAmount apoyo_mto_vehicular = Money.of(0.00, "MXN");
+        MonetaryAmount apoyo_mto_vehicular_diario = Money.of(0.00, "MXN");
+        
         MonetaryAmount prima_quinquenal = Money.of(0.00, "MXN");
+        MonetaryAmount prima_quinquenal_diaria = Money.of(0.00, "MXN");
         
         MonetaryAmount ajuste_calendario_diario = Money.of(0.00, "MXN");
         MonetaryAmount ajuste_calendario = Money.of(0.00, "MXN");
@@ -244,8 +254,10 @@ public class CalculoREST {
             if (empleadoNomina == null ) {
                 throw new NullPointerException("EMPLEADO");
             }
+            
             if (empleadoNomina.getEmpleadoQuincenal() == null ) {
-                throw new NullPointerException("EMPLEADO -- QUINCENAL");
+                empleadoQuincenalREST.init(idEmpleado);
+                //throw new NullPointerException("EMPLEADO -- QUINCENAL");
                 // se tiene que haber executado antes (al inicio de quincena).
                 // http://localhost:8080/RestRH01/api/empleado_quincenal/init/155
             }
@@ -304,7 +316,7 @@ public class CalculoREST {
             Percepciones que dependen del Salario Minimo
             - Estimulos, Fondo de Ahorro
             */
-                        
+
             /* Sueldo */
             if (isHON) {
                 // HON
@@ -339,7 +351,6 @@ public class CalculoREST {
             }
             
             /* CompensaciÃ³n Garantizada */
-            
             
             /* Prima Antiguedad */
             if (isCYT || isAYA) {
@@ -463,8 +474,30 @@ public class CalculoREST {
             prima_vacacional_diaria = sueldo_diario.multiply(24 / 360);
             
             /* Prima Quinquenal */
-            // TODO como se calcula PrimaQuinquenal? y suma para SDI? BaseGravable? 
-            // TODO es un tabulador y es por antiguedad
+            if (isMMS) {
+                int yearsCumplidos = empleadoNomina.getEmpleadoQuincenal().getYearPAnt();
+                if (yearsCumplidos >= 5 && yearsCumplidos < 10) {
+                    prima_quinquenal =  Money.of(100.00, "MXN").divide(2);   
+                } else if (yearsCumplidos >= 10 && yearsCumplidos < 15) {
+                    prima_quinquenal =  Money.of(125.00, "MXN").divide(2);   
+                } else if (yearsCumplidos >= 15 && yearsCumplidos < 20) {
+                    prima_quinquenal =  Money.of(175.00, "MXN").divide(2);   
+                } else if (yearsCumplidos >= 20 && yearsCumplidos < 25) {
+                    prima_quinquenal =  Money.of(200.00, "MXN").divide(2);   
+                }  else if (yearsCumplidos >= 25) {
+                    prima_quinquenal =  Money.of(225.00, "MXN").divide(2);   
+                }
+                prima_quinquenal_diaria = prima_quinquenal.multiply(yearsCumplidos).divide(DIAS_QUINCENA_15);
+                prima_quinquenal = prima_quinquenal_diaria.multiply(dias_trabajados);
+            }
+            // TODO PrimaQuinquenal y suma para SDI?
+            
+            // Apoyo Mantenimiento Vehicular
+            if (nivel.getCode().startsWith("KA")) {
+                // Sólo para el Director General
+                apoyo_mto_vehicular_diario = Money.of(5916 / 2 / 15, "MXN");
+                apoyo_mto_vehicular = apoyo_mto_vehicular_diario.multiply(dias_trabajados);
+            }
             
             /* Seguro de SeparaciÃ³n Individualizado */
             
@@ -489,6 +522,8 @@ public class CalculoREST {
             salario_diario_fijo = salario_diario_fijo.add(materiales_diario);
             salario_diario_fijo = salario_diario_fijo.add(estimulos_cyt_diario);
             salario_diario_fijo = salario_diario_fijo.add(otros_fijos);
+            salario_diario_fijo = salario_diario_fijo.add(prima_quinquenal_diaria);
+            salario_diario_fijo = salario_diario_fijo.add(apoyo_mto_vehicular_diario);
             
             // TODO otras percepciones capturadas van en Fijo ??
             
@@ -530,10 +565,10 @@ public class CalculoREST {
             imss_obrero = excedente_3SM_diario.add(prestaciones_en_dinero).add(gtos_medicos_y_pension).add(invalidez_y_vida).add(cesantia_y_vejez);
             imss_obrero = imss_obrero.multiply(dias_trabajados);
                 
-        } catch (NullPointerException e) {
+        } catch (NullPointerException e1) {
             return "-1";
         }
-        
+
         // TODO Al termino del ejercicio fiscal (Ãºltima quincena de dic) se acumulan todos los pagos 
         // por concepto de previsiÃ³n social para gravar la diferencia y / o integrar la diferencia de vales 
         // como variable para integraciÃ³n del IMSS en enero y febrero del siguiente aÃ±o.
@@ -549,7 +584,9 @@ public class CalculoREST {
         base_gravable = base_gravable.add(carga_admin);
         base_gravable = base_gravable.add(compensa_garantiza);
         base_gravable = base_gravable.add(fondo_ahorro_gravado);
-        base_gravable = base_gravable.add(mondero_despensa); // TODO Despensa Â¿Grava / Excenta?
+        // base_gravable = base_gravable.add(mondero_despensa); // Monedero excenta
+        base_gravable = base_gravable.add(prima_quinquenal);
+        base_gravable = base_gravable.add(apoyo_mto_vehicular);
         
         base_exenta = base_exenta.add(fondo_ahorro_exento);
         
@@ -573,6 +610,9 @@ public class CalculoREST {
             insertarMov(FONDO_AHORRO_GRAVADO, fondo_ahorro_gravado);
             insertarMov(FONDO_AHORRO, fondo_ahorro);
             insertarMov(APORTACION_FONDO_AHORRO, fondo_ahorro);
+            insertarMov(PRIMA_QUINQUENAL, prima_quinquenal);
+            insertarMov(APOYO_MANTENIMIENTO_VEHICULAR, apoyo_mto_vehicular);
+            
             insertarMov(MONEDERO_DESPENSA, mondero_despensa); //TODO la Despensa no suma puesto que se paga con Vales
             insertarMov(IMSS, imss_obrero);
 
@@ -605,6 +645,8 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + MATERIALES + "\": " + materiales.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + ESTIMULOS_PRODUCTIVIDAD_CYT + "\": " + estimulos_cyt.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + COMPENSA_GARANTIZADA + "\": " + compensa_garantiza.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + PRIMA_QUINQUENAL + "\": " + prima_quinquenal.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + APOYO_MANTENIMIENTO_VEHICULAR + "\": " + apoyo_mto_vehicular.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO_EXENTO + "\": " + fondo_ahorro_exento.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO_GRAVADO + "\": " + fondo_ahorro_gravado.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + MONEDERO_DESPENSA + "\": " + mondero_despensa.getNumber().toString();
@@ -627,8 +669,8 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + "Carga" + "\": " + carga_admin.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Compensa" + "\": " + compensa_garantiza.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Fondo ahorro" + "\": " + fondo_ahorro_gravado.getNumber().toString() + ",";
-            resultJSON = resultJSON + "\"" + "Estimulos" + "\": " + estimulos_cyt.getNumber().toString() + ",";
-            resultJSON = resultJSON + "\"" + "Monedero" + "\": " + mondero_despensa.getNumber().toString();
+            resultJSON = resultJSON + "\"" + "Estimulos" + "\": " + estimulos_cyt.getNumber().toString(); // + ",";
+//            resultJSON = resultJSON + "\"" + "Monedero" + "\": " + mondero_despensa.getNumber().toString();
         resultJSON = resultJSON + " }";
         
         resultJSON = resultJSON + ",\"BASE_EXENTA\": {";
@@ -650,6 +692,8 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + "Aguin" + "\": " + aguinaldo_diario.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "PrimaVac" + "\": " + prima_vacacional_diaria.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Materiales" + "\": " + materiales_diario.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Prima Quinquenal" + "\": " + prima_quinquenal_diaria.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Apoyo Manto Vehicular" + "\": " + apoyo_mto_vehicular_diario.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Estimulos" + "\": " + estimulos_cyt_diario.getNumber().toString();
         resultJSON = resultJSON + " }";
 
@@ -663,6 +707,8 @@ public class CalculoREST {
         resultJSON = resultJSON + " }";
         
         resultJSON = ("{" + "\"id\":" + this.idEmpleado +"," + resultJSON + "}").replace(",}", "}");
+        
+        logger.log(Level.INFO, "Calculo en: " + idEmpleado + " > " + Duration.between(a, Instant.now()).toMillis());
         
         return resultJSON;
     }
@@ -776,99 +822,6 @@ public class CalculoREST {
         
         return impAntesSubsidio;
     }
-/*
-    @GET
-    @Path("fechas/{quincena}")
-    @Produces("application/json")
-    public String calcularDias(@PathParam("quincena") int quincena) {
-        String result = prnFechas(quincena);
-        return result;
-    }
-    
-    @GET
-    @Path("fechas")
-    @Produces("application/json")
-    public String fechas() {
-        String result = "";
-        for(int i=1; i<=24; i++) {
-            result = result + prnFechas(i) +",\n";
-        }
-        return result;
-    }
-    
-    private String prnFechas(int quincena) {
-        
-        // TODO Fechas, falta dÃ­as de asueto
-        
-        String result;
-        boolean isPar = (quincena & 1) == 0;
-        int year = 2015;
-        int mes = (int)Math.ceil(quincena/2.0);
-        int diaInicio = isPar ? 16 : 1;
-        
-        Calendar fechaInicio = Calendar.getInstance();
-        fechaInicio.set(year, mes-1, diaInicio);
-        
-        // si es quincena non, dia real y topado coinciden en 15
-        int diaFinalReal = 15;
-        int diaFinalFiscal = 15;
-        if (isPar) {
-            // Ãºltimo dÃ­a real del mes
-            diaFinalReal = fechaInicio.getActualMaximum(Calendar.DAY_OF_MONTH);
-            // maximo llegan al dÃ­a treinta
-            diaFinalFiscal = diaFinalReal > 30 ? 30 : diaFinalReal; 
-        }
-        
-        Calendar fechaFinReal = Calendar.getInstance();
-        fechaFinReal.set(year, mes-1, diaFinalReal);
-        
-        Calendar fechaFinFiscal = Calendar.getInstance();
-        fechaFinFiscal.set(year, mes-1, diaFinalFiscal);
-        
-        int diasOrdinarios = 0;
-        int diasDescanso = 0;
-        Calendar fechaAux = Calendar.getInstance();
-        fechaAux.set(year, mes-1, diaInicio); //igual a la de inicio
-        while (fechaFinFiscal.after(fechaAux) || fechaFinFiscal.equals(fechaAux)) {
-            if (fechaAux.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || fechaAux.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                diasDescanso++;
-            } else {
-                diasOrdinarios++;
-            }
-            fechaAux.add(Calendar.DATE, 1);
-        }
-        
-        DateTime start = new DateTime(year, mes, fechaInicio.get(Calendar.DATE), 0, 0, 0, DateTimeZone.UTC).minusDays(1);
-        DateTime end = new DateTime(year, mes, fechaFinReal.get(Calendar.DATE), 0, 0, 0, DateTimeZone.UTC);
-        
-        long diasImss = Days.daysBetween(start, end).getDays();
-        
-        //Duration duration = new Duration(start, end);
-        //long diasImss = duration.getStandardDays();
-        
-        
-        String fi = "\"" + fechaInicio.get(Calendar.DATE) + "/" +(fechaInicio.get(Calendar.MONTH)+1) +"/"+fechaInicio.get(Calendar.YEAR) + "\"";
-        String ffr = "\"" + fechaFinReal.get(Calendar.DATE) + "/" +(fechaFinReal.get(Calendar.MONTH)+1) +"/"+fechaFinReal.get(Calendar.YEAR) + "\"";
-        String fff = "\"" + fechaFinFiscal.get(Calendar.DATE) + "/" +(fechaFinFiscal.get(Calendar.MONTH)+1) +"/"+fechaFinFiscal.get(Calendar.YEAR) + "\"";
-        
-        //result = String.format("%02d%15s%15s%15s%5s%5s%5s", quincena, fi, ffr, fff, diasOrdinarios, diasDescanso, diasOrdinarios+diasDescanso);
-        
-        result = 
-                "{ " + "\"quincena\": " + quincena + "," +
-                "\t" + "\"fecha_inicio\": " + fi + "," +
-                "\t" + "\"fecha_fin\": " + fff + "," +
-                "\t" + "\"fecha_fin_calendario\": " + ffr + "," +
-                "\t" + "\"dias\": " + (diasOrdinarios + diasDescanso) + "," +
-                "\t" + "\"dias_ordinarios\": " + diasOrdinarios + "," +
-                "\t" + "\"dias_descando\": " + diasDescanso + "," +
-                "\t" + "\"dias_asueto\": " + 0 + "," +
-                "\t" + "\"dias_imss\": " + diasImss + "" +
-                "}";
-                
-        
-        return result;
-    }
-*/
 
     @GET
     @Path("quincena")
