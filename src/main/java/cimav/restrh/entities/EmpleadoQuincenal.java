@@ -6,9 +6,11 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
+import javax.money.MonetaryAmount;
 import javax.persistence.Basic;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -78,6 +80,10 @@ public class EmpleadoQuincenal implements Serializable {
     @Column(name = "dias_pant_dos")
     private Integer diasPAntDos;
 
+    @Column(name = "sdi_variable_bimestre_anterior") 
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount sdiVariableBimestreAnterior;
+    
     public EmpleadoQuincenal() {
     }
     
@@ -180,5 +186,14 @@ public class EmpleadoQuincenal implements Serializable {
     public void setDaysPAnt(Integer daysPAnt) {
         this.daysPAnt = daysPAnt;
     }    
+
+    public MonetaryAmount getSdiVariableBimestreAnterior() {
+        return sdiVariableBimestreAnterior;
+    }
+
+    public void setSdiVariableBimestreAnterior(MonetaryAmount sdiVariableBimestreAnterior) {
+        this.sdiVariableBimestreAnterior = sdiVariableBimestreAnterior;
+    }
+    
     
 }

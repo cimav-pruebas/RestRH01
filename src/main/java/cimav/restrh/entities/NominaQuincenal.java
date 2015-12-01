@@ -113,6 +113,7 @@ public class NominaQuincenal implements Serializable {
         this.idEmpleado = idEmpleado;
         this.concepto = concepto;
         this.cantidad = cantidad;
+        
     }
     public NominaQuincenal(Integer id) {
         this.id = id;

@@ -108,6 +108,7 @@ public class CalculoREST {
     private final String BASE_GRAVABLE              = "BG";
     private final String BASE_EXENTA                = "BE";    
     private final String ISR                        = "00101";
+    private final String SUELDO_DIARIO              = "SUD";
     private final String SALARIO_DIARIO_FIJO            = "SDF";
     private final String SALARIO_DIARIO_VARIABLE        = "SDV";
     private final String SALARIO_DIARIO_COTIZADO        = "SDC";
@@ -335,6 +336,12 @@ public class CalculoREST {
                 if (sueldo_tabulador == null) {
                     throw new NullPointerException("SUELDO_BASE_MES");
                 }
+                
+                if (idEmpleado == 123) {
+                    // zaragoza
+                    sueldo_tabulador = Money.of(BigDecimal.ZERO, MXN);
+                    dias_trabajados = 0;
+                }
 
                 // El Sueldo Diario es mes / 30
                 sueldo_diario = sueldo_tabulador.divide(DIAS_MES_30);
@@ -442,8 +449,11 @@ public class CalculoREST {
             if (isAYA || isCYT) {
                 // TODO constantes de Vales no HARD CODE
                 mondero_despensa = Money.of(771.00, MXN).divide(2);
+                // TODO despensa 15 es correcto
+                mondero_despensa = mondero_despensa.divide(15).multiply(dias_trabajados);
             } else if (isMMS) {
                 mondero_despensa = Money.of(365.00, MXN).divide(2);
+                mondero_despensa = mondero_despensa.divide(15).multiply(dias_trabajados);
             } 
 
             // La nÃ³mina no incluye  Jovenes Catedras?
@@ -466,12 +476,12 @@ public class CalculoREST {
             
             /* Aguinaldo */ 
             // por 360 dias tocan 40 dias
-            aguinaldo_diario = sueldo_diario.multiply(40 /360);
+            aguinaldo_diario = sueldo_diario.multiply(40).divide(360);
             // TODO para honorarios el aguinaldo juega como variables para ene-feb
             
             /* Prima Vacional */
             // por 360 dias tocan 24 dias para CYT y AYA (24 = 40% de 60 dias)
-            prima_vacacional_diaria = sueldo_diario.multiply(24 / 360);
+            prima_vacacional_diaria = sueldo_diario.multiply(24).divide(360);
             
             /* Prima Quinquenal */
             if (isMMS) {
@@ -511,6 +521,16 @@ public class CalculoREST {
             // Los pagos extra no van al SDI, no aplican al IMSS
             // La despensa si aplica al IMSS, lo que exceda del 40% que entra como variables y se sabes hasta la 24 integrado a Ene-Feb            
             
+            // TODO Horas extras gravadas y exentas
+            if (idEmpleado == 180) {
+                // aya gonzalez trevizo
+                base_gravable = Money.of(771.41,MXN);
+            }
+            if (idEmpleado == 67) {
+                // aya mariana lopez
+                base_gravable = Money.of(302.55,MXN);
+            }
+            
             salario_diario_fijo = salario_diario_fijo.add(sueldo_diario);
             salario_diario_fijo = salario_diario_fijo.add(sueldo_honorarios_diario);
             salario_diario_fijo = salario_diario_fijo.add(prima_antiguedad_diaria);
@@ -528,6 +548,12 @@ public class CalculoREST {
             // TODO otras percepciones capturadas van en Fijo ??
             
             // TODO Faltan el SDI Variable (Remanente CYT, Estimulo AYA, Bimestre Anterior)
+            salario_diario_variable = empleadoNomina.getEmpleadoQuincenal().getSdiVariableBimestreAnterior();
+            if (salario_diario_variable == null) {
+                // TODO que pasa si salario_diario_variable es null
+                salario_diario_variable = Money.of(BigDecimal.ZERO, MXN);
+            }
+            
             // cotizado = fijo + variables Â¿Equivalente al Mixto del Imss?
             salario_diario_cotizado = salario_diario_fijo.add(salario_diario_variable);
             
@@ -620,6 +646,9 @@ public class CalculoREST {
             insertarMov(BASE_EXENTA, base_exenta);
             
             insertarMov(ISR, impuesto_antes_subsidio);
+            
+            insertarMov(SUELDO_DIARIO, sueldo_diario);
+            insertarMov(SUELDO_DIARIO, sueldo_honorarios);
             
             insertarMov(SALARIO_DIARIO_FIJO, salario_diario_fijo);
             insertarMov(SALARIO_DIARIO_VARIABLE, salario_diario_variable);
