@@ -843,6 +843,9 @@ public class CalculoREST {
     }
     
     private MonetaryAmount calcularImpuesto(MonetaryAmount base_gravable) {
+        if (base_gravable.isLessThanOrEqualTo(Money.of(BigDecimal.ZERO, MXN))) {
+            return Money.of(BigDecimal.ZERO, MXN);
+        }
         TarifaAnual tarifaAnual = getTarifaAnual(base_gravable);
         MonetaryAmount excedente = base_gravable.subtract(tarifaAnual.getLimiteInferior());
         MonetaryOperator opePercen = MonetaryUtil.percent(tarifaAnual.getPorcentaje());
@@ -866,6 +869,16 @@ public class CalculoREST {
     @Produces("application/json")
     public String quincena(@PathParam("year") int year, @PathParam("quincena") int quin) {
         quincena.set(year, quin);
+        String result = quincena.toJSON();
+        return result;
+    }
+    
+    @GET
+    @Path("/weeks/{quincena}")
+    @Produces("application/json")
+    public String weeks(@PathParam("quincena") int quin) {
+        // TODO 2015
+        quincena.set(2015, quin);
         String result = quincena.toJSON();
         return result;
     }

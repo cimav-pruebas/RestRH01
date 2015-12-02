@@ -41,6 +41,9 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
     @OneToOne(mappedBy = "empleadoNomina")
     private EmpleadoQuincenal empleadoQuincenal;
     
+    @OneToMany(mappedBy = "EmpleadoBase")
+    private Collection<HoraExtra> horaExtraCollection;
+    
     public EmpleadoNomina() {
         super();
     }
@@ -85,5 +88,12 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
         this.empleadoQuincenal = empleadoQuincenal;
     }
 
-    
+    public Collection<HoraExtra> getHoraExtraCollection() {
+        return horaExtraCollection;
+    }
+
+    public void setHoraExtraCollection(Collection<HoraExtra> horaExtraCollection) {
+        this.horaExtraCollection = horaExtraCollection;
+    }
+
 }

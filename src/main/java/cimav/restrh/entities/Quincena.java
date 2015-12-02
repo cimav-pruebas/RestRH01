@@ -62,6 +62,7 @@ public class Quincena {
     public void init() {
         Parametros parametros = parametrosREST.get();
         //logger.log(Level.INFO, "%%>> " + quin);
+        // TODO 2015
         this.set(2015, parametros.getQuincenaActual());
     }
     
@@ -115,7 +116,7 @@ public class Quincena {
         
         Calendar fechaAvanzaCal = Calendar.getInstance();
         fechaAvanzaCal.set(year, mes-1, diaInicio, 0, 0, 0); //igual a la de inicio
-            
+        
         int diasOrdinariosCount = 0;
         int diasDescansoCount = 0;
         while (fechaFinCalculoCal.after(fechaAvanzaCal) || fechaFinCalculoCal.equals(fechaAvanzaCal)) {
