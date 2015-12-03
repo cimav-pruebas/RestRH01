@@ -6,6 +6,7 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Basic;
@@ -40,7 +41,7 @@ public class HoraExtra implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    // No tiene Get/Set y No Insertable ni Updatable; es decir, es OnlyRead y sirve como mappedBy en EmpleadoQuincenal
+    // No tiene Get/Set y No Insertable ni Updatable; es decir, es OnlyRead y sirve como mappedBy en EmpleadoNomina
     @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne
     private EmpleadoBase empleadoBase;
@@ -50,13 +51,16 @@ public class HoraExtra implements Serializable {
     
     @Column(name = "dia")
     @Temporal(TemporalType.DATE)
-    private Date dias;
+    private Date dia;
 
     @Column(name = "horas")
     private Double horas;
 
     @Column(name = "quincena")
     private Integer quincena;
+    
+    @Column(name = "week_of_year")
+    private Integer weekOfYear;
     
     public HoraExtra() {
     }
@@ -77,12 +81,15 @@ public class HoraExtra implements Serializable {
         this.idEmpleado = idEmpleado;
     }
 
-    public Date getDias() {
-        return dias;
+    public Date getDia() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dia);
+        this.weekOfYear = cal.get(Calendar.WEEK_OF_YEAR);
+        return dia;
     }
 
-    public void setDias(Date dias) {
-        this.dias = dias;
+    public void setDia(Date dia) {
+        this.dia = dia;
     }
 
     public Double getHoras() {
@@ -99,6 +106,14 @@ public class HoraExtra implements Serializable {
 
     public void setQuincena(Integer quincena) {
         this.quincena = quincena;
+    }
+
+    public Integer getWeekOfYear() {
+        return weekOfYear;
+    }
+
+    public void setWeekOfYear(Integer weekOfYear) {
+        this.weekOfYear = weekOfYear;
     }
 
     @Override

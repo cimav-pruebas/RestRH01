@@ -521,6 +521,9 @@ public class CalculoREST {
             // Los pagos extra no van al SDI, no aplican al IMSS
             // La despensa si aplica al IMSS, lo que exceda del 40% que entra como variables y se sabes hasta la 24 integrado a Ene-Feb            
             
+            // Tiempo Extra
+            // http://www.idconline.com.mx/laboral/2013/07/26/pago-correcto-de-tiempo-extra
+            
             // TODO Horas extras gravadas y exentas
             if (idEmpleado == 180) {
                 // aya gonzalez trevizo

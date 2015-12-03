@@ -6,7 +6,6 @@
 package cimav.restrh.services;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -17,12 +16,12 @@ import javax.ws.rs.container.ContainerResponseFilter;
  */
 public class RESTCorsResponseFilter implements ContainerResponseFilter {
 
-    private final static Logger log = Logger.getLogger(RESTCorsResponseFilter.class.getName() ); 
+    //private final static Logger log = Logger.getLogger(RESTCorsResponseFilter.class.getName() ); 
     
    @Override
    public void filter(final ContainerRequestContext requestContext, final ContainerResponseContext cres) throws IOException {
        
-        log.info( ">>>>>>>>>>> CERO <<<<<<<<<<<<<<< Executing REST response filter" );
+        //log.info( ">>>>>>>>>>> CERO <<<<<<<<<<<<<<< Executing REST response filter" );
        
         cres.getHeaders().add("Access-Control-Allow-Origin", "*");
         cres.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization, X-HTTP-Method-Override");

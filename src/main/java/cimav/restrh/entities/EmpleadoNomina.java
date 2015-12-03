@@ -6,13 +6,16 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -42,12 +45,25 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
     private EmpleadoQuincenal empleadoQuincenal;
     
     @OneToMany(mappedBy = "EmpleadoBase")
-    private Collection<HoraExtra> horaExtraCollection;
+    private Collection<HoraExtra> horasExtras;
     
+    @Transient 
+    private Double horasDobles;
+    @Transient 
+    private Double horasTriples;
+            
     public EmpleadoNomina() {
         super();
     }
 
+    public void ajustarTiempoExtra() {
+        for(HoraExtra horaExtra : horasExtras) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(horaExtra.getDia());
+            cal.get(Calendar.WEEK_OF_YEAR);
+        }
+    }
+    
     public Short getIdTipoAntiguedad() {
         return idTipoAntiguedad;
     }
@@ -88,12 +104,12 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
         this.empleadoQuincenal = empleadoQuincenal;
     }
 
-    public Collection<HoraExtra> getHoraExtraCollection() {
-        return horaExtraCollection;
+    public Collection<HoraExtra> getHorasExtras() {
+        return horasExtras;
     }
 
-    public void setHoraExtraCollection(Collection<HoraExtra> horaExtraCollection) {
-        this.horaExtraCollection = horaExtraCollection;
+    public void setHorasExtras(Collection<HoraExtra> horasExtras) {
+        this.horasExtras = horasExtras;
     }
-
+    
 }
