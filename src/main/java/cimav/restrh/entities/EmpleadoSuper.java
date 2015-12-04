@@ -12,7 +12,6 @@ import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
@@ -59,9 +58,8 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     @Column(name = "estimulos_productividad")
     private Double estimulosProductividad;
     
-    @OneToOne(mappedBy = "empleadoBase")
-    private EmpleadoQuincenal empleadoQuincenal;
-
+//    @OneToOne(mappedBy = "empleadoBase")
+//    private EmpleadoQuincenal empleadoQuincenal;
 
 //    @PostLoad
 //    public void reduceJefe() {
@@ -151,14 +149,6 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
 
     public void setEstimulosProductividad(Double estimulosProductividad) {
         this.estimulosProductividad = estimulosProductividad;
-    }
-
-    public EmpleadoQuincenal getEmpleadoQuincenal() {
-        return empleadoQuincenal;
-    }
-
-    public void setEmpleadoQuincenal(EmpleadoQuincenal empleadoQuincenal) {
-        this.empleadoQuincenal = empleadoQuincenal;
     }
 
 }

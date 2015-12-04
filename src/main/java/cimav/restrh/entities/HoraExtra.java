@@ -41,10 +41,10 @@ public class HoraExtra implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    // No tiene Get/Set y No Insertable ni Updatable; es decir, es OnlyRead y sirve como mappedBy en EmpleadoNomina
-    @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
+    // No tiene Get/Set y No Insertable ni Updatable; es decir, es OnlyRead y sirve como mappedBy en EmpleadoQuincenal
+    @JoinColumn(name = "id_empleado", referencedColumnName = "id_empleado", insertable = false, updatable = false)
     @ManyToOne
-    private EmpleadoBase empleadoBase;
+    private EmpleadoQuincenal empleadoQuincenal;
     
     @Column(name = "id_empleado")
     private Integer idEmpleado;
@@ -64,7 +64,7 @@ public class HoraExtra implements Serializable {
     
     public HoraExtra() {
     }
-
+    
     public Integer getId() {
         return id;
     }

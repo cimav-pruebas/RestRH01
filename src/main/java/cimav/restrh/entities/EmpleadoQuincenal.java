@@ -6,6 +6,7 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
+import java.util.Collection;
 import javax.money.MonetaryAmount;
 import javax.persistence.Basic;
 import javax.persistence.Cacheable;
@@ -16,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -40,17 +42,17 @@ public class EmpleadoQuincenal implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    // Conexion con el Empleado
     @Column(name = "id_empleado")
     private Integer idEmpleado;
+    // Conexion con el EmpleadoNomina
     @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
     @OneToOne
     private EmpleadoNomina empleadoNomina; /* Read Only */
     
-    // Conexion con el Empleado
-    @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
-    @OneToOne
-    private EmpleadoBase empleadoBase; /* Read Only */
+//    // Conexion con el EmpleadoSuper
+//    @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
+//    @OneToOne
+//    private EmpleadoBase empleadoBase; /* Read Only */
     
     // Faltas, Incapacidades, Ordinarios y Descanso se modifican junto
     // a las Incidencias
@@ -83,6 +85,17 @@ public class EmpleadoQuincenal implements Serializable {
     @Column(name = "sdi_variable_bimestre_anterior") 
     @Convert(converter = MonetaryAmountConverter.class)
     private MonetaryAmount sdiVariableBimestreAnterior;
+    
+    @OneToMany(mappedBy = "empleadoQuincenal")
+    private Collection<Incidencia> incidencias;
+    
+    @OneToMany(mappedBy = "empleadoQuincenal")
+    private Collection<HoraExtra> horasExtras;
+    
+    @Column(name = "horas_extras_dobles") 
+    private Double horasExtrasDobles;
+    @Column(name = "horas_extras_triples") 
+    private Double horasExtrasTriples;
     
     public EmpleadoQuincenal() {
     }
@@ -193,6 +206,38 @@ public class EmpleadoQuincenal implements Serializable {
 
     public void setSdiVariableBimestreAnterior(MonetaryAmount sdiVariableBimestreAnterior) {
         this.sdiVariableBimestreAnterior = sdiVariableBimestreAnterior;
+    }
+
+    public Double getHorasExtrasDobles() {
+        return horasExtrasDobles;
+    }
+
+    public void setHorasExtrasDobles(Double horasExtrasDobles) {
+        this.horasExtrasDobles = horasExtrasDobles;
+    }
+
+    public Double getHorasExtrasTriples() {
+        return horasExtrasTriples;
+    }
+
+    public void setHorasExtrasTriples(Double horasExtrasTriples) {
+        this.horasExtrasTriples = horasExtrasTriples;
+    }
+
+    public Collection<HoraExtra> getHorasExtras() {
+        return horasExtras;
+    }
+
+    public void setHorasExtras(Collection<HoraExtra> horasExtras) {
+        this.horasExtras = horasExtras;
+    }
+
+    public Collection<Incidencia> getIncidencias() {
+        return incidencias;
+    }
+
+    public void setIncidencias(Collection<Incidencia> incidencias) {
+        this.incidencias = incidencias;
     }
     
     

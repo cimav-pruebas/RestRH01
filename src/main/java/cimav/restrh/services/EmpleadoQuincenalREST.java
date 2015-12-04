@@ -4,11 +4,16 @@ package cimav.restrh.services;
 import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
 import cimav.restrh.entities.EmpleadoQuincenal;
+import cimav.restrh.entities.HoraExtra;
 import cimav.restrh.entities.Quincena;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -16,6 +21,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -137,6 +143,63 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     private int daysBetween(Date d1, Date d2){
       return (int)( (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
     }    
+    
+    @GET
+    @Path("tiempo_extra/{id_empleado}")
+    @Produces("text/plain")
+    public String calcularTiempoExtra(@PathParam("id_empleado") Integer idEmpleado) {
+        Query query = getEntityManager().createQuery("SELECT eq FROM EmpleadoQuincenal AS eq WHERE eq.idEmpleado =:id_empleado", EmpleadoQuincenal.class);
+        query.setParameter("id_empleado", idEmpleado);
+        EmpleadoQuincenal empleadoQuincenal = (EmpleadoQuincenal) query.getSingleResult();
+        if (empleadoQuincenal != null) {
+            // agrupar hrs extras por semana
+            HashMap<Integer, List<HoraExtra>> hashMap = new HashMap<>();
+            for (HoraExtra horaExtra : empleadoQuincenal.getHorasExtras()) {
+                if (!hashMap.containsKey(horaExtra.getWeekOfYear())) {
+                    List<HoraExtra> hrs = new ArrayList<>();
+                    hrs.add(horaExtra);
+                    hashMap.put(horaExtra.getWeekOfYear(), hrs);
+                } else {
+                    hashMap.get(horaExtra.getWeekOfYear()).add(horaExtra);
+                }
+            }
+            empleadoQuincenal.getHorasExtras().stream().forEach((horaExtra) -> {
+                if (!hashMap.containsKey(horaExtra.getWeekOfYear())) {
+                    List<HoraExtra> hrs = new ArrayList<>();
+                    hrs.add(horaExtra);
+                    hashMap.put(horaExtra.getWeekOfYear(), hrs);
+                } else {
+                    hashMap.get(horaExtra.getWeekOfYear()).add(horaExtra);
+                }
+            });
+
+            Double hrsDobles = 0.00;
+            Double hrsTriples = 0.00;
+
+            // agrupar total hrs pero contabilizadas por semana
+            Iterator it = hashMap.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                List<HoraExtra> hrs = (List<HoraExtra>) pair.getValue();
+                Double tot = 0.00;
+                for (HoraExtra hr : hrs) {
+                    tot = tot + hr.getHoras();
+                }
+                if (tot > 0) {
+                    // la semana tiene hrs
+                    Double hd = tot > 9 ? 9 : tot;
+                    Double ht = tot > 9 ? tot - 9 : 0.00;
+                    hrsDobles = hrsDobles + hd;
+                    hrsTriples = hrsTriples + ht;
+                }
+            }
+            empleadoQuincenal.setHorasExtrasDobles(hrsDobles);
+            empleadoQuincenal.setHorasExtrasTriples(hrsTriples);
+
+            //TODO ¿Cuando se persiste? Lo hace pero no sé cuando.
+        }
+        return "nada";
+    }
     
     @POST
     @Consumes("application/json")

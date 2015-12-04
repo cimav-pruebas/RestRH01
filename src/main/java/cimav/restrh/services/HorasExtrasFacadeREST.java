@@ -7,6 +7,7 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.HoraExtra;
 import java.util.List;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -26,9 +27,13 @@ import javax.ws.rs.Produces;
 @Stateless
 @Path("horas_extras")
 public class HorasExtrasFacadeREST extends AbstractFacade<HoraExtra> {
+    
     @PersistenceContext(unitName = "PU_JPA")
     private EntityManager em;
 
+    @EJB
+    private EmpleadoQuincenalREST empleadoQuincenalREST;
+    
     public HorasExtrasFacadeREST() {
         super(HoraExtra.class);
     }
@@ -39,6 +44,9 @@ public class HorasExtrasFacadeREST extends AbstractFacade<HoraExtra> {
     @Override
     public HoraExtra insert(HoraExtra entity) {
         super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
+        
+        empleadoQuincenalREST.calcularTiempoExtra(entity.getIdEmpleado());
+        
         return entity; 
     }
     
@@ -47,19 +55,30 @@ public class HorasExtrasFacadeREST extends AbstractFacade<HoraExtra> {
     @Consumes("application/json")
     public void edit(@PathParam("id") Integer id, HoraExtra entity) {
         super.edit(entity);
+        
+        empleadoQuincenalREST.calcularTiempoExtra(entity.getIdEmpleado());
+        
     }
 
     @DELETE
     @Path("{id}")
     public void remove(@PathParam("id") Integer id) {
-        super.remove(super.find(id));
+        HoraExtra horaExtra = super.find(id);
+        super.remove(horaExtra);
+        
+        empleadoQuincenalREST.calcularTiempoExtra(horaExtra.getIdEmpleado());
     }
 
     @GET
     @Path("{id}")
     @Produces("application/json")
     public HoraExtra find(@PathParam("id") Integer id) {
-        return super.find(id);
+        HoraExtra horaExtra = super.find(id);
+        
+        // TODO quitarlo de aqui; solo esta para test
+        empleadoQuincenalREST.calcularTiempoExtra(horaExtra.getIdEmpleado());
+        
+        return horaExtra;
     }
 
     @GET
