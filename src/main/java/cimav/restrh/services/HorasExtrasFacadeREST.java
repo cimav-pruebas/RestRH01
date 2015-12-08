@@ -7,7 +7,6 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.HoraExtra;
 import java.util.List;
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -31,8 +30,8 @@ public class HorasExtrasFacadeREST extends AbstractFacade<HoraExtra> {
     @PersistenceContext(unitName = "PU_JPA")
     private EntityManager em;
 
-    @EJB
-    private EmpleadoQuincenalREST empleadoQuincenalREST;
+//    @EJB
+//    private EmpleadoQuincenalREST empleadoQuincenalREST;
     
     public HorasExtrasFacadeREST() {
         super(HoraExtra.class);
@@ -45,7 +44,7 @@ public class HorasExtrasFacadeREST extends AbstractFacade<HoraExtra> {
     public HoraExtra insert(HoraExtra entity) {
         super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
         
-        empleadoQuincenalREST.calcularTiempoExtra(entity.getIdEmpleado());
+//        empleadoQuincenalREST.calcularTiempoExtra(entity.getIdEmpleado());
         
         return entity; 
     }
@@ -56,7 +55,7 @@ public class HorasExtrasFacadeREST extends AbstractFacade<HoraExtra> {
     public void edit(@PathParam("id") Integer id, HoraExtra entity) {
         super.edit(entity);
         
-        empleadoQuincenalREST.calcularTiempoExtra(entity.getIdEmpleado());
+//        empleadoQuincenalREST.calcularTiempoExtra(entity.getIdEmpleado());
         
     }
 
@@ -66,7 +65,7 @@ public class HorasExtrasFacadeREST extends AbstractFacade<HoraExtra> {
         HoraExtra horaExtra = super.find(id);
         super.remove(horaExtra);
         
-        empleadoQuincenalREST.calcularTiempoExtra(horaExtra.getIdEmpleado());
+//        empleadoQuincenalREST.calcularTiempoExtra(horaExtra.getIdEmpleado());
     }
 
     @GET
@@ -76,7 +75,7 @@ public class HorasExtrasFacadeREST extends AbstractFacade<HoraExtra> {
         HoraExtra horaExtra = super.find(id);
         
         // TODO quitarlo de aqui; solo esta para test
-        empleadoQuincenalREST.calcularTiempoExtra(horaExtra.getIdEmpleado());
+//        empleadoQuincenalREST.calcularTiempoExtra(horaExtra.getIdEmpleado());
         
         return horaExtra;
     }

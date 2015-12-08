@@ -5,11 +5,15 @@
  */
 package cimav.restrh.entities;
 
+import cimav.restrh.services.CalculoREST;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collection;
+import javax.inject.Inject;
 import javax.money.MonetaryAmount;
 import javax.persistence.Basic;
 import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -20,7 +24,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.javamoney.moneta.Money;
 
 /**
  * Se calcula SOLO UNA VEZ la iniciar la Quincena.
@@ -67,6 +73,14 @@ public class EmpleadoQuincenal implements Serializable {
     @Column(name = "descanso")
     private Integer descanso;
     
+    @Transient
+    private Integer diasTrabajados;
+    @Transient
+    private Integer diasOrdinariosDeLaQuincena;
+    @Transient
+    private Integer diasDescansoDeLaQuincena;
+    // TODO Falta Trasiente Asueto
+    
     // Si cumple años durante la quicena la PAnt es proporcional.
     // diasPAntUno corresponde a los dias con los años anteriores
     // diasPAntDos corresponde a los dias con los años nuevos
@@ -86,10 +100,10 @@ public class EmpleadoQuincenal implements Serializable {
     @Convert(converter = MonetaryAmountConverter.class)
     private MonetaryAmount sdiVariableBimestreAnterior;
     
-    @OneToMany(mappedBy = "empleadoQuincenal")
+    @OneToMany(mappedBy = "empleadoQuincenal", orphanRemoval = true)
     private Collection<Incidencia> incidencias;
     
-    @OneToMany(mappedBy = "empleadoQuincenal")
+    @OneToMany(mappedBy = "empleadoQuincenal", orphanRemoval = true)
     private Collection<HoraExtra> horasExtras;
     
     @Column(name = "horas_extras_dobles") 
@@ -97,7 +111,18 @@ public class EmpleadoQuincenal implements Serializable {
     @Column(name = "horas_extras_triples") 
     private Double horasExtrasTriples;
     
+    /*
+     Requiere Inicializarse
+    EmpleadoQuincenalREST.init()
+    */
+    
     public EmpleadoQuincenal() {
+        this.diasDescansoDeLaQuincena = 4;
+        this.diasOrdinariosDeLaQuincena = 11;
+        this.horasExtrasDobles = 0.00;
+        this.horasExtrasTriples = 0.00;
+        this.sdiVariableBimestreAnterior = Money.of(BigDecimal.ZERO, CalculoREST.MXN);
+        // TODO Falta iniciarlizar el sdiVariableBimestreAnterior
     }
     
     public Integer getId() {
@@ -141,6 +166,7 @@ public class EmpleadoQuincenal implements Serializable {
     }
 
     public Integer getOrdinarios() {
+        this.ordinarios = diasOrdinariosDeLaQuincena - faltas - incapacidadHabiles;
         return ordinarios;
     }
 
@@ -149,6 +175,7 @@ public class EmpleadoQuincenal implements Serializable {
     }
 
     public Integer getDescanso() {
+        this.descanso = this.diasDescansoDeLaQuincena - incapacidadInhabiles;
         return descanso;
     }
 
@@ -156,6 +183,32 @@ public class EmpleadoQuincenal implements Serializable {
         this.descanso = descanso;
     }
 
+    public Integer getDiasTrabajados() {
+        // TODO faltan de asueto
+        this.diasTrabajados = this.ordinarios + this.descanso;
+        return this.diasTrabajados;
+    }
+
+    public void setDiasTrabajados(Integer diasTrabajados) {
+        this.diasTrabajados = diasTrabajados;
+    }
+
+    public Integer getDiasOrdinariosDeLaQuincena() {
+        return diasOrdinariosDeLaQuincena;
+    }
+
+    public void setDiasOrdinariosDeLaQuincena(Integer diasOrdinariosDeLaQuincena) {
+        this.diasOrdinariosDeLaQuincena = diasOrdinariosDeLaQuincena;
+    }
+
+    public Integer getDiasDescansoDeLaQuincena() {
+        return diasDescansoDeLaQuincena;
+    }
+
+    public void setDiasDescansoDeLaQuincena(Integer diasDescansoDeLaQuincena) {
+        this.diasDescansoDeLaQuincena = diasDescansoDeLaQuincena;
+    }
+    
     public Integer getYearPAnt() {
         return yearPAnt;
     }

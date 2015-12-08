@@ -32,7 +32,7 @@ public class ParametrosREST {
     }
 
     @GET
-    @Path("")
+    //@Path("")
     @Produces(value = "application/json")
     public Parametros get() {
         Parametros parametros = getEntityManager().find(Parametros.class, 1);

@@ -5,7 +5,9 @@ import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
 import cimav.restrh.entities.EmpleadoQuincenal;
 import cimav.restrh.entities.HoraExtra;
+import cimav.restrh.entities.Incidencia;
 import cimav.restrh.entities.Quincena;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import org.javamoney.moneta.Money;
 
 /**
  *
@@ -85,10 +88,10 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     
     @GET
     @Path("init/{id_emp}")
-    @Produces("text/plain")
-    public String init(@PathParam("id_emp") Integer idEmp) {
+    @Produces(value = "application/json")
+    public EmpleadoQuincenal init(@PathParam("id_emp") Integer idEmp) {
         // inicializa un empleado
-        String result = "";
+        EmpleadoQuincenal result = null;
         try {
             quincena.init();
             EmpleadoNomina empleadoNomina = empleadoNominaFacadeREST.find(idEmp);
@@ -99,7 +102,15 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
         return result;
     }
     
-    private String inicializar(EmpleadoNomina empNom) {
+    public EmpleadoQuincenal inicializar(EmpleadoNomina empNom) {
+        /*
+        Inicializa la Antigüedad del Empleado.
+        Dias ordinarios, descanso, trabajados de la quincena
+        Sdi del bimestre para el empleado
+        */
+        
+        EmpleadoQuincenal empleadoQuincenal = null;
+        
         LocalDate localDateFinQuincena = Quincena.convert(quincena.getFechaFin());
         boolean isCYT = empNom.getIdGrupo().equals(EGrupo.CYT.getId());
         boolean isAYA = empNom.getIdGrupo().equals(EGrupo.AYA.getId());
@@ -122,35 +133,80 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
             Integer diasPAntAnterior = 0;
             Integer diasPAntActual = quincena.getDiasLaborables();
 
-            EmpleadoQuincenal empleadoQuincenal = new EmpleadoQuincenal();
+            // borrarlo si ya existe
+            Query query = getEntityManager().createQuery("DELETE FROM EmpleadoQuincenal eq WHERE eq.idEmpleado = :id_emp");
+            int deletedCount = query.setParameter("id_emp", empNom.getId()).executeUpdate();
+            
+            empleadoQuincenal = new EmpleadoQuincenal();
             empleadoQuincenal.setIdEmpleado(empNom.getId());
             empleadoQuincenal.setYearPAnt(period.getYears());
             empleadoQuincenal.setMonthsPAnt(period.getMonths());
             empleadoQuincenal.setDaysPAnt(period.getDays());
-            empleadoQuincenal.setDescanso(quincena.getDiasDescanso());
-            empleadoQuincenal.setOrdinarios(quincena.getDiasOrdinarios());
+            empleadoQuincenal.setDescanso(0);
+            empleadoQuincenal.setOrdinarios(0);
+            empleadoQuincenal.setDiasDescansoDeLaQuincena(quincena.getDiasDescanso());
+            empleadoQuincenal.setDiasOrdinariosDeLaQuincena(quincena.getDiasOrdinarios());
             empleadoQuincenal.setDiasPAntUno(diasPAntAnterior);
             empleadoQuincenal.setDiasPAntDos(diasPAntActual);
             empleadoQuincenal.setFaltas(0);
             empleadoQuincenal.setIncapacidadHabiles(0);
             empleadoQuincenal.setIncapacidadInhabiles(0);
+            empleadoQuincenal.setHorasExtrasDobles(0.00);
+            empleadoQuincenal.setHorasExtrasTriples(0.00);
+            // TODO falta inicializar el sdiVariableBimestreAnterior
+            empleadoQuincenal.setSdiVariableBimestreAnterior(Money.of(BigDecimal.ZERO, CalculoREST.MXN)); 
 
-            getEntityManager().persist(empleadoQuincenal);
+            this.insert(empleadoQuincenal);
+            //getEntityM anager().persist(empleadoQuincenal);
         }
-        return "";
+        return empleadoQuincenal;
     }
     
     private int daysBetween(Date d1, Date d2){
       return (int)( (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
     }    
+
+    @GET
+    @Path("incidencias/{id_empleado}")
+    @Produces("text/plain")
+    public String incidencias(@PathParam("id_empleado") Integer idEmpleado) {
+        Query query = getEntityManager().createQuery("SELECT eq FROM EmpleadoQuincenal AS eq WHERE eq.idEmpleado =:id_empleado", EmpleadoQuincenal.class);
+        query.setParameter("id_empleado", idEmpleado);
+        EmpleadoQuincenal empleadoQuincenal = (EmpleadoQuincenal) query.getSingleResult();
+        return this.calcularIncidencias(empleadoQuincenal);
+    }
+    
+    public String calcularIncidencias(EmpleadoQuincenal empleadoQuincenal) {
+        if (empleadoQuincenal != null) {
+            Integer faltas = 0;
+            Integer incapacidadHabiles = 0;
+            Integer incapacidadInhabiles = 0;
+            for(Incidencia incidencia : empleadoQuincenal.getIncidencias()) {
+                if (Incidencia.FALTA.equals(incidencia.getClase())) {
+                    faltas += incidencia.getDiasHabiles();
+                } else if (Incidencia.INCAPACIDAD.equals(incidencia.getClase())) {
+                    incapacidadHabiles += incidencia.getDiasHabiles();
+                    incapacidadInhabiles += incidencia.getDiasInhabiles();
+                }
+            }
+            empleadoQuincenal.setFaltas(faltas);
+            empleadoQuincenal.setIncapacidadHabiles(incapacidadHabiles);
+            empleadoQuincenal.setIncapacidadInhabiles(incapacidadInhabiles);
+        }
+        return "none";
+    }
     
     @GET
     @Path("tiempo_extra/{id_empleado}")
     @Produces("text/plain")
-    public String calcularTiempoExtra(@PathParam("id_empleado") Integer idEmpleado) {
+    public String tiempoExtra(@PathParam("id_empleado") Integer idEmpleado) {
         Query query = getEntityManager().createQuery("SELECT eq FROM EmpleadoQuincenal AS eq WHERE eq.idEmpleado =:id_empleado", EmpleadoQuincenal.class);
         query.setParameter("id_empleado", idEmpleado);
         EmpleadoQuincenal empleadoQuincenal = (EmpleadoQuincenal) query.getSingleResult();
+        return this.calcularTiempoExtra(empleadoQuincenal);
+    }
+    
+    public String calcularTiempoExtra(EmpleadoQuincenal empleadoQuincenal) {
         if (empleadoQuincenal != null) {
             // agrupar hrs extras por semana
             HashMap<Integer, List<HoraExtra>> hashMap = new HashMap<>();
@@ -198,7 +254,7 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
 
             //TODO ¿Cuando se persiste? Lo hace pero no sé cuando.
         }
-        return "nada";
+        return "aucune";
     }
     
     @POST

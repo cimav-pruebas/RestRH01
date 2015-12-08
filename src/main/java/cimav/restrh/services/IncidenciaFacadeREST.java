@@ -26,8 +26,12 @@ import javax.ws.rs.Produces;
 @Stateless
 @Path("incidencias")
 public class IncidenciaFacadeREST extends AbstractFacade<Incidencia> {
+
     @PersistenceContext(unitName = "PU_JPA")
     private EntityManager em;
+    
+//    @EJB
+//    private EmpleadoQuincenalREST empleadoQuincenalREST;
 
     public IncidenciaFacadeREST() {
         super(Incidencia.class);
@@ -39,6 +43,9 @@ public class IncidenciaFacadeREST extends AbstractFacade<Incidencia> {
     @Override
     public Incidencia insert(Incidencia entity) {
         super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
+        
+        //empleadoQuincenalREST.calcularIncidencias(entity.getIdEmpleado());
+        
         return entity; 
     }
     
@@ -47,12 +54,17 @@ public class IncidenciaFacadeREST extends AbstractFacade<Incidencia> {
     @Consumes("application/json")
     public void edit(@PathParam("id") Integer id, Incidencia entity) {
         super.edit(entity);
+        
+        //empleadoQuincenalREST.calcularIncidencias(entity.getIdEmpleado());
     }
 
     @DELETE
     @Path("{id}")
     public void remove(@PathParam("id") Integer id) {
-        super.remove(super.find(id));
+        Incidencia entity = super.find(id);
+        super.remove(entity);
+        
+        //empleadoQuincenalREST.calcularIncidencias(entity.getIdEmpleado());
     }
 
     @GET

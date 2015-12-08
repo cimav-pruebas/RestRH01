@@ -9,7 +9,7 @@ import cimav.restrh.entities.Quincena;
 import cimav.restrh.entities.Concepto;
 import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
-import cimav.restrh.entities.Incidencia;
+import cimav.restrh.entities.EmpleadoQuincenal;
 import cimav.restrh.entities.NominaQuincenal;
 import cimav.restrh.entities.Tabulador;
 import cimav.restrh.entities.TarifaAnual;
@@ -34,7 +34,6 @@ import javax.money.MonetaryAmount;
 import javax.money.MonetaryOperator;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.RollbackException;
 import javax.ws.rs.Consumes;
@@ -255,14 +254,18 @@ public class CalculoREST {
             if (empleadoNomina == null ) {
                 throw new NullPointerException("EMPLEADO");
             }
-            
             if (empleadoNomina.getEmpleadoQuincenal() == null ) {
-                empleadoQuincenalREST.init(idEmpleado);
+                EmpleadoQuincenal tmp = empleadoQuincenalREST.inicializar(empleadoNomina);
+                empleadoNomina.setEmpleadoQuincenal(tmp);
+                
                 //throw new NullPointerException("EMPLEADO -- QUINCENAL");
                 // se tiene que haber executado antes (al inicio de quincena).
                 // http://localhost:8080/RestRH01/api/empleado_quincenal/init/155
-            }
-
+            } 
+            EmpleadoQuincenal empleadoQuincenal = empleadoNomina.getEmpleadoQuincenal();
+            empleadoQuincenalREST.calcularIncidencias(empleadoQuincenal);
+            empleadoQuincenalREST.calcularTiempoExtra(empleadoQuincenal);
+            
             /*
             Faltas:
             Restar los dÃ­as faltados de los dÃ­as ordinarios. 
@@ -285,19 +288,18 @@ public class CalculoREST {
             */
             
             // faltas, incapacidades y asueto del empleado en la quincena
-            Integer faltas = this.findIncidencias(idEmpleado, Incidencia.FALTA)[0];
-            Integer[] incapacidades = this.findIncidencias(idEmpleado, Incidencia.INCAPACIDAD);
-            Integer incapacidadesHabiles = incapacidades[0];
-            Integer incapacidadesInhabiles = incapacidades[1];
+            Integer faltas = empleadoQuincenal.getFaltas();
+            Integer incapacidadesHabiles = empleadoQuincenal.getIncapacidadHabiles();
+            Integer incapacidadesInhabiles = empleadoQuincenal.getIncapacidadInhabiles();
             // TODO faltan dias de ASUETO/VACACIONES  (16 Sept, etc.)
             
 //            logger.log(Level.INFO, quincena.toJSON());
             
-            Integer dias_ordinarios = quincena.getDiasOrdinarios() - faltas - incapacidadesHabiles; // dias ordianrios que trabajÃ³
-            Integer dias_descanso = quincena.getDiasDescanso() - incapacidadesInhabiles; // los dÃ­as de descanso que si le contaron
-            
-            Integer dias_trabajados = dias_ordinarios + dias_descanso; // los dias ordinarios y de descanso q si le contaron
             // TODO faltan dias de ASUETO/VACACIONES  (16 Sept, etc.) tambien en dias_trabajados
+            
+            Integer dias_ordinarios = empleadoQuincenal.getOrdinarios(); // dias ordianrios que trabajÃ³
+            Integer dias_descanso = empleadoQuincenal.getDescanso(); // los dÃ­as de descanso que si le contaron
+            Integer dias_trabajados = empleadoQuincenal.getDiasTrabajados(); //dias_ordinarios + dias_descanso; // los dias ordinarios y de descanso q si le contaron
             
             Tabulador nivel = empleadoNomina.getNivel();
             if (nivel == null) {
@@ -374,7 +376,7 @@ public class CalculoREST {
                 int yearsCumplidos = Period.between(lfAnt, lfFin).getYears();
                 */
                 
-                int yearsCumplidos = empleadoNomina.getEmpleadoQuincenal().getYearPAnt();
+                int yearsCumplidos = empleadoQuincenal.getYearPAnt();
                 
                 Double factorPAnt = 0.00;
                 
@@ -485,7 +487,7 @@ public class CalculoREST {
             
             /* Prima Quinquenal */
             if (isMMS) {
-                int yearsCumplidos = empleadoNomina.getEmpleadoQuincenal().getYearPAnt();
+                int yearsCumplidos = empleadoQuincenal.getYearPAnt();
                 if (yearsCumplidos >= 5 && yearsCumplidos < 10) {
                     prima_quinquenal =  Money.of(100.00, "MXN").divide(2);   
                 } else if (yearsCumplidos >= 10 && yearsCumplidos < 15) {
@@ -551,7 +553,7 @@ public class CalculoREST {
             // TODO otras percepciones capturadas van en Fijo ??
             
             // TODO Faltan el SDI Variable (Remanente CYT, Estimulo AYA, Bimestre Anterior)
-            salario_diario_variable = empleadoNomina.getEmpleadoQuincenal().getSdiVariableBimestreAnterior();
+            salario_diario_variable = empleadoQuincenal.getSdiVariableBimestreAnterior();
             if (salario_diario_variable == null) {
                 // TODO que pasa si salario_diario_variable es null
                 salario_diario_variable = Money.of(BigDecimal.ZERO, MXN);
@@ -800,21 +802,21 @@ public class CalculoREST {
         }
     }
     
-    public Integer[] findIncidencias(Integer idEmpleado, String clase) {
-        Integer[] result = new Integer[2];
-        result[0] = 0;
-        result[1] = 0;
-        try {
-            Object[] tmp = (Object[])getEntityManager().createQuery("SELECT SUM(i.diasHabiles), SUM(i.diasInhabiles) FROM Incidencia i WHERE i.idEmpleado = :id_empleado AND i.clase = :clase")
-                    .setParameter("id_empleado", idEmpleado).setParameter("clase", clase).getSingleResult();
-            if (tmp != null) {
-                result[0] = tmp[0] == null ? 0 : ((Long)tmp[0]).intValue();
-                result[1] = tmp[1] == null ? 0 : ((Long)tmp[1]).intValue();
-            }
-        } catch (NonUniqueResultException | NoResultException e) {
-        }
-        return result;
-    }
+//    public Integer[] findIncidencias(Integer idEmpleado, String clase) {
+//        Integer[] result = new Integer[2];
+//        result[0] = 0;
+//        result[1] = 0;
+//        try {
+//            Object[] tmp = (Object[])getEntityManager().createQuery("SELECT SUM(i.diasHabiles), SUM(i.diasInhabiles) FROM Incidencia i WHERE i.idEmpleado = :id_empleado AND i.clase = :clase")
+//                    .setParameter("id_empleado", idEmpleado).setParameter("clase", clase).getSingleResult();
+//            if (tmp != null) {
+//                result[0] = tmp[0] == null ? 0 : ((Long)tmp[0]).intValue();
+//                result[1] = tmp[1] == null ? 0 : ((Long)tmp[1]).intValue();
+//            }
+//        } catch (NonUniqueResultException | NoResultException e) {
+//        }
+//        return result;
+//    }
     
     public void vaciarCalculos(int idEmpleado) {
         // Elimina todos los calculos del empleado de NominaQuincenal
