@@ -39,7 +39,8 @@ public class EmpleadoNominaFacadeREST extends AbstractFacade<EmpleadoNomina> {
     @Path("{id}")
     @Produces("application/json")
     public EmpleadoNomina find(@PathParam("id") Integer id) {
-        return super.find(id);
+        EmpleadoNomina empleadoNomina = super.find(id);
+        return empleadoNomina;
     }
 
     @GET

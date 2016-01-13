@@ -93,6 +93,8 @@ public class CalculoREST {
     private final String FONDO_AHORRO_GRAVADO           = "00022";
     private final String APOYO_MANTENIMIENTO_VEHICULAR  = "00035";
     private final String PRIMA_QUINQUENAL               = "00067";
+    private final String HORAS_EXTRAS_EXENTO            = "00056";
+    private final String HORAS_EXTRAS_GRAVADO           = "00058";
     private final String FONDO_AHORRO                   = "00111";
     private final String APORTACION_FONDO_AHORRO        = "00112";
     private final String MONEDERO_DESPENSA              = "00092";
@@ -230,6 +232,9 @@ public class CalculoREST {
         MonetaryAmount fondo_ahorro_gravado = Money.of(0.00, "MXN");
         MonetaryAmount fondo_ahorro = Money.of(0.00, "MXN");
         MonetaryAmount mondero_despensa = Money.of(0.00, "MXN");
+
+        MonetaryAmount tiempo_extra_gravado = Money.of(0.00, "MXN");
+        MonetaryAmount tiempo_extra_exento = Money.of(0.00, "MXN");
         
         MonetaryAmount base_gravable= Money.of(0.00, "MXN");
         MonetaryAmount base_exenta = Money.of(0.00, "MXN");
@@ -526,15 +531,25 @@ public class CalculoREST {
             // Tiempo Extra
             // http://www.idconline.com.mx/laboral/2013/07/26/pago-correcto-de-tiempo-extra
             
-            // TODO Horas extras gravadas y exentas
-            if (idEmpleado == 180) {
-                // aya gonzalez trevizo
-                base_gravable = Money.of(771.41,MXN);
+            
+            /* Tiempo Horas Extras */
+            if (isAYA) {
+                // Jornada de 8 horas
+                MonetaryAmount sueldo_hora = sueldo_diario.divide(8.0); // Para el TE se usa el diario o el cotizado
+                tiempo_extra_gravado = sueldo_hora.multiply(empleadoQuincenal.getHorasExtrasDobles());
+                if (empleadoQuincenal.getHorasExtrasDobles() > 0) {
+                    tiempo_extra_gravado = tiempo_extra_gravado.add(sueldo_hora.multiply(empleadoQuincenal.getHorasExtrasTriples()));
+                }
             }
-            if (idEmpleado == 67) {
-                // aya mariana lopez
-                base_gravable = Money.of(302.55,MXN);
-            }
+//            // TODO Horas extras gravadas y exentas
+//            if (idEmpleado == 180) {
+//                // aya gonzalez trevizo
+//                base_gravable = Money.of(771.41,MXN);
+//            }
+//            if (idEmpleado == 67) {
+//                // aya mariana lopez
+//                base_gravable = Money.of(302.55,MXN);
+//            }
             
             salario_diario_fijo = salario_diario_fijo.add(sueldo_diario);
             salario_diario_fijo = salario_diario_fijo.add(sueldo_honorarios_diario);
@@ -549,6 +564,7 @@ public class CalculoREST {
             salario_diario_fijo = salario_diario_fijo.add(otros_fijos);
             salario_diario_fijo = salario_diario_fijo.add(prima_quinquenal_diaria);
             salario_diario_fijo = salario_diario_fijo.add(apoyo_mto_vehicular_diario);
+            // Tiempo extra no cotiza
             
             // TODO otras percepciones capturadas van en Fijo ??
             
@@ -594,7 +610,8 @@ public class CalculoREST {
             cesantia_y_vejez = salario_diario_cotizado_topado.multiply(0.011250);
             
             imss_obrero = excedente_3SM_diario.add(prestaciones_en_dinero).add(gtos_medicos_y_pension).add(invalidez_y_vida).add(cesantia_y_vejez);
-            imss_obrero = imss_obrero.multiply(dias_trabajados);
+            //imss_obrero = imss_obrero.multiply(dias_trabajados);
+            imss_obrero = imss_obrero.multiply(dias_trabajados); // TODO ¿Es por dias trabajado o dias quincena o dias reales de la quincena?
                 
         } catch (NullPointerException e1) {
             return "-1";
@@ -618,8 +635,10 @@ public class CalculoREST {
         // base_gravable = base_gravable.add(mondero_despensa); // Monedero excenta
         base_gravable = base_gravable.add(prima_quinquenal);
         base_gravable = base_gravable.add(apoyo_mto_vehicular);
+        base_gravable = base_gravable.add(tiempo_extra_gravado);
         
         base_exenta = base_exenta.add(fondo_ahorro_exento);
+        base_exenta = base_exenta.add(tiempo_extra_exento);
         
         impuesto_antes_subsidio = calcularImpuesto(base_gravable);
 
@@ -640,6 +659,8 @@ public class CalculoREST {
             insertarMov(FONDO_AHORRO_EXENTO, fondo_ahorro_exento);
             insertarMov(FONDO_AHORRO_GRAVADO, fondo_ahorro_gravado);
             insertarMov(FONDO_AHORRO, fondo_ahorro);
+            insertarMov(HORAS_EXTRAS_GRAVADO, tiempo_extra_gravado);
+            insertarMov(HORAS_EXTRAS_EXENTO, tiempo_extra_exento);
             insertarMov(APORTACION_FONDO_AHORRO, fondo_ahorro);
             insertarMov(PRIMA_QUINQUENAL, prima_quinquenal);
             insertarMov(APOYO_MANTENIMIENTO_VEHICULAR, apoyo_mto_vehicular);
@@ -683,6 +704,7 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + APOYO_MANTENIMIENTO_VEHICULAR + "\": " + apoyo_mto_vehicular.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO_EXENTO + "\": " + fondo_ahorro_exento.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO_GRAVADO + "\": " + fondo_ahorro_gravado.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + HORAS_EXTRAS_GRAVADO + "\": " + tiempo_extra_gravado.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + MONEDERO_DESPENSA + "\": " + mondero_despensa.getNumber().toString();
         resultJSON = resultJSON + " }";
         
@@ -703,13 +725,15 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + "Carga" + "\": " + carga_admin.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Compensa" + "\": " + compensa_garantiza.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Fondo ahorro" + "\": " + fondo_ahorro_gravado.getNumber().toString() + ",";
-            resultJSON = resultJSON + "\"" + "Estimulos" + "\": " + estimulos_cyt.getNumber().toString(); // + ",";
+            resultJSON = resultJSON + "\"" + "Estimulos" + "\": " + estimulos_cyt.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Tiempo Extra" + "\": " + tiempo_extra_gravado.getNumber().toString();
 //            resultJSON = resultJSON + "\"" + "Monedero" + "\": " + mondero_despensa.getNumber().toString();
         resultJSON = resultJSON + " }";
         
         resultJSON = resultJSON + ",\"BASE_EXENTA\": {";
             resultJSON = resultJSON + "\"" + "TOTAL" + "\": " + base_exenta.getNumber().toString() + ",";
-            resultJSON = resultJSON + "\"" + "Fondo ahorro" + "\": " + fondo_ahorro_exento.getNumber().toString();
+            resultJSON = resultJSON + "\"" + "Fondo ahorro" + "\": " + fondo_ahorro_exento.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Tiempo Extra" + "\": " + tiempo_extra_exento.getNumber().toString();
         resultJSON = resultJSON + " }";
         
         resultJSON = resultJSON + ",\"SDI\": {";

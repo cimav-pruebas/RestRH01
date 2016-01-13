@@ -149,13 +149,13 @@ public class NominaQuincenal implements Serializable {
         this.cantidad = cantidad;
     }
 
-    public EmpleadoBase getEmpleadoBase() {
-        return empleadoBase;
-    }
-
-    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
-        this.empleadoBase = empleadoBase;
-    }
+//    public EmpleadoBase getEmpleadoBase() {
+//        return empleadoBase;
+//    }
+//
+//    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
+//        this.empleadoBase = empleadoBase;
+//    }
 
 //    public BigDecimal getAliasCantidad() {
 //        return aliasCantidad;
