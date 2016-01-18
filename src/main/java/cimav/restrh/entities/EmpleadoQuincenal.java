@@ -79,7 +79,7 @@ public class EmpleadoQuincenal implements Serializable {
     private Integer diasDescansoDeLaQuincena;
     // TODO Falta Trasiente Asueto
     
-    // Si cumple años durante la quicena la PAnt es proporcional.
+    // TODO Si cumple años durante la quicena la PAnt es proporcional.
     // diasPAntUno corresponde a los dias con los años anteriores
     // diasPAntDos corresponde a los dias con los años nuevos
     @Column(name = "years_pant")

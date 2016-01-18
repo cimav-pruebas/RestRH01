@@ -93,6 +93,7 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
         // inicializa un empleado
         EmpleadoQuincenal result = null;
         try {
+            // TODO es necesario el quincena.init();?
             quincena.init();
             EmpleadoNomina empleadoNomina = empleadoNominaFacadeREST.find(idEmp);
             result = this.inicializar(empleadoNomina);
