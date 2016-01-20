@@ -365,7 +365,10 @@ public class CalculoREST {
             }
             
             /* CompensaciÃ³n Garantizada */
+
             
+            int yearsCumplidos = empleadoQuincenal.getYearPAnt();
+
             /* Prima Antiguedad */
             if (isCYT || isAYA) {
                 // TODO Para PAnt faltan los casos donde cumple aÃ±os (complejo)
@@ -380,8 +383,6 @@ public class CalculoREST {
                 
                 int yearsCumplidos = Period.between(lfAnt, lfFin).getYears();
                 */
-                
-                int yearsCumplidos = empleadoQuincenal.getYearPAnt();
                 
                 Double factorPAnt = 0.00;
                 
@@ -492,7 +493,6 @@ public class CalculoREST {
             
             /* Prima Quinquenal */
             if (isMMS) {
-                int yearsCumplidos = empleadoQuincenal.getYearPAnt();
                 if (yearsCumplidos >= 5 && yearsCumplidos < 10) {
                     prima_quinquenal =  Money.of(100.00, "MXN").divide(2);   
                 } else if (yearsCumplidos >= 10 && yearsCumplidos < 15) {
@@ -911,4 +911,20 @@ public class CalculoREST {
         String result = quincena.toJSON();
         return result;
     }
+    
+    @GET
+    @Path("/sdi_vinculacion/{id_empleado}")
+    @Produces("application/json")
+    public String getSdi(@PathParam("id_empleado") int idEmpleado) {
+        Concepto concepto = finConceptoByCode(SALARIO_DIARIO_FIJO);
+        if (concepto == null) {
+            return "0.00";
+        }
+        NominaQuincenal nomQuin = this.findNominaQuincenal(idEmpleado, concepto);
+        if (nomQuin != null && nomQuin.getCantidad() != null) {
+            return "" + nomQuin.getCantidad().getNumber();
+        }
+        return "-1.00";
+    }
+
 }
