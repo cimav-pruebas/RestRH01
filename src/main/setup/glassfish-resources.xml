@@ -24,12 +24,14 @@
                           max-pool-size="32" max-wait-time-in-millis="60000" name="post-gre-sql_rh_development_rh_userPool" 
                           non-transactional-connections="false" pool-resize-quantity="2" res-type="javax.sql.DataSource" 
                           statement-timeout-in-seconds="-1" steady-pool-size="8" validate-atmost-once-period-in-seconds="0" wrap-jdbc-objects="false">
-        <property name="serverName" value="localhost"/>
+<!--        <property name="serverName" value="localhost"/> -->
+        <property name="serverName" value="10.0.4.40"/>
         <property name="portNumber" value="5432"/>
         <property name="databaseName" value="rh_development"/>
         <property name="User" value="rh_user"/>
         <property name="Password" value="rh_1ser"/>
-        <property name="URL" value="jdbc:postgresql://localhost:5432/rh_development"/>
+        <!-- <property name="URL" value="jdbc:postgresql://localhost:5432/rh_development"/> -->
+        <property name="URL" value="jdbc:postgresql://10.0.4.40:5432/rh_development"/>
         <property name="driverClass" value="org.postgresql.Driver"/>
         <property name="schema" value="public" />
         <property name="ssl" value="true" />
