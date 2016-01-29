@@ -26,8 +26,8 @@ import javax.ws.rs.Produces;
 @Stateless
 @Path("departamento")
 public class DepartamentoFacadeREST extends AbstractFacade<Departamento> {
-    @PersistenceContext(unitName = "PU_JPA")
-    private EntityManager em;
+//    @PersistenceContext(unitName = "PU_JPA")
+//    private EntityManager em;
 
     public DepartamentoFacadeREST() {
         super(Departamento.class);

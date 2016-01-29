@@ -9,7 +9,6 @@ import cimav.restrh.entities.Empleado;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -27,8 +26,8 @@ import javax.ws.rs.Produces;
 @Path("empleado")
 public class EmpleadoFacadeREST extends AbstractFacade<Empleado> {
 
-    @PersistenceContext(unitName = "PU_JPA")
-    private EntityManager em;
+//    @PersistenceContext(unitName = "PU_JPA")
+//    private EntityManager em;
 
     public EmpleadoFacadeREST() {
         super(Empleado.class);

@@ -9,7 +9,6 @@ import cimav.restrh.entities.EmpleadoNomina;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -23,8 +22,8 @@ import javax.ws.rs.Produces;
 @Path("empleado_nomina")
 public class EmpleadoNominaFacadeREST extends AbstractFacade<EmpleadoNomina> {
     
-    @PersistenceContext(unitName = "PU_JPA")
-    private EntityManager em;
+//    @PersistenceContext(unitName = "PU_JPA")
+//    private EntityManager em;
 
     public EmpleadoNominaFacadeREST() {
         super(EmpleadoNomina.class);

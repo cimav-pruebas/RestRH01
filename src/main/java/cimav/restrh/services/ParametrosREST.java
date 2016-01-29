@@ -28,7 +28,7 @@ public class ParametrosREST {
     }
     
     public EntityManager getEntityManager() {
-        return em;
+        return em; 
     }
 
     @GET

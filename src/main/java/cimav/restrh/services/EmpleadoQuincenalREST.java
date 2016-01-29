@@ -22,7 +22,6 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -47,8 +46,8 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     @EJB
     private EmpleadoNominaFacadeREST empleadoNominaFacadeREST;
 
-    @PersistenceContext(unitName = "PU_JPA")
-    private EntityManager em;
+//    @PersistenceContext(unitName = "PU_JPA")
+//    private EntityManager em;
 
     @Inject
     private Quincena quincena;

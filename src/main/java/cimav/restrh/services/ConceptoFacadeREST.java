@@ -7,9 +7,9 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.Concepto;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -26,8 +26,11 @@ import javax.ws.rs.Produces;
 @Stateless
 @Path("concepto")
 public class ConceptoFacadeREST extends AbstractFacade<Concepto> {
-    @PersistenceContext(unitName = "PU_JPA")
-    private EntityManager em;
+    
+    private final static Logger logger = Logger.getLogger(ConceptoFacadeREST.class.getName() ); 
+    
+//    @PersistenceContext(unitName = "PU_JPA")
+//    private EntityManager em;
 
     public ConceptoFacadeREST() {
         super(Concepto.class);

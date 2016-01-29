@@ -65,7 +65,7 @@ public class CalculoREST {
     public static final String MXN = "MXN";
     
     @PersistenceContext(unitName = "PU_JPA")
-    private EntityManager em;
+    EntityManager em;
 
     @EJB
     private EmpleadoQuincenalREST empleadoQuincenalREST;

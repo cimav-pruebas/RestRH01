@@ -7,6 +7,9 @@ package cimav.restrh.services;
 
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 
 /**
  *
@@ -22,6 +25,12 @@ public abstract class AbstractFacade<T> {
 
     protected abstract EntityManager getEntityManager();
 
+    @PersistenceContext(unitName = "PU_JPA")
+    EntityManager em;
+    
+    @Context
+    HttpHeaders httpHeaders;
+    
     public T insert(T entity) {
         try {
             getEntityManager().persist(entity);

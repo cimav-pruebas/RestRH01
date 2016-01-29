@@ -13,7 +13,6 @@ import java.util.Comparator;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -28,8 +27,8 @@ import javax.ws.rs.Produces;
 @Path("empleado_base")
 public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
  
-    @PersistenceContext(unitName = "PU_JPA")
-    private EntityManager em;
+//    @PersistenceContext(unitName = "PU_JPA")
+//    private EntityManager em;
 
     public EmpleadoBaseFacadeREST() {
         super(EmpleadoBase.class);

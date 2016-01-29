@@ -9,7 +9,6 @@ import cimav.restrh.entities.HoraExtra;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -27,8 +26,8 @@ import javax.ws.rs.Produces;
 @Path("horas_extras")
 public class HorasExtrasFacadeREST extends AbstractFacade<HoraExtra> {
     
-    @PersistenceContext(unitName = "PU_JPA")
-    private EntityManager em;
+//    @PersistenceContext(unitName = "PU_JPA")
+//    private EntityManager em;
 
 //    @EJB
 //    private EmpleadoQuincenalREST empleadoQuincenalREST;
