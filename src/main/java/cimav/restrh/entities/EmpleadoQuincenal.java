@@ -79,21 +79,6 @@ public class EmpleadoQuincenal implements Serializable {
     private Integer diasDescansoDeLaQuincena;
     // TODO Falta Trasiente Asueto
     
-    // TODO Si cumple años durante la quicena la PAnt es proporcional.
-    // diasPAntUno corresponde a los dias con los años anteriores
-    // diasPAntDos corresponde a los dias con los años nuevos
-    @Column(name = "years_pant")
-    private Integer yearPAnt;
-    @Column(name = "months_pant")
-    private Integer monthsPAnt;
-    @Column(name = "days_pant")
-    private Integer daysPAnt;
-    
-    @Column(name = "dias_pant_uno") 
-    private Integer diasPAntUno;
-    @Column(name = "dias_pant_dos")
-    private Integer diasPAntDos;
-
     @Column(name = "sdi_variable_bimestre_anterior") 
     @Convert(converter = MonetaryAmountConverter.class)
     private MonetaryAmount sdiVariableBimestreAnterior;
@@ -207,50 +192,6 @@ public class EmpleadoQuincenal implements Serializable {
         this.diasDescansoDeLaQuincena = diasDescansoDeLaQuincena;
     }
     
-    public Integer getYearPAnt() {
-        return yearPAnt;
-    }
-
-    public void setYearPAnt(Integer yearPAnt) {
-        this.yearPAnt = yearPAnt;
-    }
-
-    public Integer getDiasPAntUno() {
-        return diasPAntUno;
-    }
-
-    public void setDiasPAntUno(Integer diasPAntUno) {
-        this.diasPAntUno = diasPAntUno;
-    }
-
-    public Integer getDiasPAntDos() {
-        return diasPAntDos;
-    }
-
-    public void setDiasPAntDos(Integer diasPAntDos) {
-        this.diasPAntDos = diasPAntDos;
-    }
-
-    public String getDayMonthYear() {
-        return daysPAnt + " día(s), " + monthsPAnt + " mese(s), " + yearPAnt + " año(s)";
-    }
-
-    public Integer getMonthsPAnt() {
-        return monthsPAnt;
-    }
-
-    public void setMonthsPAnt(Integer monthsPAnt) {
-        this.monthsPAnt = monthsPAnt;
-    }
-
-    public Integer getDaysPAnt() {
-        return daysPAnt;
-    }
-
-    public void setDaysPAnt(Integer daysPAnt) {
-        this.daysPAnt = daysPAnt;
-    }    
-
     public MonetaryAmount getSdiVariableBimestreAnterior() {
         return sdiVariableBimestreAnterior;
     }

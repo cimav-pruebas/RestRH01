@@ -124,12 +124,12 @@ public class CalculoREST {
     private final String PORCEN_MATERIALES          = "0.06";
     private final Double PORCEN_FONDO_AHORRO        = 0.13;
     private final Double PORCEN_FONDO_AHORRO_EXENTO = 1.3;
-    private final Double SALARIO_MINIMO             = 70.10;
+    private final Double SALARIO_MINIMO             = 73.04; //= 70.10; //TODO SM
     private final Integer SALARIO_DIARIO_TOPE        = 25; // 25 veces el Salario MÃ­nimo
     
     private final Integer DIAS_MES_30           = 30;
     private final Integer DIAS_QUINCENA_15      = 15;
-    private final Integer DIAS_AJUSTE_5         = 5;
+    private final Integer DIAS_AJUSTE_5_6       = 6;
 
     private int idEmpleado;
     
@@ -367,7 +367,8 @@ public class CalculoREST {
             /* CompensaciÃ³n Garantizada */
 
             
-            int yearsCumplidos = empleadoQuincenal.getYearPAnt();
+            // TODO PAnt Odd|Even
+            int yearsCumplidos = empleadoNomina.getPantYears();
 
             /* Prima Antiguedad */
             if (isCYT || isAYA) {
@@ -456,7 +457,7 @@ public class CalculoREST {
             /* Monedero Despensa */
             if (isAYA || isCYT) {
                 // TODO constantes de Vales no HARD CODE
-                mondero_despensa = Money.of(771.00, MXN).divide(2);
+                mondero_despensa = Money.of(931.00, MXN).divide(2); //771
                 // TODO despensa 15 es correcto
                 mondero_despensa = mondero_despensa.divide(15).multiply(dias_trabajados);
             } else if (isMMS) {
@@ -472,7 +473,7 @@ public class CalculoREST {
             if (isAYA || isCYT /*|| isHON*/) {
                 // TODO Ajuste 5 o 6 aÃ±os Constante
                 // sueldo_diario * 5 /360
-                ajuste_calendario_diario = sueldo_diario.multiply(5).divide(360);
+                ajuste_calendario_diario = sueldo_diario.multiply(DIAS_AJUSTE_5_6).divide(360);
                 
                 // Si es quincena de calculo semestral
                 if (false) {
@@ -592,11 +593,15 @@ public class CalculoREST {
        //     Integer dias_reales_bimestre = quincena.getDiasBimestre(); 
             // TODO IMSS: donde uso los dias_reales_bimestre ?!?!
             
+            // ES CON DIAS COTIZADOS
+            
             // TODO calculo del Imss
             // TODO Â¿Con el Cotizado_Topado se calculan las ramas? Â¿Cotizado_Topado equivalente la SDI_Calculado de Excel?
             // con dias reales de la quincena menos incapacidades
             // con topes
             // el execente incluye falta e incapacidades
+            
+            // TODO para las repercuciones del Imss, los Dias Trabajados DEBEN ser Dias Cotizados
             
             excedente_3SM_diario = Money.of(3 * SALARIO_MINIMO, MXN);
             if (salario_diario_cotizado_topado.compareTo(excedente_3SM_diario) > 0) {
@@ -612,7 +617,7 @@ public class CalculoREST {
             imss_obrero = excedente_3SM_diario.add(prestaciones_en_dinero).add(gtos_medicos_y_pension).add(invalidez_y_vida).add(cesantia_y_vejez);
             //imss_obrero = imss_obrero.multiply(dias_trabajados);
             imss_obrero = imss_obrero.multiply(dias_trabajados); // TODO ¿Es por dias trabajado o dias quincena o dias reales de la quincena?
-                
+            
         } catch (NullPointerException e1) {
             return "-1";
         }

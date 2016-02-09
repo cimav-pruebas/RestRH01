@@ -6,12 +6,19 @@
 package cimav.restrh.services;
 
 import cimav.restrh.entities.Departamento;
+import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoBase;
+import cimav.restrh.entities.Quincena;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.ws.rs.GET;
@@ -27,9 +34,14 @@ import javax.ws.rs.Produces;
 @Path("empleado_base")
 public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
  
+    private final static Logger logger = Logger.getLogger(EmpleadoBaseFacadeREST.class.getName() ); 
+    
 //    @PersistenceContext(unitName = "PU_JPA")
 //    private EntityManager em;
 
+    @Inject
+    private Quincena quincena;
+    
     public EmpleadoBaseFacadeREST() {
         super(EmpleadoBase.class);
     }
@@ -89,5 +101,69 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
         return String.valueOf(super.count());
     }
 
+    @GET
+    @Path("init")
+    @Produces("text/plain")
+    public String init() {
+        List<EmpleadoBase> empleados = this.findAll();
+        empleados.stream().forEach((emp) -> {
+            this.init(emp.getId());
+        });
+        return "Empleados inicialiados: " + empleados.size();
+    }
+    
+    @GET
+    @Path("init/{id_emp}")
+    @Produces("application/json")
+    public EmpleadoBase init(@PathParam("id_emp") Integer idEmp) {
+        
+        EmpleadoBase empBase = null;
+        
+        // inicializa un empleado
+        try {
+            // TODO es necesario el quincena.init();?
+            //quincena.init();
+            /*
+            Inicializa la AntigÃ¼edad del Empleado.
+            */
+        
+            empBase = this.find(idEmp);
+            
+            LocalDate localDateFinQuincena = Quincena.convert(quincena.getFechaFin());
+            boolean isCYT = empBase.getIdGrupo().equals(EGrupo.CYT.getId());
+            boolean isAYA = empBase.getIdGrupo().equals(EGrupo.AYA.getId());
+            if (isCYT || isAYA) {
+
+                LocalDate localDateFechaAntiguedad = Quincena.convert(empBase.getFechaAntiguedad());
+
+                logger.log(Level.INFO, empBase.getId() + " | " + empBase.getName() 
+                        + " | " + empBase.getNivel() + " | " + empBase.getFechaAntiguedad() + " | " + localDateFechaAntiguedad
+                        + " >> " + localDateFinQuincena);
+                // TODO Para cuando la PAnt se cumpla en la quincena, no consideramos incidencias (faltas e incapacidades);
+                // se debe corregir.
+
+                //TODO BUG Muy Lento y problema con JodaTime Resource not found: "org/joda/time/tz/data/ZoneInfoMap"
+                // TODO Checar que incluya el dia Inicial.
+                // Se da por hecho q nadie cumple el 28, 29 o 31 
+                // Se calculan los aÃ±os en base al Ãºltimo dÃ­a de la quincena 
+
+                
+                localDateFinQuincena = localDateFinQuincena.plusDays(1);
+                // requierse agregarse un día por: Period between(LocalDate startDateInclusive, LocalDate endDateExclusive)
+                Period period = Period.between(localDateFechaAntiguedad, localDateFinQuincena);
+                empBase.setPantYears(period.getYears());
+                empBase.setPantMonths(period.getMonths());
+                empBase.setPantDayOdd(period.getDays());
+                empBase.setPantDayEven(0); // TODO PAnt Odd|Even
+
+                // persistir
+                this.edit(empBase);
+            }
+
+        } catch (Exception er){
+            logger.log(Level.INFO, er.getMessage());
+        }
+        return empBase;
+    }
     
 }

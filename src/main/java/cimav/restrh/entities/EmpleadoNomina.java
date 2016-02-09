@@ -25,8 +25,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "empleado_nomina")
 public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
 
-    @Column(name = "id_tipo_antiguedad")
-    private Short idTipoAntiguedad;
+//    @Column(name = "id_tipo_antiguedad")
+//    private Short idTipoAntiguedad;
     
     @OneToMany(mappedBy = "EmpleadoBase")
     private Collection<NominaQuincenal> nominaQuincenalCollection;
@@ -38,13 +38,13 @@ public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
         super();
     }
 
-    public Short getIdTipoAntiguedad() {
-        return idTipoAntiguedad;
-    }
-
-    public void setIdTipoAntiguedad(Short idTipoAntiguedad) {
-        this.idTipoAntiguedad = idTipoAntiguedad;
-    }
+//    public Short getIdTipoAntiguedad() {
+//        return idTipoAntiguedad;
+//    }
+//
+//    public void setIdTipoAntiguedad(Short idTipoAntiguedad) {
+//        this.idTipoAntiguedad = idTipoAntiguedad;
+//    }
 
     public Collection<NominaQuincenal> getNominaQuincenalCollection() {
         return nominaQuincenalCollection;

@@ -9,7 +9,6 @@ import cimav.restrh.entities.Incidencia;
 import cimav.restrh.entities.Quincena;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -104,17 +103,16 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     
     public EmpleadoQuincenal inicializar(EmpleadoNomina empNom) {
         /*
-        Inicializa la Antigüedad del Empleado.
+        Inicializa la AntigÃ¼edad del Empleado.
         Dias ordinarios, descanso, trabajados de la quincena
         Sdi del bimestre para el empleado
         */
         
         EmpleadoQuincenal empleadoQuincenal = null;
         
-        LocalDate localDateFinQuincena = Quincena.convert(quincena.getFechaFin());
         boolean isCYT = empNom.getIdGrupo().equals(EGrupo.CYT.getId());
         boolean isAYA = empNom.getIdGrupo().equals(EGrupo.AYA.getId());
-        if (true || /*empleadoNomina.getId() == 155 &&*/ (isCYT || isAYA)) {
+        if (isCYT || isAYA) {
 
             LocalDate localDateFechaAntiguedad = Quincena.convert(empNom.getFechaAntiguedad());
 
@@ -126,12 +124,8 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
             //TODO BUG Muy Lento y problema con JodaTime Resource not found: "org/joda/time/tz/data/ZoneInfoMap"
             // TODO Checar que incluya el dia Inicial.
             // Se da por hecho q nadie cumple el 28, 29 o 31 
-            // Se calculan los años en base al último día de la quincena 
+            // Se calculan los aÃ±os en base al Ãºltimo dÃ­a de la quincena 
 
-            Period period = Period.between(localDateFechaAntiguedad, localDateFinQuincena);
-
-            Integer diasPAntAnterior = 0;
-            Integer diasPAntActual = quincena.getDiasLaborables();
 
             // borrarlo si ya existe
             Query query = getEntityManager().createQuery("DELETE FROM EmpleadoQuincenal eq WHERE eq.idEmpleado = :id_emp");
@@ -139,15 +133,10 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
             
             empleadoQuincenal = new EmpleadoQuincenal();
             empleadoQuincenal.setIdEmpleado(empNom.getId());
-            empleadoQuincenal.setYearPAnt(period.getYears());
-            empleadoQuincenal.setMonthsPAnt(period.getMonths());
-            empleadoQuincenal.setDaysPAnt(period.getDays());
             empleadoQuincenal.setDescanso(0);
             empleadoQuincenal.setOrdinarios(0);
             empleadoQuincenal.setDiasDescansoDeLaQuincena(quincena.getDiasDescanso());
             empleadoQuincenal.setDiasOrdinariosDeLaQuincena(quincena.getDiasOrdinarios());
-            empleadoQuincenal.setDiasPAntUno(diasPAntAnterior);
-            empleadoQuincenal.setDiasPAntDos(diasPAntActual);
             empleadoQuincenal.setFaltas(0);
             empleadoQuincenal.setIncapacidadHabiles(0);
             empleadoQuincenal.setIncapacidadInhabiles(0);
@@ -194,6 +183,16 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
             empleadoQuincenal.setIncapacidadInhabiles(incapacidadInhabiles);
         }
         return "none";
+    }
+    
+    @GET
+    @Path("by_id_empleado/{id_empleado}")
+    @Produces("application/json")
+    public EmpleadoQuincenal findByIdEmpleado(@PathParam("id_empleado") Integer idEmpleado) {
+        Query query = getEntityManager().createQuery("SELECT eq FROM EmpleadoQuincenal AS eq WHERE eq.idEmpleado =:id_empleado", EmpleadoQuincenal.class);
+        query.setParameter("id_empleado", idEmpleado);
+        EmpleadoQuincenal empleadoQuincenal = (EmpleadoQuincenal) query.getSingleResult();
+        return empleadoQuincenal;
     }
     
     @GET
@@ -252,7 +251,7 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
             empleadoQuincenal.setHorasExtrasDobles(hrsDobles);
             empleadoQuincenal.setHorasExtrasTriples(hrsTriples);
 
-            //TODO ¿Cuando se persiste? Lo hace pero no sé cuando.
+            //TODO Â¿Cuando se persiste? Lo hace pero no sÃ© cuando.
         }
         return "aucune";
     }
@@ -283,7 +282,7 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     @Path("{id}")
     @Produces("application/json")
     public EmpleadoQuincenal find(@PathParam("id") Integer id) {
-        return super.find(id);
+        return super.find(id); 
     }
 
     @GET

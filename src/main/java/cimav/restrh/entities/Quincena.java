@@ -62,7 +62,7 @@ public class Quincena {
         Parametros parametros = parametrosREST.get();
         //logger.log(Level.INFO, "%%>> " + quin);
         // TODO 2015
-        this.set(2015, parametros.getQuincenaActual());
+        this.set(parametros.getYear(), parametros.getQuincenaActual());
     }
     
     public static LocalDate convert(Date date) {

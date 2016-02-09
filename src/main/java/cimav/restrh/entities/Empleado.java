@@ -94,12 +94,12 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date fechaBaja;
     
-    @Column(name = "id_tipo_antiguedad")
-    private Short idTipoAntiguedad;
-    
-    @Column(name = "fecha_antiguedad")
-    @Temporal(TemporalType.DATE)
-    private Date fechaAntiguedad;
+//    @Column(name = "id_tipo_antiguedad")
+//    private Short idTipoAntiguedad;
+//    
+//    @Column(name = "fecha_antiguedad")
+//    @Temporal(TemporalType.DATE)
+//    private Date fechaAntiguedad;
     
     @Column(name = "id_tipo_sni")
     private Short idTipoSni;
@@ -294,24 +294,24 @@ public class Empleado extends EmpleadoSuper implements Serializable {
         this.fechaBaja = DateUtils.truncate(fechaBaja, Calendar.DAY_OF_MONTH);
     }
 
-    public Short getIdTipoAntiguedad() {
-        return idTipoAntiguedad;
-    }
-
-    public void setIdTipoAntiguedad(Short idTipoAntiguedad) {
-        this.idTipoAntiguedad = idTipoAntiguedad;
-    }
-
-    @Override
-    public Date getFechaAntiguedad() {
-        return fechaAntiguedad;
-    }
-
-    @Override
-    public void setFechaAntiguedad(Date fechaAntiguedad) {
-        //this.fechaAntiguedad = fechaAntiguedad;
-        this.fechaAntiguedad = DateUtils.truncate(fechaAntiguedad, Calendar.DAY_OF_MONTH);
-    }
+//    public Short getIdTipoAntiguedad() {
+//        return idTipoAntiguedad;
+//    }
+//
+//    public void setIdTipoAntiguedad(Short idTipoAntiguedad) {
+//        this.idTipoAntiguedad = idTipoAntiguedad;
+//    }
+//
+//    @Override
+//    public Date getFechaAntiguedad() {
+//        return fechaAntiguedad;
+//    }
+//
+//    @Override
+//    public void setFechaAntiguedad(Date fechaAntiguedad) {
+//        //this.fechaAntiguedad = fechaAntiguedad;
+//        this.fechaAntiguedad = DateUtils.truncate(fechaAntiguedad, Calendar.DAY_OF_MONTH);
+//    }
 
     public Short getIdTipoSni() {
         return idTipoSni;

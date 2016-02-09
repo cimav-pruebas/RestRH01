@@ -32,6 +32,8 @@ public class Parametros implements Serializable {
     @Column(name = "id")
     private Integer id;
     
+    @Column(name = "year")
+    private Integer year;
     @Column(name = "quincena_actual")
     private Integer quincenaActual;
     @Column(name = "status_quincena")
@@ -63,6 +65,13 @@ public class Parametros implements Serializable {
     public void setStatusQuincena(Integer statusQuincena) {
         this.statusQuincena = statusQuincena;
     }
-    
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
     
 }
