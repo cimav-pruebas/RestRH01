@@ -5,7 +5,7 @@
  */
 package cimav.restrh.services;
 
-import cimav.restrh.entities.Quincena;
+import cimav.restrh.entities.QuincenaSingleton;
 import cimav.restrh.entities.Concepto;
 import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
@@ -16,9 +16,9 @@ import cimav.restrh.entities.TarifaAnual;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -69,6 +69,9 @@ public class CalculoREST {
 
     @EJB
     private EmpleadoQuincenalREST empleadoQuincenalREST;
+    
+    @Inject
+    private QuincenaSingleton quincenaSingleton;
     
     public CalculoREST() {
     }
@@ -135,10 +138,6 @@ public class CalculoREST {
     
     private List<TarifaAnual> listTarifaAnual;
     
-    //private Quincena quincena;
-    @Inject
-    private Quincena quincena;
-    
     @POST
     @Consumes(value = "application/json")
     @Produces(value = "application/json")
@@ -149,9 +148,6 @@ public class CalculoREST {
 
     private String doCalculo(JsonArray ids) {
         
-        // TODO Siempre verificar que el quincena corresponde a la actual
-        quincena.init();        
-
         String resultJson = "[";
         
         long startTime = System.currentTimeMillis();
@@ -175,9 +171,6 @@ public class CalculoREST {
         
         //Instant a = Instant.now();
         
-        // TODO Siempre verificar que el quincena corresponde a la actual
-        quincena.init();
-
         String resultJson = this.calcular(idEmpleado);
         
         //logger.log(Level.INFO, "Calculo en: " + Duration.between(a, Instant.now()).toMillis());
@@ -254,7 +247,7 @@ public class CalculoREST {
         MonetaryAmount cesantia_y_vejez         = Money.of(0.00, "MXN");
         
         try {
-
+            
             EmpleadoNomina empleadoNomina = getEntityManager().find(EmpleadoNomina.class, this.idEmpleado);
             if (empleadoNomina == null ) {
                 throw new NullPointerException("EMPLEADO");
@@ -298,8 +291,6 @@ public class CalculoREST {
             Integer incapacidadesInhabiles = empleadoQuincenal.getIncapacidadInhabiles();
             // TODO faltan dias de ASUETO/VACACIONES  (16 Sept, etc.)
             
-//            logger.log(Level.INFO, quincena.toJSON());
-            
             // TODO faltan dias de ASUETO/VACACIONES  (16 Sept, etc.) tambien en dias_trabajados
             
             Integer dias_ordinarios = empleadoQuincenal.getOrdinarios(); // dias ordianrios que trabajÃ³
@@ -342,12 +333,6 @@ public class CalculoREST {
                 sueldo_tabulador = nivel.getSueldo();
                 if (sueldo_tabulador == null) {
                     throw new NullPointerException("SUELDO_BASE_MES");
-                }
-                
-                if (idEmpleado == 123) {
-                    // zaragoza
-                    sueldo_tabulador = Money.of(BigDecimal.ZERO, MXN);
-                    dias_trabajados = 0;
                 }
 
                 // El Sueldo Diario es mes / 30
@@ -505,7 +490,7 @@ public class CalculoREST {
                 }  else if (yearsCumplidos >= 25) {
                     prima_quinquenal =  Money.of(225.00, "MXN").divide(2);   
                 }
-                prima_quinquenal_diaria = prima_quinquenal.multiply(yearsCumplidos).divide(DIAS_QUINCENA_15);
+                prima_quinquenal_diaria = prima_quinquenal.divide(DIAS_QUINCENA_15);
                 prima_quinquenal = prima_quinquenal_diaria.multiply(dias_trabajados);
             }
             // TODO PrimaQuinquenal y suma para SDI?
@@ -551,6 +536,8 @@ public class CalculoREST {
 //                // aya mariana lopez
 //                base_gravable = Money.of(302.55,MXN);
 //            }
+            
+            /* Integrar: Salario Diario Integrado */
             
             salario_diario_fijo = salario_diario_fijo.add(sueldo_diario);
             salario_diario_fijo = salario_diario_fijo.add(sueldo_honorarios_diario);
@@ -628,6 +615,8 @@ public class CalculoREST {
         
         String resultJSON = "";
                 
+        /* Gravar */
+        
         base_gravable = base_gravable.add(sueldo_ordinario);
         base_gravable = base_gravable.add(sueldo_dias_descanso);
         base_gravable = base_gravable.add(sueldo_honorarios);
@@ -642,9 +631,13 @@ public class CalculoREST {
         base_gravable = base_gravable.add(apoyo_mto_vehicular);
         base_gravable = base_gravable.add(tiempo_extra_gravado);
         
+        /* Exentar */
+        
         base_exenta = base_exenta.add(fondo_ahorro_exento);
         base_exenta = base_exenta.add(tiempo_extra_exento);
-        
+
+            
+        /* Impuesto */
         impuesto_antes_subsidio = calcularImpuesto(base_gravable);
 
         try {
@@ -653,49 +646,49 @@ public class CalculoREST {
             // no incluidos en el este proceso
             this.vaciarCalculos(idEmpleado);
             
-            insertarMov(SUELDO_ORDINARIO, sueldo_ordinario);
-            insertarMov(SUELDO_DIAS_DESCANSO, sueldo_dias_descanso);
-            insertarMov(HONORARIOS_ASIMILABLES, sueldo_honorarios);
-            insertarMov(PRIMA_ANTIGUEDAD, prima_antiguedad);
-            insertarMov(CARGA_ADMINISTRATIVA, carga_admin);
-            insertarMov(MATERIALES, materiales);
-            insertarMov(ESTIMULOS_PRODUCTIVIDAD_CYT, estimulos_cyt);
-            insertarMov(COMPENSA_GARANTIZADA, compensa_garantiza);
-            insertarMov(FONDO_AHORRO_EXENTO, fondo_ahorro_exento);
-            insertarMov(FONDO_AHORRO_GRAVADO, fondo_ahorro_gravado);
-            insertarMov(FONDO_AHORRO, fondo_ahorro);
-            insertarMov(HORAS_EXTRAS_GRAVADO, tiempo_extra_gravado);
-            insertarMov(HORAS_EXTRAS_EXENTO, tiempo_extra_exento);
-            insertarMov(APORTACION_FONDO_AHORRO, fondo_ahorro);
-            insertarMov(PRIMA_QUINQUENAL, prima_quinquenal);
-            insertarMov(APOYO_MANTENIMIENTO_VEHICULAR, apoyo_mto_vehicular);
+            insertarCalculo(SUELDO_ORDINARIO, sueldo_ordinario);
+            insertarCalculo(SUELDO_DIAS_DESCANSO, sueldo_dias_descanso);
+            insertarCalculo(HONORARIOS_ASIMILABLES, sueldo_honorarios);
+            insertarCalculo(PRIMA_ANTIGUEDAD, prima_antiguedad);
+            insertarCalculo(CARGA_ADMINISTRATIVA, carga_admin);
+            insertarCalculo(MATERIALES, materiales);
+            insertarCalculo(ESTIMULOS_PRODUCTIVIDAD_CYT, estimulos_cyt);
+            insertarCalculo(COMPENSA_GARANTIZADA, compensa_garantiza);
+            insertarCalculo(FONDO_AHORRO_EXENTO, fondo_ahorro_exento);
+            insertarCalculo(FONDO_AHORRO_GRAVADO, fondo_ahorro_gravado);
+            insertarCalculo(FONDO_AHORRO, fondo_ahorro);
+            insertarCalculo(HORAS_EXTRAS_GRAVADO, tiempo_extra_gravado);
+            insertarCalculo(HORAS_EXTRAS_EXENTO, tiempo_extra_exento);
+            insertarCalculo(APORTACION_FONDO_AHORRO, fondo_ahorro);
+            insertarCalculo(PRIMA_QUINQUENAL, prima_quinquenal);
+            insertarCalculo(APOYO_MANTENIMIENTO_VEHICULAR, apoyo_mto_vehicular);
             
-            insertarMov(MONEDERO_DESPENSA, mondero_despensa); //TODO la Despensa no suma puesto que se paga con Vales
-            insertarMov(IMSS, imss_obrero);
+            insertarCalculo(MONEDERO_DESPENSA, mondero_despensa); //TODO la Despensa no suma puesto que se paga con Vales
+            insertarCalculo(IMSS, imss_obrero);
 
-            insertarMov(BASE_GRAVABLE, base_gravable);
-            insertarMov(BASE_EXENTA, base_exenta);
+            insertarCalculo(BASE_GRAVABLE, base_gravable);
+            insertarCalculo(BASE_EXENTA, base_exenta);
             
-            insertarMov(ISR, impuesto_antes_subsidio);
+            insertarCalculo(ISR, impuesto_antes_subsidio);
             
-            insertarMov(SUELDO_DIARIO, sueldo_diario);
-            insertarMov(SUELDO_DIARIO, sueldo_honorarios);
+            insertarCalculo(SUELDO_DIARIO, sueldo_diario);
+            insertarCalculo(SUELDO_DIARIO, sueldo_honorarios_diario);
             
-            insertarMov(SALARIO_DIARIO_FIJO, salario_diario_fijo);
-            insertarMov(SALARIO_DIARIO_VARIABLE, salario_diario_variable);
-            insertarMov(SALARIO_DIARIO_COTIZADO, salario_diario_cotizado);
-            insertarMov(SALARIO_DIARIO_COTIZADO_TOPADO, salario_diario_cotizado_topado);
+            insertarCalculo(SALARIO_DIARIO_FIJO, salario_diario_fijo);
+            insertarCalculo(SALARIO_DIARIO_VARIABLE, salario_diario_variable);
+            insertarCalculo(SALARIO_DIARIO_COTIZADO, salario_diario_cotizado);
+            insertarCalculo(SALARIO_DIARIO_COTIZADO_TOPADO, salario_diario_cotizado_topado);
 
-            insertarMov(EXCEDENTE_3SMG, excedente_3SM_diario);
-            insertarMov(PRESTACIONES_EN_DINERO, prestaciones_en_dinero);
-            insertarMov(GTOS_MEDICOS_Y_PENSION, gtos_medicos_y_pension);
-            insertarMov(INVALIDEZ_Y_VIDA, invalidez_y_vida);
-            insertarMov(CESANTIA_Y_VEJEZ, cesantia_y_vejez);
+            insertarCalculo(EXCEDENTE_3SMG, excedente_3SM_diario);
+            insertarCalculo(PRESTACIONES_EN_DINERO, prestaciones_en_dinero);
+            insertarCalculo(GTOS_MEDICOS_Y_PENSION, gtos_medicos_y_pension);
+            insertarCalculo(INVALIDEZ_Y_VIDA, invalidez_y_vida);
+            insertarCalculo(CESANTIA_Y_VEJEZ, cesantia_y_vejez);
             
         } catch (NullPointerException | RollbackException ex) {
             return "-2";
         }
-
+            
         resultJSON = resultJSON + "\"PERCEPCION\": {";
             resultJSON = resultJSON + "\"" + SUELDO_ORDINARIO + "\": " + sueldo_ordinario.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + SUELDO_DIAS_DESCANSO + "\": " + sueldo_dias_descanso.getNumber().toString() + ",";
@@ -771,17 +764,20 @@ public class CalculoREST {
         
         resultJSON = ("{" + "\"id\":" + this.idEmpleado +"," + resultJSON + "}").replace(",}", "}");
         
-        logger.log(Level.INFO, "Calculo en: " + idEmpleado + " > " + Duration.between(a, Instant.now()).toMillis());
-        
         return resultJSON;
     }
+
+//        int n = 0;
+//        Instant start = Instant.now();
+//        logger.log(Level.INFO, strConcepto + "> " + Duration.between(start, start = Instant.now()));
+
+    private  HashMap<String, Concepto> hmapConceptos = new HashMap<>();
     
-    private void insertarMov(String strConcepto, MonetaryAmount monto) {
-//        Instant a = Instant.now();
+    private void insertarCalculo(String strConcepto, MonetaryAmount monto) {
         
         if (monto == null || monto.isZero()) {
             // insertar solo los mayores a cero
-            return;// "";
+            return;
         }
         // obtener concepto
         Concepto concepto = finConceptoByCode(strConcepto);
@@ -789,10 +785,10 @@ public class CalculoREST {
             throw new NullPointerException(strConcepto);
         }
         
-//        Instant b = Instant.now();
-//        logger.log(Level.INFO, "Concepton: " + Duration.between(a, b).toMillis());
-        
-        // movimiento
+        // calculo
+        NominaQuincenal nomQuin = new NominaQuincenal(this.idEmpleado, concepto, monto, quincenaSingleton.getQuincena());
+        // siempre es inserción de nuevo, dado que previo vacié/eliminé todos sus cálculos
+        /*
         NominaQuincenal nomQuin = this.findNominaQuincenal(this.idEmpleado, concepto);
         if (nomQuin == null) {
             // es creaciÃƒÂ³n
@@ -801,25 +797,25 @@ public class CalculoREST {
             // es update
             nomQuin.setCantidad(monto);
         }
-        
-//        Instant c = Instant.now();
-//        logger.log(Level.INFO, "NominaQuincenal: " + Duration.between(b, c).toMillis());
+        */
         
         // persistirlo
         getEntityManager().persist(nomQuin);
         
-//        Instant d = Instant.now();
-//        logger.log(Level.INFO, "Persist: " + Duration.between(c, d).toMillis());
-        
-        //return "\"" + strConcepto + "\": " + monto + ",";
     }
 
     public Concepto finConceptoByCode(String code) {
-        try {
-            return (Concepto) getEntityManager().createNamedQuery("Concepto.findByCode").setParameter("code", code).getSingleResult();
-        } catch (NoResultException e) {
-            return null;
+        Concepto result = hmapConceptos.get(code);
+        if (result == null) {
+            try {
+                result = (Concepto) getEntityManager().createNamedQuery("Concepto.findByCode").setParameter("code", code).getSingleResult();
+                if (result != null) {
+                    hmapConceptos.put(code, result);
+                }
+            } catch (NoResultException e) {
+            }
         }
+        return result;
     }
 
     public NominaQuincenal findNominaQuincenal(Integer idEmpleado, Concepto concepto) {
@@ -889,34 +885,6 @@ public class CalculoREST {
         return impAntesSubsidio;
     }
 
-    @GET
-    @Path("quincena")
-    @Produces("application/json")
-    public String quincena() {
-        quincena.init();
-        String result = quincena.toJSON();
-        return result;
-    }
-    
-    @GET
-    @Path("quincena/{year}/{quincena}")
-    @Produces("application/json")
-    public String quincena(@PathParam("year") int year, @PathParam("quincena") int quin) {
-        quincena.set(year, quin);
-        String result = quincena.toJSON();
-        return result;
-    }
-    
-    @GET
-    @Path("/weeks/{quincena}")
-    @Produces("application/json")
-    public String weeks(@PathParam("quincena") int quin) {
-        // TODO 2015
-        quincena.set(2015, quin);
-        String result = quincena.toJSON();
-        return result;
-    }
-    
     @GET
     @Path("/sdi_vinculacion/{id_empleado}")
     @Produces("application/json")

@@ -8,7 +8,7 @@ package cimav.restrh.services;
 import cimav.restrh.entities.Departamento;
 import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoBase;
-import cimav.restrh.entities.Quincena;
+import cimav.restrh.entities.QuincenaSingleton;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
 //    private EntityManager em;
 
     @Inject
-    private Quincena quincena;
+    private QuincenaSingleton quincena;
     
     public EmpleadoBaseFacadeREST() {
         super(EmpleadoBase.class);
@@ -129,36 +129,34 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
         
             empBase = this.find(idEmp);
             
-            LocalDate localDateFinQuincena = Quincena.convert(quincena.getFechaFin());
+            LocalDate localDateFinQuincena = QuincenaSingleton.convert(quincena.getFechaFin());
             boolean isCYT = empBase.getIdGrupo().equals(EGrupo.CYT.getId());
             boolean isAYA = empBase.getIdGrupo().equals(EGrupo.AYA.getId());
-            if (isCYT || isAYA) {
 
-                LocalDate localDateFechaAntiguedad = Quincena.convert(empBase.getFechaAntiguedad());
+            LocalDate localDateFechaAntiguedad = QuincenaSingleton.convert(empBase.getFechaAntiguedad());
 
-                logger.log(Level.INFO, empBase.getId() + " | " + empBase.getName() 
-                        + " | " + empBase.getNivel() + " | " + empBase.getFechaAntiguedad() + " | " + localDateFechaAntiguedad
-                        + " >> " + localDateFinQuincena);
-                // TODO Para cuando la PAnt se cumpla en la quincena, no consideramos incidencias (faltas e incapacidades);
-                // se debe corregir.
+            logger.log(Level.INFO, empBase.getId() + " | " + empBase.getName() 
+                    + " | " + empBase.getNivel() + " | " + empBase.getFechaAntiguedad() + " | " + localDateFechaAntiguedad
+                    + " >> " + localDateFinQuincena);
+            // TODO Para cuando la PAnt se cumpla en la quincena, no consideramos incidencias (faltas e incapacidades);
+            // se debe corregir.
 
-                //TODO BUG Muy Lento y problema con JodaTime Resource not found: "org/joda/time/tz/data/ZoneInfoMap"
-                // TODO Checar que incluya el dia Inicial.
-                // Se da por hecho q nadie cumple el 28, 29 o 31 
-                // Se calculan los aÃ±os en base al Ãºltimo dÃ­a de la quincena 
+            //TODO BUG Muy Lento y problema con JodaTime Resource not found: "org/joda/time/tz/data/ZoneInfoMap"
+            // TODO Checar que incluya el dia Inicial.
+            // Se da por hecho q nadie cumple el 28, 29 o 31 
+            // Se calculan los aÃ±os en base al Ãºltimo dÃ­a de la quincena 
 
-                
-                localDateFinQuincena = localDateFinQuincena.plusDays(1);
-                // requierse agregarse un día por: Period between(LocalDate startDateInclusive, LocalDate endDateExclusive)
-                Period period = Period.between(localDateFechaAntiguedad, localDateFinQuincena);
-                empBase.setPantYears(period.getYears());
-                empBase.setPantMonths(period.getMonths());
-                empBase.setPantDayOdd(period.getDays());
-                empBase.setPantDayEven(0); // TODO PAnt Odd|Even
 
-                // persistir
-                this.edit(empBase);
-            }
+           // localDateFinQuincena = localDateFinQuincena.plusDays(1); // TODO Plus Day Hell
+            // requierse agregarse un día por: Period between(LocalDate startDateInclusive, LocalDate endDateExclusive)
+            Period period = Period.between(localDateFechaAntiguedad, localDateFinQuincena);
+            empBase.setPantYears(period.getYears());
+            empBase.setPantMonths(period.getMonths());
+            empBase.setPantDayOdd(period.getDays());
+            empBase.setPantDayEven(0); // TODO PAnt Odd|Even
+
+            // persistir
+            this.edit(empBase);
 
         } catch (Exception er){
             logger.log(Level.INFO, er.getMessage());

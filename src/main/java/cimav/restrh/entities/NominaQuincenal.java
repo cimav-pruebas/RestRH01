@@ -45,6 +45,9 @@ public class NominaQuincenal implements Serializable {
     @Column(name = "id")
     private Integer id;
     
+    @Column(name = "quincena")
+    private Integer quincena;
+    
     // No tiene Get/Set y No Insertable ni Updatable; es decir, es OnlyRead y sirve como mappedBy en EmpleadoNomina
     @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne
@@ -91,6 +94,7 @@ public class NominaQuincenal implements Serializable {
     private Boolean permanente;
     
     public NominaQuincenal() {
+        quincena = 0;
         idEmpleado = 0;
         numQuincenas = 1;
         cantidad = Money.of(0.00, "MXN");
@@ -102,18 +106,19 @@ public class NominaQuincenal implements Serializable {
     // constructor usado con aliasCantidad (en lugar de con cantidad)
     // porque el constructor usado en el query de NominaQuincenalFacadeREST.doFindByIds 
     // no entiende el tipo MonetaryAmount
-    public NominaQuincenal(int idEmpleado, Concepto concepto, BigDecimal aliasCantidad) {
+    public NominaQuincenal(int idEmpleado, Concepto concepto, BigDecimal aliasCantidad, Integer quincena) {
         this();
         this.idEmpleado = idEmpleado;
         this.concepto = concepto;
         this.cantidad = Money.of(aliasCantidad, "MXN");
+        this.quincena = quincena;
     }
-    public NominaQuincenal(int idEmpleado, Concepto concepto, MonetaryAmount cantidad) {
+    public NominaQuincenal(int idEmpleado, Concepto concepto, MonetaryAmount cantidad, Integer quincena) {
         this();
         this.idEmpleado = idEmpleado;
         this.concepto = concepto;
         this.cantidad = cantidad;
-        
+        this.quincena = quincena;
     }
     public NominaQuincenal(Integer id) {
         this.id = id;
@@ -212,8 +217,23 @@ public class NominaQuincenal implements Serializable {
     public void setAliasCantidad(BigDecimal aliasCantidad) {
         this.aliasCantidad = aliasCantidad;
     }
-    
 
+    public Integer getQuincena() {
+        return quincena;
+    }
+
+    public void setQuincena(Integer quincena) {
+        this.quincena = quincena;
+    }
+
+//    public EmpleadoBase getEmpleadoBase() {
+//        return empleadoBase;
+//    }
+//
+//    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
+//        this.empleadoBase = empleadoBase;
+//    }
+    
     @Override
     public int hashCode() {
         int hash = 0;

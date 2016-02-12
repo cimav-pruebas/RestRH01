@@ -6,10 +6,12 @@
 package cimav.restrh.services;
 
 import cimav.restrh.entities.NominaQuincenal;
+import cimav.restrh.entities.QuincenaSingleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.persistence.EntityManager;
@@ -36,6 +38,9 @@ public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
 //    @PersistenceContext(unitName = "PU_JPA")
 //    private EntityManager em;
 
+    @Inject
+    private QuincenaSingleton quincena;
+    
     public NominaQuincenalFacadeREST() {
         super(NominaQuincenal.class);
     }
@@ -53,10 +58,11 @@ public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
         if (idList.size() > 0) {
             // el constructor usa el aliasCantidad porque es del tipo BigDecimal.
             // No usa directamente cantidad porque es del tipo MonetaryAmount que no es reconocido por el JPA
-            String qlString = "SELECT NEW cimav.restrh.entities.NominaQuincenal(0, nq.concepto, SUM(nq.aliasCantidad)) FROM NominaQuincenal AS nq " +
+            String p_quincena = quincena.getQuincena() != null ? "" + quincena.getQuincena() : "0";
+            String qlString = "SELECT NEW cimav.restrh.entities.NominaQuincenal(0, nq.concepto, SUM(nq.aliasCantidad), " + p_quincena + ") FROM NominaQuincenal AS nq " +
                     " WHERE nq.idEmpleado IN :idList GROUP BY nq.concepto ORDER BY nq.concepto.id";
             Query query = getEntityManager().createQuery(qlString, NominaQuincenal.class);
-            query.setParameter("idList", idList);
+            query.setParameter("idList", idList); //.setParameter("quincena", 1); //quincena.getQuincena());
             result.addAll(query.getResultList());
         }
         return result;

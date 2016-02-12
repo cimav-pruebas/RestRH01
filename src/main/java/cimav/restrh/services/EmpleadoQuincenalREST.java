@@ -6,7 +6,7 @@ import cimav.restrh.entities.EmpleadoNomina;
 import cimav.restrh.entities.EmpleadoQuincenal;
 import cimav.restrh.entities.HoraExtra;
 import cimav.restrh.entities.Incidencia;
-import cimav.restrh.entities.Quincena;
+import cimav.restrh.entities.QuincenaSingleton;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
 //    private EntityManager em;
 
     @Inject
-    private Quincena quincena;
+    private QuincenaSingleton quincena;
     
     public EmpleadoQuincenalREST() {
         super(EmpleadoQuincenal.class);
@@ -65,8 +65,6 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     @Produces("text/plain")
     public String init() {
         try {
-            // Inicializa a todos
-            quincena.init();
             
             // vaciar
             getEntityManager().createQuery("DELETE FROM EmpleadoQuincenal").executeUpdate();
@@ -91,8 +89,6 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
         // inicializa un empleado
         EmpleadoQuincenal result = null;
         try {
-            // TODO es necesario el quincena.init();?
-            quincena.init();
             EmpleadoNomina empleadoNomina = empleadoNominaFacadeREST.find(idEmp);
             result = this.inicializar(empleadoNomina);
         } catch (Exception er){
@@ -114,7 +110,7 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
         boolean isAYA = empNom.getIdGrupo().equals(EGrupo.AYA.getId());
         if (isCYT || isAYA) {
 
-            LocalDate localDateFechaAntiguedad = Quincena.convert(empNom.getFechaAntiguedad());
+            LocalDate localDateFechaAntiguedad = QuincenaSingleton.convert(empNom.getFechaAntiguedad());
 
             logger.log(Level.INFO, empNom.getId() + " | " + empNom.getName() 
                     + " | " + empNom.getNivel() + " | " + empNom.getFechaAntiguedad() + " | " + localDateFechaAntiguedad);
@@ -137,6 +133,7 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
             empleadoQuincenal.setOrdinarios(0);
             empleadoQuincenal.setDiasDescansoDeLaQuincena(quincena.getDiasDescanso());
             empleadoQuincenal.setDiasOrdinariosDeLaQuincena(quincena.getDiasOrdinarios());
+            //TODO faltan días de asueto
             empleadoQuincenal.setFaltas(0);
             empleadoQuincenal.setIncapacidadHabiles(0);
             empleadoQuincenal.setIncapacidadInhabiles(0);

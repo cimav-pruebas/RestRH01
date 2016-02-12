@@ -23,9 +23,9 @@ import javax.ejb.Startup;
  */
 @Singleton
 @Startup
-public class Quincena {
+public class QuincenaSingleton {
     
-    private final static Logger logger = Logger.getLogger(Quincena.class.getName() ); 
+    private final static Logger logger = Logger.getLogger(QuincenaSingleton.class.getName() ); 
     
     private Integer year;
     private Integer bimestre;
@@ -50,15 +50,15 @@ public class Quincena {
     private ParametrosREST parametrosREST;
     
     
-    public Quincena() {
+    public QuincenaSingleton() {
     }
     
     /**
-     * Inicializa la Quincena con el Year y Quincena acuales
-     * traídos desde la DB
+     * Inicializa la QuincenaSingleton con el Year y QuincenaSingleton acuales
+ traídos desde la DB
      */
     @PostConstruct
-    public void init() {
+    public void load() {
         Parametros parametros = parametrosREST.get();
         //logger.log(Level.INFO, "%%>> " + quin);
         // TODO 2015
@@ -76,10 +76,10 @@ public class Quincena {
     }
     
     /**
-     * Inicializa la Quincena de acuerdo a los parametros.
+     * Inicializa la QuincenaSingleton de acuerdo a los parametros.
      * 
      * Importante: después de utilizar la quincena con set, 
-     * llamar el método init() para recuperar la quincena actual.
+     * llamar el método load() para recuperar la quincena actual.
      * 
      * @param pyear
      * @param pquincena 
@@ -244,7 +244,7 @@ public class Quincena {
     }
 /**
  * 
- * @return  Fecha Fin de la Quincena
+ * @return  Fecha Fin de la QuincenaSingleton
  */
     public Date getFechaFin() {
         return fechaFin;
@@ -259,7 +259,7 @@ public class Quincena {
     }
 
     /**
-     * Días de la Quincena
+     * Días de la QuincenaSingleton
      */
     public Integer getDiasLaborables() {
         return diasOrdinarios + diasDescanso;
