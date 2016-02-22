@@ -92,6 +92,12 @@ public class NominaQuincenal implements Serializable {
     @Basic(optional = false)
     @Column(name = "permanente")
     private Boolean permanente;
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "cantidad_empresa")
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount cantidadEmpresa;
     
     public NominaQuincenal() {
         quincena = 0;
@@ -101,6 +107,7 @@ public class NominaQuincenal implements Serializable {
         saldo = Money.of(0.00, "MXN");
         pago = Money.of(0.00, "MXN");
         permanente = false;
+        cantidadEmpresa = Money.of(0.00, "MXN");
     }
 
     // constructor usado con aliasCantidad (en lugar de con cantidad)
@@ -112,22 +119,25 @@ public class NominaQuincenal implements Serializable {
         this.concepto = concepto;
         this.cantidad = Money.of(aliasCantidad, "MXN");
         this.quincena = quincena;
+        this.cantidadEmpresa = Money.of(aliasCantidad, "MXN");
     }
-    public NominaQuincenal(int idEmpleado, Concepto concepto, MonetaryAmount cantidad, Integer quincena) {
+    public NominaQuincenal(int idEmpleado, Concepto concepto, MonetaryAmount cantidad, Integer quincena, MonetaryAmount cantidadEmpresa) {
         this();
         this.idEmpleado = idEmpleado;
         this.concepto = concepto;
         this.cantidad = cantidad;
         this.quincena = quincena;
+        this.cantidadEmpresa = cantidadEmpresa;
     }
     public NominaQuincenal(Integer id) {
         this.id = id;
     }
 
-    public NominaQuincenal(Integer id, MonetaryAmount cantidad, short numQuincenas) {
+    public NominaQuincenal(Integer id, MonetaryAmount cantidad, short numQuincenas, MonetaryAmount cantidadEmpresa) {
         this.id = id;
         this.cantidad = cantidad;
         this.numQuincenas = numQuincenas;
+        this.cantidadEmpresa = cantidadEmpresa;
     }
 
     public Integer getIdEmpleado() {
@@ -233,6 +243,14 @@ public class NominaQuincenal implements Serializable {
 //    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
 //        this.empleadoBase = empleadoBase;
 //    }
+
+    public MonetaryAmount getCantidadEmpresa() {
+        return cantidadEmpresa;
+    }
+
+    public void setCantidadEmpresa(MonetaryAmount cantidadEmpresa) {
+        this.cantidadEmpresa = cantidadEmpresa;
+    }
     
     @Override
     public int hashCode() {

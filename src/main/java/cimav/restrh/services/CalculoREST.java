@@ -108,6 +108,12 @@ public class CalculoREST {
     private final String GTOS_MEDICOS_Y_PENSION         = "GMYP";
     private final String INVALIDEZ_Y_VIDA               = "IYV";
     private final String CESANTIA_Y_VEJEZ               = "CYV";
+    private final String CUOTA_FIJA                     = "CFIJA";
+    private final String RIESGO_DE_TRABJO               = "RIESGOT";
+    private final String GUARDERIAS_Y_PRESTA_SOCIALES   = "GYPS";
+    private final String SEGURO_RETIRO                  = "SEGRET";
+    private final String INFONAVIT                      = "INFONA";
+
     // internos
     private final String BASE_GRAVABLE              = "BG";
     private final String BASE_EXENTA                = "BE";    
@@ -241,10 +247,21 @@ public class CalculoREST {
         
         MonetaryAmount imss_obrero              = Money.of(0.00, "MXN");
         MonetaryAmount excedente_3SM_diario     = Money.of(0.00, "MXN");
+        MonetaryAmount excedente_3SM_diario_empresa = Money.of(0.00, "MXN");
         MonetaryAmount prestaciones_en_dinero   = Money.of(0.00, "MXN");
+        MonetaryAmount prestaciones_en_dinero_empresa   = Money.of(0.00, "MXN");
         MonetaryAmount gtos_medicos_y_pension   = Money.of(0.00, "MXN");
+        MonetaryAmount gtos_medicos_y_pension_empresa   = Money.of(0.00, "MXN");
         MonetaryAmount invalidez_y_vida         = Money.of(0.00, "MXN");
+        MonetaryAmount invalidez_y_vida_empresa         = Money.of(0.00, "MXN");
         MonetaryAmount cesantia_y_vejez         = Money.of(0.00, "MXN");
+        MonetaryAmount cesantia_y_vejez_empresa         = Money.of(0.00, "MXN");
+
+        MonetaryAmount cuota_fija_empresa              = Money.of(0.00, "MXN");
+        MonetaryAmount riesgo_trabajo_empresa              = Money.of(0.00, "MXN");
+        MonetaryAmount guarderias_y_prestaciones_sociales_empresa              = Money.of(0.00, "MXN");
+        MonetaryAmount seguro_retiro_empresa              = Money.of(0.00, "MXN");
+        MonetaryAmount infonavit_empresa              = Money.of(0.00, "MXN");
         
         try {
             
@@ -590,20 +607,30 @@ public class CalculoREST {
             
             // TODO para las repercuciones del Imss, los Dias Trabajados DEBEN ser Dias Cotizados
             
-            excedente_3SM_diario = Money.of(3 * SALARIO_MINIMO, MXN);
-            if (salario_diario_cotizado_topado.compareTo(excedente_3SM_diario) > 0) {
-                excedente_3SM_diario = salario_diario_cotizado_topado.subtract(excedente_3SM_diario);
+            MonetaryAmount excedente_3SM_diario_factor = Money.of(3 * SALARIO_MINIMO, MXN);
+            if (salario_diario_cotizado_topado.compareTo(excedente_3SM_diario_factor) > 0) {
+                excedente_3SM_diario_factor = salario_diario_cotizado_topado.subtract(excedente_3SM_diario_factor);
             }
-            // .multiply(dias_reales_bimestre, mc)
-            excedente_3SM_diario = excedente_3SM_diario.multiply(0.0040);
-            prestaciones_en_dinero = salario_diario_cotizado_topado.multiply(0.0025);
-            gtos_medicos_y_pension = salario_diario_cotizado_topado.multiply(0.003750);
-            invalidez_y_vida = salario_diario_cotizado_topado.multiply(0.006250);
-            cesantia_y_vejez = salario_diario_cotizado_topado.multiply(0.011250);
+            excedente_3SM_diario = excedente_3SM_diario_factor.multiply(0.0040).multiply(dias_trabajados); //especie - excedente
+            prestaciones_en_dinero = salario_diario_cotizado_topado.multiply(0.0025).multiply(dias_trabajados); // prestaciones en dinero
+            gtos_medicos_y_pension = salario_diario_cotizado_topado.multiply(0.003750).multiply(dias_trabajados); // pensionados y beneficiarios
+            invalidez_y_vida = salario_diario_cotizado_topado.multiply(0.006250).multiply(dias_trabajados);
+            cesantia_y_vejez = salario_diario_cotizado_topado.multiply(0.011250).multiply(dias_trabajados);
             
             imss_obrero = excedente_3SM_diario.add(prestaciones_en_dinero).add(gtos_medicos_y_pension).add(invalidez_y_vida).add(cesantia_y_vejez);
-            //imss_obrero = imss_obrero.multiply(dias_trabajados);
-            imss_obrero = imss_obrero.multiply(dias_trabajados); // TODO ¿Es por dias trabajado o dias quincena o dias reales de la quincena?
+            //imss_obrero = imss_obrero.multiply(dias_trabajados); // TODO ¿Es por dias trabajado o dias quincena o dias reales de la quincena?
+            
+            excedente_3SM_diario_empresa = excedente_3SM_diario_factor.multiply(0.0110).multiply(dias_trabajados); //especie - excedente
+            prestaciones_en_dinero_empresa = salario_diario_cotizado_topado.multiply(0.0070).multiply(dias_trabajados); // prestaciones en dinero
+            gtos_medicos_y_pension_empresa = salario_diario_cotizado_topado.multiply(0.0105).multiply(dias_trabajados); // pensionados y beneficiarios
+            invalidez_y_vida_empresa = salario_diario_cotizado_topado.multiply(0.0175).multiply(dias_trabajados);
+            cesantia_y_vejez_empresa = salario_diario_cotizado_topado.multiply(0.0315).multiply(dias_trabajados);
+
+            cuota_fija_empresa = Money.of(SALARIO_MINIMO, MXN).multiply(0.2040).multiply(dias_trabajados); 
+            riesgo_trabajo_empresa = salario_diario_cotizado_topado.multiply(0.005436).multiply(dias_trabajados);
+            guarderias_y_prestaciones_sociales_empresa = salario_diario_cotizado_topado.multiply(0.0100).multiply(dias_trabajados); 
+            seguro_retiro_empresa = salario_diario_cotizado_topado.multiply(0.0200).multiply(dias_trabajados); 
+            infonavit_empresa = salario_diario_cotizado_topado.multiply(0.0500).multiply(dias_trabajados); 
             
         } catch (NullPointerException e1) {
             return "-1";
@@ -679,11 +706,17 @@ public class CalculoREST {
             insertarCalculo(SALARIO_DIARIO_COTIZADO, salario_diario_cotizado);
             insertarCalculo(SALARIO_DIARIO_COTIZADO_TOPADO, salario_diario_cotizado_topado);
 
-            insertarCalculo(EXCEDENTE_3SMG, excedente_3SM_diario);
-            insertarCalculo(PRESTACIONES_EN_DINERO, prestaciones_en_dinero);
-            insertarCalculo(GTOS_MEDICOS_Y_PENSION, gtos_medicos_y_pension);
-            insertarCalculo(INVALIDEZ_Y_VIDA, invalidez_y_vida);
-            insertarCalculo(CESANTIA_Y_VEJEZ, cesantia_y_vejez);
+            //insertarCalculo(EXCEDENTE_3SMG, excedente_3SM_diario);
+            insertarCalculoImssEmpresa(EXCEDENTE_3SMG, excedente_3SM_diario, excedente_3SM_diario_empresa);
+            insertarCalculoImssEmpresa(PRESTACIONES_EN_DINERO, prestaciones_en_dinero, prestaciones_en_dinero_empresa);
+            insertarCalculoImssEmpresa(GTOS_MEDICOS_Y_PENSION, gtos_medicos_y_pension, gtos_medicos_y_pension_empresa);
+            insertarCalculoImssEmpresa(INVALIDEZ_Y_VIDA, invalidez_y_vida, invalidez_y_vida_empresa);
+            insertarCalculoImssEmpresa(CESANTIA_Y_VEJEZ, cesantia_y_vejez, cesantia_y_vejez_empresa);
+            insertarCalculoImssEmpresa(CUOTA_FIJA, Money.of(0.00, "MXN"), cuota_fija_empresa);
+            insertarCalculoImssEmpresa(RIESGO_DE_TRABJO, Money.of(0.00, "MXN"), riesgo_trabajo_empresa);
+            insertarCalculoImssEmpresa(GUARDERIAS_Y_PRESTA_SOCIALES, Money.of(0.00, "MXN"), guarderias_y_prestaciones_sociales_empresa);
+            insertarCalculoImssEmpresa(SEGURO_RETIRO, Money.of(0.00, "MXN"), seguro_retiro_empresa);
+            insertarCalculoImssEmpresa(INFONAVIT, Money.of(0.00, "MXN"), infonavit_empresa);
             
         } catch (NullPointerException | RollbackException ex) {
             return "-2";
@@ -759,7 +792,13 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + "prestaciones_en_dinero" + "\": " + prestaciones_en_dinero.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "gtos_medicos_y_pension" + "\": " + gtos_medicos_y_pension.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "invalidez_y_vida" + "\": " + invalidez_y_vida.getNumber().toString() + ",";
-            resultJSON = resultJSON + "\"" + "cesantia_y_vejez" + "\": " + cesantia_y_vejez.getNumber().toString();
+            resultJSON = resultJSON + "\"" + "cesantia_y_vejez" + "\": " + cesantia_y_vejez.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "couta_fija" + "\": " + cuota_fija_empresa.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "riesgo_trabajo" + "\": " + riesgo_trabajo_empresa.getNumber().toString()+ ",";
+            resultJSON = resultJSON + "\"" + "guarderias_y_presta_sociales" + "\": " + guarderias_y_prestaciones_sociales_empresa.getNumber().toString()+ ",";
+            resultJSON = resultJSON + "\"" + "seguro_retiro" + "\": " + seguro_retiro_empresa.getNumber().toString()+ ",";
+            resultJSON = resultJSON + "\"" + "infonavit" + "\": " + infonavit_empresa.getNumber().toString();
+            
         resultJSON = resultJSON + " }";
         
         resultJSON = ("{" + "\"id\":" + this.idEmpleado +"," + resultJSON + "}").replace(",}", "}");
@@ -786,7 +825,7 @@ public class CalculoREST {
         }
         
         // calculo
-        NominaQuincenal nomQuin = new NominaQuincenal(this.idEmpleado, concepto, monto, quincenaSingleton.getQuincena());
+        NominaQuincenal nomQuin = new NominaQuincenal(this.idEmpleado, concepto, monto, quincenaSingleton.getQuincena(), Money.of(0.00, "MXN"));
         // siempre es inserción de nuevo, dado que previo vacié/eliminé todos sus cálculos
         /*
         NominaQuincenal nomQuin = this.findNominaQuincenal(this.idEmpleado, concepto);
@@ -804,6 +843,37 @@ public class CalculoREST {
         
     }
 
+    private void insertarCalculoImssEmpresa(String strConcepto, MonetaryAmount monto, MonetaryAmount montoEmpresa) {
+        
+//        if (monto == null || monto.isZero()) {
+//            // insertar solo los mayores a cero
+//            return;
+//        }
+        // obtener concepto
+        Concepto concepto = finConceptoByCode(strConcepto);
+        if (concepto == null) {
+            throw new NullPointerException(strConcepto);
+        }
+        
+        // calculo
+        NominaQuincenal nomQuin = new NominaQuincenal(this.idEmpleado, concepto, monto, quincenaSingleton.getQuincena(), montoEmpresa);
+        // siempre es inserción de nuevo, dado que previo vacié/eliminé todos sus cálculos
+        /*
+        NominaQuincenal nomQuin = this.findNominaQuincenal(this.idEmpleado, concepto);
+        if (nomQuin == null) {
+            // es creaciÃƒÂ³n
+            nomQuin = new NominaQuincenal(this.idEmpleado, concepto, monto);
+        } else {
+            // es update
+            nomQuin.setCantidad(monto);
+        }
+        */
+        
+        // persistirlo
+        getEntityManager().persist(nomQuin);
+        
+    }
+    
     public Concepto finConceptoByCode(String code) {
         Concepto result = hmapConceptos.get(code);
         if (result == null) {
