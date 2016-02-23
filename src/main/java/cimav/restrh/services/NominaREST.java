@@ -3,7 +3,7 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
-import cimav.restrh.entities.EmpleadoQuincenal;
+import cimav.restrh.entities.Nomina;
 import cimav.restrh.entities.HoraExtra;
 import cimav.restrh.entities.Incidencia;
 import cimav.restrh.entities.QuincenaSingleton;
@@ -37,10 +37,10 @@ import org.javamoney.moneta.Money;
  * @author juan.calderon
  */
 @Stateless
-@Path("empleado_quincenal")
-public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
+@Path("nomina")
+public class NominaREST extends AbstractFacade<Nomina>{
     
-    private final static Logger logger = Logger.getLogger(EmpleadoQuincenalREST.class.getName() ); 
+    private final static Logger logger = Logger.getLogger(NominaREST.class.getName() ); 
     
     @EJB
     private EmpleadoNominaFacadeREST empleadoNominaFacadeREST;
@@ -51,8 +51,8 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     @Inject
     private QuincenaSingleton quincena;
     
-    public EmpleadoQuincenalREST() {
-        super(EmpleadoQuincenal.class);
+    public NominaREST() {
+        super(Nomina.class);
     }
     
     @Override
@@ -67,7 +67,8 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
         try {
             
             // vaciar
-            getEntityManager().createQuery("DELETE FROM EmpleadoQuincenal").executeUpdate();
+            getEntityManager().createQuery("DELETE FROM Nomina").executeUpdate();
+            //TODO falta cambiar ALTER SEQUENCE empleadoquincenal_id_seq RESTART WITH 1
             getEntityManager().createNativeQuery("ALTER SEQUENCE empleadoquincenal_id_seq RESTART WITH 1").executeUpdate(); 
 
             // TODO Filtrar que solo inicialize a los empleados activos.
@@ -85,9 +86,9 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     @GET
     @Path("init/{id_emp}")
     @Produces(value = "application/json")
-    public EmpleadoQuincenal init(@PathParam("id_emp") Integer idEmp) {
+    public Nomina init(@PathParam("id_emp") Integer idEmp) {
         // inicializa un empleado
-        EmpleadoQuincenal result = null;
+        Nomina result = null;
         try {
             EmpleadoNomina empleadoNomina = empleadoNominaFacadeREST.find(idEmp);
             result = this.inicializar(empleadoNomina);
@@ -97,14 +98,14 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
         return result;
     }
     
-    public EmpleadoQuincenal inicializar(EmpleadoNomina empNom) {
+    public Nomina inicializar(EmpleadoNomina empNom) {
         /*
         Inicializa la AntigÃ¼edad del Empleado.
         Dias ordinarios, descanso, trabajados de la quincena
         Sdi del bimestre para el empleado
         */
         
-        EmpleadoQuincenal empleadoQuincenal = null;
+        Nomina nomina = null;
         
         boolean isCYT = empNom.getIdGrupo().equals(EGrupo.CYT.getId());
         boolean isAYA = empNom.getIdGrupo().equals(EGrupo.AYA.getId());
@@ -124,28 +125,28 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
 
 
             // borrarlo si ya existe
-            Query query = getEntityManager().createQuery("DELETE FROM EmpleadoQuincenal eq WHERE eq.idEmpleado = :id_emp");
+            Query query = getEntityManager().createQuery("DELETE FROM Nomina eq WHERE eq.idEmpleado = :id_emp");
             int deletedCount = query.setParameter("id_emp", empNom.getId()).executeUpdate();
             
-            empleadoQuincenal = new EmpleadoQuincenal();
-            empleadoQuincenal.setIdEmpleado(empNom.getId());
-            empleadoQuincenal.setDescanso(0);
-            empleadoQuincenal.setOrdinarios(0);
-            empleadoQuincenal.setDiasDescansoDeLaQuincena(quincena.getDiasDescanso());
-            empleadoQuincenal.setDiasOrdinariosDeLaQuincena(quincena.getDiasOrdinarios());
+            nomina = new Nomina();
+            nomina.setIdEmpleado(empNom.getId());
+            nomina.setDescanso(0);
+            nomina.setOrdinarios(0);
+            nomina.setDiasDescansoDeLaQuincena(quincena.getDiasDescanso());
+            nomina.setDiasOrdinariosDeLaQuincena(quincena.getDiasOrdinarios());
             //TODO faltan días de asueto
-            empleadoQuincenal.setFaltas(0);
-            empleadoQuincenal.setIncapacidadHabiles(0);
-            empleadoQuincenal.setIncapacidadInhabiles(0);
-            empleadoQuincenal.setHorasExtrasDobles(0.00);
-            empleadoQuincenal.setHorasExtrasTriples(0.00);
+            nomina.setFaltas(0);
+            nomina.setIncapacidadHabiles(0);
+            nomina.setIncapacidadInhabiles(0);
+            nomina.setHorasExtrasDobles(0.00);
+            nomina.setHorasExtrasTriples(0.00);
             // TODO falta inicializar el sdiVariableBimestreAnterior
-            empleadoQuincenal.setSdiVariableBimestreAnterior(Money.of(BigDecimal.ZERO, CalculoREST.MXN)); 
+            nomina.setSdiVariableBimestreAnterior(Money.of(BigDecimal.ZERO, CalculoREST.MXN)); 
 
-            this.insert(empleadoQuincenal);
+            this.insert(nomina);
             //getEntityM anager().persist(empleadoQuincenal);
         }
-        return empleadoQuincenal;
+        return nomina;
     }
     
     private int daysBetween(Date d1, Date d2){
@@ -156,18 +157,18 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     @Path("incidencias/{id_empleado}")
     @Produces("text/plain")
     public String incidencias(@PathParam("id_empleado") Integer idEmpleado) {
-        Query query = getEntityManager().createQuery("SELECT eq FROM EmpleadoQuincenal AS eq WHERE eq.idEmpleado =:id_empleado", EmpleadoQuincenal.class);
+        Query query = getEntityManager().createQuery("SELECT eq FROM Nomina AS eq WHERE eq.idEmpleado =:id_empleado", Nomina.class);
         query.setParameter("id_empleado", idEmpleado);
-        EmpleadoQuincenal empleadoQuincenal = (EmpleadoQuincenal) query.getSingleResult();
-        return this.calcularIncidencias(empleadoQuincenal);
+        Nomina nomina = (Nomina) query.getSingleResult();
+        return this.calcularIncidencias(nomina);
     }
     
-    public String calcularIncidencias(EmpleadoQuincenal empleadoQuincenal) {
-        if (empleadoQuincenal != null) {
+    public String calcularIncidencias(Nomina nomina) {
+        if (nomina != null) {
             Integer faltas = 0;
             Integer incapacidadHabiles = 0;
             Integer incapacidadInhabiles = 0;
-            for(Incidencia incidencia : empleadoQuincenal.getIncidencias()) {
+            for(Incidencia incidencia : nomina.getIncidencias()) {
                 if (Incidencia.FALTA.equals(incidencia.getClase())) {
                     faltas += incidencia.getDiasHabiles();
                 } else if (Incidencia.INCAPACIDAD.equals(incidencia.getClase())) {
@@ -175,9 +176,9 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
                     incapacidadInhabiles += incidencia.getDiasInhabiles();
                 }
             }
-            empleadoQuincenal.setFaltas(faltas);
-            empleadoQuincenal.setIncapacidadHabiles(incapacidadHabiles);
-            empleadoQuincenal.setIncapacidadInhabiles(incapacidadInhabiles);
+            nomina.setFaltas(faltas);
+            nomina.setIncapacidadHabiles(incapacidadHabiles);
+            nomina.setIncapacidadInhabiles(incapacidadInhabiles);
         }
         return "none";
     }
@@ -185,28 +186,28 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     @GET
     @Path("by_id_empleado/{id_empleado}")
     @Produces("application/json")
-    public EmpleadoQuincenal findByIdEmpleado(@PathParam("id_empleado") Integer idEmpleado) {
-        Query query = getEntityManager().createQuery("SELECT eq FROM EmpleadoQuincenal AS eq WHERE eq.idEmpleado =:id_empleado", EmpleadoQuincenal.class);
+    public Nomina findByIdEmpleado(@PathParam("id_empleado") Integer idEmpleado) {
+        Query query = getEntityManager().createQuery("SELECT eq FROM Nomina AS eq WHERE eq.idEmpleado =:id_empleado", Nomina.class);
         query.setParameter("id_empleado", idEmpleado);
-        EmpleadoQuincenal empleadoQuincenal = (EmpleadoQuincenal) query.getSingleResult();
-        return empleadoQuincenal;
+        Nomina nomina = (Nomina) query.getSingleResult();
+        return nomina;
     }
     
     @GET
     @Path("tiempo_extra/{id_empleado}")
     @Produces("text/plain")
     public String tiempoExtra(@PathParam("id_empleado") Integer idEmpleado) {
-        Query query = getEntityManager().createQuery("SELECT eq FROM EmpleadoQuincenal AS eq WHERE eq.idEmpleado =:id_empleado", EmpleadoQuincenal.class);
+        Query query = getEntityManager().createQuery("SELECT eq FROM Nomina AS eq WHERE eq.idEmpleado =:id_empleado", Nomina.class);
         query.setParameter("id_empleado", idEmpleado);
-        EmpleadoQuincenal empleadoQuincenal = (EmpleadoQuincenal) query.getSingleResult();
-        return this.calcularTiempoExtra(empleadoQuincenal);
+        Nomina nomina = (Nomina) query.getSingleResult();
+        return this.calcularTiempoExtra(nomina);
     }
     
-    public String calcularTiempoExtra(EmpleadoQuincenal empleadoQuincenal) {
-        if (empleadoQuincenal != null) {
+    public String calcularTiempoExtra(Nomina nomina) {
+        if (nomina != null) {
             // agrupar hrs extras por semana
             HashMap<Integer, List<HoraExtra>> hashMap = new HashMap<>();
-            for (HoraExtra horaExtra : empleadoQuincenal.getHorasExtras()) {
+            for (HoraExtra horaExtra : nomina.getHorasExtras()) {
                 if (!hashMap.containsKey(horaExtra.getWeekOfYear())) {
                     List<HoraExtra> hrs = new ArrayList<>();
                     hrs.add(horaExtra);
@@ -215,7 +216,7 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
                     hashMap.get(horaExtra.getWeekOfYear()).add(horaExtra);
                 }
             }
-            empleadoQuincenal.getHorasExtras().stream().forEach((horaExtra) -> {
+            nomina.getHorasExtras().stream().forEach((horaExtra) -> {
                 if (!hashMap.containsKey(horaExtra.getWeekOfYear())) {
                     List<HoraExtra> hrs = new ArrayList<>();
                     hrs.add(horaExtra);
@@ -245,8 +246,8 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
                     hrsTriples = hrsTriples + ht;
                 }
             }
-            empleadoQuincenal.setHorasExtrasDobles(hrsDobles);
-            empleadoQuincenal.setHorasExtrasTriples(hrsTriples);
+            nomina.setHorasExtrasDobles(hrsDobles);
+            nomina.setHorasExtrasTriples(hrsTriples);
 
             //TODO Â¿Cuando se persiste? Lo hace pero no sÃ© cuando.
         }
@@ -257,7 +258,7 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     @Consumes("application/json")
     @Produces("application/json")
     @Override
-    public EmpleadoQuincenal insert(EmpleadoQuincenal entity) {
+    public Nomina insert(Nomina entity) {
         super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
         return entity; 
     }
@@ -265,7 +266,7 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     @PUT
     @Path("{id}")
     @Consumes("application/json")
-    public void edit(@PathParam("id") Integer id, EmpleadoQuincenal entity) {
+    public void edit(@PathParam("id") Integer id, Nomina entity) {
         super.edit(entity);
     }
 
@@ -278,14 +279,14 @@ public class EmpleadoQuincenalREST extends AbstractFacade<EmpleadoQuincenal>{
     @GET
     @Path("{id}")
     @Produces("application/json")
-    public EmpleadoQuincenal find(@PathParam("id") Integer id) {
+    public Nomina find(@PathParam("id") Integer id) {
         return super.find(id); 
     }
 
     @GET
     @Override
     @Produces("application/json")
-    public List<EmpleadoQuincenal> findAll() {
+    public List<Nomina> findAll() {
         return super.findAll();
     }
 

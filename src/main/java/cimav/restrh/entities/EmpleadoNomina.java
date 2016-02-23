@@ -8,7 +8,6 @@ package cimav.restrh.entities;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Cacheable;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -26,37 +25,29 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class EmpleadoNomina extends EmpleadoSuper implements Serializable {
 
     @OneToMany(mappedBy = "EmpleadoBase")
-    private Collection<NominaQuincenal> nominaQuincenalCollection;
+    private Collection<Movimiento> movimientos;
     
     @OneToOne(mappedBy = "empleadoNomina")
-    private EmpleadoQuincenal empleadoQuincenal;
+    private Nomina nomina;
     
     public EmpleadoNomina() {
         super();
     }
 
-//    public Short getIdTipoAntiguedad() {
-//        return idTipoAntiguedad;
-//    }
-//
-//    public void setIdTipoAntiguedad(Short idTipoAntiguedad) {
-//        this.idTipoAntiguedad = idTipoAntiguedad;
-//    }
-
-    public Collection<NominaQuincenal> getNominaQuincenalCollection() {
-        return nominaQuincenalCollection;
+    public Collection<Movimiento> getMovimientos() {
+        return movimientos;
     }
 
-    public void setNominaQuincenalCollection(Collection<NominaQuincenal> nominaQuincenalCollection) {
-        this.nominaQuincenalCollection = nominaQuincenalCollection;
+    public void setMovimientos(Collection<Movimiento> movimientos) {
+        this.movimientos = movimientos;
     }
 
-    public EmpleadoQuincenal getEmpleadoQuincenal() {
-        return empleadoQuincenal;
+    public Nomina getNomina() {
+        return nomina;
     }
 
-    public void setEmpleadoQuincenal(EmpleadoQuincenal empleadoQuincenal) {
-        this.empleadoQuincenal = empleadoQuincenal;
+    public void setNomina(Nomina nomina) {
+        this.nomina = nomina;
     }
-
+    
 }

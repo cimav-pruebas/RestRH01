@@ -36,9 +36,9 @@ import org.javamoney.moneta.Money;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "empleadoquincenal", catalog = "rh_development", schema = "public")
-@XmlRootElement(name = "empleadoquincenal")
-public class EmpleadoQuincenal implements Serializable {
+@Table(name = "nomina", catalog = "rh_development", schema = "public")
+@XmlRootElement(name = "nomina")
+public class Nomina implements Serializable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -83,10 +83,10 @@ public class EmpleadoQuincenal implements Serializable {
     @Convert(converter = MonetaryAmountConverter.class)
     private MonetaryAmount sdiVariableBimestreAnterior;
     
-    @OneToMany(mappedBy = "empleadoQuincenal", orphanRemoval = true)
+    @OneToMany(mappedBy = "nomina", orphanRemoval = true)
     private Collection<Incidencia> incidencias;
     
-    @OneToMany(mappedBy = "empleadoQuincenal", orphanRemoval = true)
+    @OneToMany(mappedBy = "nomina", orphanRemoval = true)
     private Collection<HoraExtra> horasExtras;
     
     @Column(name = "horas_extras_dobles") 
@@ -94,12 +94,7 @@ public class EmpleadoQuincenal implements Serializable {
     @Column(name = "horas_extras_triples") 
     private Double horasExtrasTriples;
     
-    /*
-     Requiere Inicializarse
-    EmpleadoQuincenalREST.init()
-    */
-    
-    public EmpleadoQuincenal() {
+    public Nomina() {
         this.diasDescansoDeLaQuincena = 4;
         this.diasOrdinariosDeLaQuincena = 11;
         this.horasExtrasDobles = 0.00;

@@ -5,12 +5,11 @@
  */
 package cimav.restrh.services;
 
-import cimav.restrh.entities.QuincenaSingleton;
 import cimav.restrh.entities.Concepto;
 import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
-import cimav.restrh.entities.EmpleadoQuincenal;
-import cimav.restrh.entities.NominaQuincenal;
+import cimav.restrh.entities.Nomina;
+import cimav.restrh.entities.Movimiento;
 import cimav.restrh.entities.Tabulador;
 import cimav.restrh.entities.TarifaAnual;
 import java.math.BigDecimal;
@@ -26,7 +25,6 @@ import java.util.logging.Logger;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -68,10 +66,7 @@ public class CalculoREST {
     EntityManager em;
 
     @EJB
-    private EmpleadoQuincenalREST empleadoQuincenalREST;
-    
-    @Inject
-    private QuincenaSingleton quincenaSingleton;
+    private NominaREST nominaREST;
     
     public CalculoREST() {
     }
@@ -269,17 +264,17 @@ public class CalculoREST {
             if (empleadoNomina == null ) {
                 throw new NullPointerException("EMPLEADO");
             }
-            if (empleadoNomina.getEmpleadoQuincenal() == null ) {
-                EmpleadoQuincenal tmp = empleadoQuincenalREST.inicializar(empleadoNomina);
-                empleadoNomina.setEmpleadoQuincenal(tmp);
+            if (empleadoNomina.getNomina()== null ) {
+                Nomina tmp = nominaREST.inicializar(empleadoNomina);
+                empleadoNomina.setNomina(tmp);
                 
                 //throw new NullPointerException("EMPLEADO -- QUINCENAL");
                 // se tiene que haber executado antes (al inicio de quincena).
                 // http://localhost:8080/RestRH01/api/empleado_quincenal/init/155
             } 
-            EmpleadoQuincenal empleadoQuincenal = empleadoNomina.getEmpleadoQuincenal();
-            empleadoQuincenalREST.calcularIncidencias(empleadoQuincenal);
-            empleadoQuincenalREST.calcularTiempoExtra(empleadoQuincenal);
+            Nomina nomina = empleadoNomina.getNomina();
+            nominaREST.calcularIncidencias(nomina);
+            nominaREST.calcularTiempoExtra(nomina);
             
             /*
             Faltas:
@@ -303,16 +298,16 @@ public class CalculoREST {
             */
             
             // faltas, incapacidades y asueto del empleado en la quincena
-            Integer faltas = empleadoQuincenal.getFaltas();
-            Integer incapacidadesHabiles = empleadoQuincenal.getIncapacidadHabiles();
-            Integer incapacidadesInhabiles = empleadoQuincenal.getIncapacidadInhabiles();
+            Integer faltas = nomina.getFaltas();
+            Integer incapacidadesHabiles = nomina.getIncapacidadHabiles();
+            Integer incapacidadesInhabiles = nomina.getIncapacidadInhabiles();
             // TODO faltan dias de ASUETO/VACACIONES  (16 Sept, etc.)
             
             // TODO faltan dias de ASUETO/VACACIONES  (16 Sept, etc.) tambien en dias_trabajados
             
-            Integer dias_ordinarios = empleadoQuincenal.getOrdinarios(); // dias ordianrios que trabajÃ³
-            Integer dias_descanso = empleadoQuincenal.getDescanso(); // los dÃ­as de descanso que si le contaron
-            Integer dias_trabajados = empleadoQuincenal.getDiasTrabajados(); //dias_ordinarios + dias_descanso; // los dias ordinarios y de descanso q si le contaron
+            Integer dias_ordinarios = nomina.getOrdinarios(); // dias ordianrios que trabajÃ³
+            Integer dias_descanso = nomina.getDescanso(); // los dÃ­as de descanso que si le contaron
+            Integer dias_trabajados = nomina.getDiasTrabajados(); //dias_ordinarios + dias_descanso; // los dias ordinarios y de descanso q si le contaron
             
             Tabulador nivel = empleadoNomina.getNivel();
             if (nivel == null) {
@@ -539,9 +534,9 @@ public class CalculoREST {
             if (isAYA) {
                 // Jornada de 8 horas
                 MonetaryAmount sueldo_hora = sueldo_diario.divide(8.0); // Para el TE se usa el diario o el cotizado
-                tiempo_extra_gravado = sueldo_hora.multiply(empleadoQuincenal.getHorasExtrasDobles());
-                if (empleadoQuincenal.getHorasExtrasDobles() > 0) {
-                    tiempo_extra_gravado = tiempo_extra_gravado.add(sueldo_hora.multiply(empleadoQuincenal.getHorasExtrasTriples()));
+                tiempo_extra_gravado = sueldo_hora.multiply(nomina.getHorasExtrasDobles());
+                if (nomina.getHorasExtrasDobles() > 0) {
+                    tiempo_extra_gravado = tiempo_extra_gravado.add(sueldo_hora.multiply(nomina.getHorasExtrasTriples()));
                 }
             }
 //            // TODO Horas extras gravadas y exentas
@@ -574,7 +569,7 @@ public class CalculoREST {
             // TODO otras percepciones capturadas van en Fijo ??
             
             // TODO Faltan el SDI Variable (Remanente CYT, Estimulo AYA, Bimestre Anterior)
-            salario_diario_variable = empleadoQuincenal.getSdiVariableBimestreAnterior();
+            salario_diario_variable = nomina.getSdiVariableBimestreAnterior();
             if (salario_diario_variable == null) {
                 // TODO que pasa si salario_diario_variable es null
                 salario_diario_variable = Money.of(BigDecimal.ZERO, MXN);
@@ -825,13 +820,13 @@ public class CalculoREST {
         }
         
         // calculo
-        NominaQuincenal nomQuin = new NominaQuincenal(this.idEmpleado, concepto, monto, quincenaSingleton.getQuincena(), Money.of(0.00, "MXN"));
+        Movimiento nomQuin = new Movimiento(this.idEmpleado, concepto, monto, Money.of(0.00, "MXN"));
         // siempre es inserción de nuevo, dado que previo vacié/eliminé todos sus cálculos
         /*
-        NominaQuincenal nomQuin = this.findNominaQuincenal(this.idEmpleado, concepto);
+        Movimiento nomQuin = this.findNominaQuincenal(this.idEmpleado, concepto);
         if (nomQuin == null) {
             // es creaciÃƒÂ³n
-            nomQuin = new NominaQuincenal(this.idEmpleado, concepto, monto);
+            nomQuin = new Movimiento(this.idEmpleado, concepto, monto);
         } else {
             // es update
             nomQuin.setCantidad(monto);
@@ -856,13 +851,13 @@ public class CalculoREST {
         }
         
         // calculo
-        NominaQuincenal nomQuin = new NominaQuincenal(this.idEmpleado, concepto, monto, quincenaSingleton.getQuincena(), montoEmpresa);
+        Movimiento nomQuin = new Movimiento(this.idEmpleado, concepto, monto, montoEmpresa);
         // siempre es inserción de nuevo, dado que previo vacié/eliminé todos sus cálculos
         /*
-        NominaQuincenal nomQuin = this.findNominaQuincenal(this.idEmpleado, concepto);
+        Movimiento nomQuin = this.findNominaQuincenal(this.idEmpleado, concepto);
         if (nomQuin == null) {
             // es creaciÃƒÂ³n
-            nomQuin = new NominaQuincenal(this.idEmpleado, concepto, monto);
+            nomQuin = new Movimiento(this.idEmpleado, concepto, monto);
         } else {
             // es update
             nomQuin.setCantidad(monto);
@@ -888,9 +883,9 @@ public class CalculoREST {
         return result;
     }
 
-    public NominaQuincenal findNominaQuincenal(Integer idEmpleado, Concepto concepto) {
+    public Movimiento findMovimiento(Integer idEmpleado, Concepto concepto) {
         try {
-            return (NominaQuincenal) getEntityManager().createNamedQuery("NominaQuincenal.findBy_IdEmpleado_Concepto")
+            return (Movimiento) getEntityManager().createNamedQuery("Movimiento.findBy_IdEmpleado_Concepto")
                     .setParameter("id_empleado", idEmpleado).setParameter("concepto", concepto).getSingleResult();
         } catch (NoResultException e) {
             return null;
@@ -914,10 +909,10 @@ public class CalculoREST {
 //    }
     
     public void vaciarCalculos(int idEmpleado) {
-        // Elimina todos los calculos del empleado de NominaQuincenal
+        // Elimina todos los calculos del empleado de Movimiento
         // Solo calculos; no movimientos (saldos y pagos).
         try {
-            String query = "DELETE FROM NominaQuincenal n WHERE n.idEmpleado = :id_empleado AND n.concepto.idTipoMovimiento = :id_tipo_mov";
+            String query = "DELETE FROM Movimiento n WHERE n.idEmpleado = :id_empleado AND n.concepto.idTipoMovimiento = :id_tipo_mov";
             getEntityManager().createQuery(query).setParameter("id_empleado", idEmpleado).setParameter("id_tipo_mov", 'C').executeUpdate();
         } catch (Exception e) {
             System.out.println("vaciarCalculos ::> " + e.getMessage());
@@ -963,7 +958,7 @@ public class CalculoREST {
         if (concepto == null) {
             return "0.00";
         }
-        NominaQuincenal nomQuin = this.findNominaQuincenal(idEmpleado, concepto);
+        Movimiento nomQuin = this.findMovimiento(idEmpleado, concepto);
         if (nomQuin != null && nomQuin.getCantidad() != null) {
             return "" + nomQuin.getCantidad().getNumber();
         }

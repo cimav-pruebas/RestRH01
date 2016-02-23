@@ -31,11 +31,11 @@ import org.javamoney.moneta.Money;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "nominaquincenal", catalog = "rh_development", schema = "public")
+@Table(name = "movimientos", catalog = "rh_development", schema = "public")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "NominaQuincenal.findBy_IdEmpleado_Concepto", query = "SELECT t FROM NominaQuincenal t WHERE t.idEmpleado = :id_empleado AND t.concepto = :concepto")})
-public class NominaQuincenal implements Serializable {
+    @NamedQuery(name = "Movimiento.findBy_IdEmpleado_Concepto", query = "SELECT t FROM Movimiento t WHERE t.idEmpleado = :id_empleado AND t.concepto = :concepto")})
+public class Movimiento implements Serializable {
     
     private static final long serialVersionUID = 1L;
     
@@ -44,9 +44,6 @@ public class NominaQuincenal implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    
-    @Column(name = "quincena")
-    private Integer quincena;
     
     // No tiene Get/Set y No Insertable ni Updatable; es decir, es OnlyRead y sirve como mappedBy en EmpleadoNomina
     @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
@@ -99,8 +96,7 @@ public class NominaQuincenal implements Serializable {
     @Convert(converter = MonetaryAmountConverter.class)
     private MonetaryAmount cantidadEmpresa;
     
-    public NominaQuincenal() {
-        quincena = 0;
+    public Movimiento() {
         idEmpleado = 0;
         numQuincenas = 1;
         cantidad = Money.of(0.00, "MXN");
@@ -111,29 +107,27 @@ public class NominaQuincenal implements Serializable {
     }
 
     // constructor usado con aliasCantidad (en lugar de con cantidad)
-    // porque el constructor usado en el query de NominaQuincenalFacadeREST.doFindByIds 
+    // porque el constructor usado en el query de MovimientoFacadeREST.doFindByIds 
     // no entiende el tipo MonetaryAmount
-    public NominaQuincenal(int idEmpleado, Concepto concepto, BigDecimal aliasCantidad, Integer quincena) {
+    public Movimiento(int idEmpleado, Concepto concepto, BigDecimal aliasCantidad) {
         this();
         this.idEmpleado = idEmpleado;
         this.concepto = concepto;
         this.cantidad = Money.of(aliasCantidad, "MXN");
-        this.quincena = quincena;
         this.cantidadEmpresa = Money.of(aliasCantidad, "MXN");
     }
-    public NominaQuincenal(int idEmpleado, Concepto concepto, MonetaryAmount cantidad, Integer quincena, MonetaryAmount cantidadEmpresa) {
+    public Movimiento(int idEmpleado, Concepto concepto, MonetaryAmount cantidad, MonetaryAmount cantidadEmpresa) {
         this();
         this.idEmpleado = idEmpleado;
         this.concepto = concepto;
         this.cantidad = cantidad;
-        this.quincena = quincena;
         this.cantidadEmpresa = cantidadEmpresa;
     }
-    public NominaQuincenal(Integer id) {
+    public Movimiento(Integer id) {
         this.id = id;
     }
 
-    public NominaQuincenal(Integer id, MonetaryAmount cantidad, short numQuincenas, MonetaryAmount cantidadEmpresa) {
+    public Movimiento(Integer id, MonetaryAmount cantidad, short numQuincenas, MonetaryAmount cantidadEmpresa) {
         this.id = id;
         this.cantidad = cantidad;
         this.numQuincenas = numQuincenas;
@@ -228,22 +222,6 @@ public class NominaQuincenal implements Serializable {
         this.aliasCantidad = aliasCantidad;
     }
 
-    public Integer getQuincena() {
-        return quincena;
-    }
-
-    public void setQuincena(Integer quincena) {
-        this.quincena = quincena;
-    }
-
-//    public EmpleadoBase getEmpleadoBase() {
-//        return empleadoBase;
-//    }
-//
-//    public void setEmpleadoBase(EmpleadoBase empleadoBase) {
-//        this.empleadoBase = empleadoBase;
-//    }
-
     public MonetaryAmount getCantidadEmpresa() {
         return cantidadEmpresa;
     }
@@ -262,10 +240,10 @@ public class NominaQuincenal implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof NominaQuincenal)) {
+        if (!(object instanceof Movimiento)) {
             return false;
         }
-        NominaQuincenal other = (NominaQuincenal) object;
+        Movimiento other = (Movimiento) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -274,7 +252,7 @@ public class NominaQuincenal implements Serializable {
 
     @Override
     public String toString() {
-        return "cimav.restrh.entities.NominaQuincenal[ id=" + id + " ]";
+        return "cimav.restrh.entities.Movimiento[ id=" + id + " ]";
     }
     
 }

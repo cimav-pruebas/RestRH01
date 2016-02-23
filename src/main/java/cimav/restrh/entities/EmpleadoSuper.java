@@ -73,9 +73,6 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     private Integer pantDayOdd;
     @Column(name = "pant_days_even")
     private Integer pantDayEven;
-    
-//    @OneToOne(mappedBy = "empleadoBase")
-//    private EmpleadoQuincenal empleadoQuincenal;
 
 //    @PostLoad
 //    public void reduceJefe() {

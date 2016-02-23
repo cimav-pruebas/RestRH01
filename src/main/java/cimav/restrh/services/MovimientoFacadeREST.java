@@ -5,13 +5,11 @@
  */
 package cimav.restrh.services;
 
-import cimav.restrh.entities.NominaQuincenal;
-import cimav.restrh.entities.QuincenaSingleton;
+import cimav.restrh.entities.Movimiento;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.persistence.EntityManager;
@@ -30,27 +28,24 @@ import javax.ws.rs.Produces;
  * @author juan.calderon
  */
 @Stateless
-@Path("nomina_quincenal")
-public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
+@Path("movimientos")
+public class MovimientoFacadeREST extends AbstractFacade<Movimiento> {
     
-    private final static Logger logger = Logger.getLogger(NominaQuincenalFacadeREST.class.getName() ); 
+    private final static Logger logger = Logger.getLogger(MovimientoFacadeREST.class.getName() ); 
     
 //    @PersistenceContext(unitName = "PU_JPA")
 //    private EntityManager em;
 
-    @Inject
-    private QuincenaSingleton quincena;
-    
-    public NominaQuincenalFacadeREST() {
-        super(NominaQuincenal.class);
+    public MovimientoFacadeREST() {
+        super(Movimiento.class);
     }
 
     @POST
     @Path("find_by_empleado_ids")
     @Consumes(value = "application/json")
     @Produces(value = "application/json")
-    public List<NominaQuincenal> doFindByIds(JsonArray ids) {
-        List<NominaQuincenal> result = new ArrayList<>();
+    public List<Movimiento> doFindByIds(JsonArray ids) {
+        List<Movimiento> result = new ArrayList<>();
         List<Integer> idList = new ArrayList<>();
         ids.stream().map((idVal) -> ((JsonObject)idVal).getInt("id")).forEach((i) -> {
             idList.add(i);
@@ -58,10 +53,10 @@ public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
         if (idList.size() > 0) {
             // el constructor usa el aliasCantidad porque es del tipo BigDecimal.
             // No usa directamente cantidad porque es del tipo MonetaryAmount que no es reconocido por el JPA
-            String p_quincena = quincena.getQuincena() != null ? "" + quincena.getQuincena() : "0";
-            String qlString = "SELECT NEW cimav.restrh.entities.NominaQuincenal(0, nq.concepto, SUM(nq.aliasCantidad), " + p_quincena + ") FROM NominaQuincenal AS nq " +
+            // TODO podria faltarle el aliasCantidad para cantidadEmpresa
+            String qlString = "SELECT NEW cimav.restrh.entities.Movimiento(0, nq.concepto, SUM(nq.aliasCantidad)) FROM Movimento AS nq " +
                     " WHERE nq.idEmpleado IN :idList GROUP BY nq.concepto ORDER BY nq.concepto.id";
-            Query query = getEntityManager().createQuery(qlString, NominaQuincenal.class);
+            Query query = getEntityManager().createQuery(qlString, Movimiento.class);
             query.setParameter("idList", idList); //.setParameter("quincena", 1); //quincena.getQuincena());
             result.addAll(query.getResultList());
         }
@@ -72,7 +67,7 @@ public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
     @Consumes("application/json")
     @Produces("application/json")
     @Override
-    public NominaQuincenal insert(NominaQuincenal entity) {
+    public Movimiento insert(Movimiento entity) {
         super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
         return entity; 
     }
@@ -80,7 +75,7 @@ public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
     @PUT
     @Path("{id}")
     @Consumes("application/json")
-    public void edit(@PathParam("id") Integer id, NominaQuincenal entity) {
+    public void edit(@PathParam("id") Integer id, Movimiento entity) {
         super.edit(entity);
     }
 
@@ -93,17 +88,17 @@ public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
     @GET
     @Path("{id}")
     @Produces("application/json")
-    public NominaQuincenal find(@PathParam("id") Integer id) {
+    public Movimiento find(@PathParam("id") Integer id) {
         return super.find(id);
     }
 
     @GET
     @Path("/by_empleado/{id}")
     @Produces("application/json")
-    public List<NominaQuincenal> findByIdEmpleado(@PathParam("id") Integer idEmpleado) {
+    public List<Movimiento> findByIdEmpleado(@PathParam("id") Integer idEmpleado) {
         
-            String query = "SELECT nq FROM NominaQuincenal nq WHERE nq.idEmpleado = :id_empleado";
-            List<NominaQuincenal>  result = getEntityManager().createQuery(query).setParameter("id_empleado", idEmpleado).getResultList();
+            String query = "SELECT nq FROM Movimiento nq WHERE nq.idEmpleado = :id_empleado";
+            List<Movimiento>  result = getEntityManager().createQuery(query).setParameter("id_empleado", idEmpleado).getResultList();
         
         return result;
     }
@@ -111,14 +106,14 @@ public class NominaQuincenalFacadeREST extends AbstractFacade<NominaQuincenal> {
     @GET
     @Override
     @Produces("application/json")
-    public List<NominaQuincenal> findAll() {
+    public List<Movimiento> findAll() {
         return super.findAll();
     }
 
     @GET
     @Path("{from}/{to}")
     @Produces("application/json")
-    public List<NominaQuincenal> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
+    public List<Movimiento> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
         return super.findRange(new int[]{from, to});
     }
 

@@ -5,7 +5,7 @@
  */
 package cimav.restrh.services;
 
-import cimav.restrh.entities.NominaQuincenal;
+import cimav.restrh.entities.Movimiento;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -53,7 +53,7 @@ public class Reportes {
     private EntityManager em;
 
     @EJB
-    private NominaQuincenalFacadeREST nominaQuincenalFacadeREST;
+    private MovimientoFacadeREST nominaQuincenalFacadeREST;
     
     public Reportes() {
     }
@@ -63,7 +63,7 @@ public class Reportes {
     @Produces("application/pdf")
     public Response testing(@PathParam("id") Integer id) {
         
-        List<NominaQuincenal> list = nominaQuincenalFacadeREST.findByIdEmpleado(id);
+        List<Movimiento> list = nominaQuincenalFacadeREST.findByIdEmpleado(id);
         
         JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(list);
         TextColumnBuilder<DefaultNumberValue> cantidadColumna = col.column("Cantidad", "cantidad.number", DefaultNumberValue.class);

@@ -69,7 +69,7 @@ public class Incidencia implements Serializable {
 
     @JoinColumn(name = "id_empleado", referencedColumnName = "id_empleado", insertable = false, updatable = false)
     @ManyToOne
-    private EmpleadoQuincenal empleadoQuincenal;
+    private Nomina nomina;
     
     @Column(name = "id_empleado") 
     private Integer idEmpleado;
