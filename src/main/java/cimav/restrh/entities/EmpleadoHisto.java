@@ -83,7 +83,6 @@ public class EmpleadoHisto implements Serializable {
     @Column(name = "fecha_antiguedad")
     @Temporal(TemporalType.DATE)
     private Date fechaAntiguedad;
-    @Size(max = 10)
     @Column(name = "antiguedad")
     private String antiguedad;
     @Column(name = "fecha_ingreso")
@@ -93,7 +92,7 @@ public class EmpleadoHisto implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date fechaBaja;
     @Column(name = "estimulos_productividad")
-    private BigDecimal estimulosProductividad;
+    private Double estimulosProductividad;
     
     @Column(name = "year")
     private Short year;
@@ -219,11 +218,11 @@ public class EmpleadoHisto implements Serializable {
         this.fechaBaja = fechaBaja;
     }
 
-    public BigDecimal getEstimulosProductividad() {
+    public Double getEstimulosProductividad() {
         return estimulosProductividad;
     }
 
-    public void setEstimulosProductividad(BigDecimal estimulosProductividad) {
+    public void setEstimulosProductividad(Double estimulosProductividad) {
         this.estimulosProductividad = estimulosProductividad;
     }
 

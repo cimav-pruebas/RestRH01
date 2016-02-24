@@ -100,59 +100,36 @@ public class NominaREST extends AbstractFacade<Nomina>{
     
     public Nomina inicializar(EmpleadoNomina empNom) {
         /*
-        Inicializa la AntigÃ¼edad del Empleado.
         Dias ordinarios, descanso, trabajados de la quincena
         Sdi del bimestre para el empleado
         */
         
         Nomina nomina = null;
         
-        boolean isCYT = empNom.getIdGrupo().equals(EGrupo.CYT.getId());
-        boolean isAYA = empNom.getIdGrupo().equals(EGrupo.AYA.getId());
-        if (isCYT || isAYA) {
+        // borrarlo si ya existe
+        Query query = getEntityManager().createQuery("DELETE FROM Nomina eq WHERE eq.idEmpleado = :id_emp");
+        int deletedCount = query.setParameter("id_emp", empNom.getId()).executeUpdate();
 
-            LocalDate localDateFechaAntiguedad = QuincenaSingleton.convert(empNom.getFechaAntiguedad());
+        nomina = new Nomina();
+        nomina.setIdEmpleado(empNom.getId());
+        nomina.setDescanso(0);
+        nomina.setOrdinarios(0);
+        nomina.setDiasDescansoDeLaQuincena(quincena.getDiasDescanso());
+        nomina.setDiasOrdinariosDeLaQuincena(quincena.getDiasOrdinarios());
+        //TODO faltan días de asueto
+        nomina.setFaltas(0);
+        nomina.setIncapacidadHabiles(0);
+        nomina.setIncapacidadInhabiles(0);
+        nomina.setHorasExtrasDobles(0.00);
+        nomina.setHorasExtrasTriples(0.00);
+        // TODO falta inicializar el sdiVariableBimestreAnterior
+        nomina.setSdiVariableBimestreAnterior(Money.of(BigDecimal.ZERO, CalculoREST.MXN)); 
 
-            logger.log(Level.INFO, empNom.getId() + " | " + empNom.getName() 
-                    + " | " + empNom.getNivel() + " | " + empNom.getFechaAntiguedad() + " | " + localDateFechaAntiguedad);
-            // TODO Para cuando la PAnt se cumpla en la quincena, no consideramos incidencias (faltas e incapacidades);
-            // se debe corregir.
-
-            //TODO BUG Muy Lento y problema con JodaTime Resource not found: "org/joda/time/tz/data/ZoneInfoMap"
-            // TODO Checar que incluya el dia Inicial.
-            // Se da por hecho q nadie cumple el 28, 29 o 31 
-            // Se calculan los aÃ±os en base al Ãºltimo dÃ­a de la quincena 
-
-
-            // borrarlo si ya existe
-            Query query = getEntityManager().createQuery("DELETE FROM Nomina eq WHERE eq.idEmpleado = :id_emp");
-            int deletedCount = query.setParameter("id_emp", empNom.getId()).executeUpdate();
-            
-            nomina = new Nomina();
-            nomina.setIdEmpleado(empNom.getId());
-            nomina.setDescanso(0);
-            nomina.setOrdinarios(0);
-            nomina.setDiasDescansoDeLaQuincena(quincena.getDiasDescanso());
-            nomina.setDiasOrdinariosDeLaQuincena(quincena.getDiasOrdinarios());
-            //TODO faltan días de asueto
-            nomina.setFaltas(0);
-            nomina.setIncapacidadHabiles(0);
-            nomina.setIncapacidadInhabiles(0);
-            nomina.setHorasExtrasDobles(0.00);
-            nomina.setHorasExtrasTriples(0.00);
-            // TODO falta inicializar el sdiVariableBimestreAnterior
-            nomina.setSdiVariableBimestreAnterior(Money.of(BigDecimal.ZERO, CalculoREST.MXN)); 
-
-            this.insert(nomina);
-            //getEntityM anager().persist(empleadoQuincenal);
-        }
+        this.insert(nomina); // insertarlo en la DB
+        
         return nomina;
     }
     
-    private int daysBetween(Date d1, Date d2){
-      return (int)( (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
-    }    
-
     @GET
     @Path("incidencias/{id_empleado}")
     @Produces("text/plain")

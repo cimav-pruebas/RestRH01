@@ -265,10 +265,11 @@ public class CalculoREST {
                 throw new NullPointerException("EMPLEADO");
             }
             if (empleadoNomina.getNomina()== null ) {
+                // solo lo carga una vez
                 Nomina tmp = nominaREST.inicializar(empleadoNomina);
                 empleadoNomina.setNomina(tmp);
                 
-                //throw new NullPointerException("EMPLEADO -- QUINCENAL");
+                //todo throw new NullPointerException("EMPLEADO -- QUINCENAL");
                 // se tiene que haber executado antes (al inicio de quincena).
                 // http://localhost:8080/RestRH01/api/empleado_quincenal/init/155
             } 
