@@ -97,6 +97,12 @@ public class CalculoREST {
     private final String APORTACION_FONDO_AHORRO        = "00112";
     private final String MONEDERO_DESPENSA              = "00092";
     private final String IMSS                           = "00106";
+    
+    private final String SEG_SEPARACION_IND             = "00093";
+    private final String SEG_SEPARACION_IND_CIMAV       = "00114";
+    private final String SEG_SEPARACION_IND_EMPLEADO   = "00115";
+    private final String SEG_SEPARACION_IND_ISR         = "00182";
+    
     // repercuciones
     private final String EXCEDENTE_3SMG                 = "E3SMG";
     private final String PRESTACIONES_EN_DINERO         = "PED";
@@ -120,9 +126,9 @@ public class CalculoREST {
     private final String SALARIO_DIARIO_COTIZADO_TOPADO = "SDCT";
     
     private final Double FACTOR_PANT_AYA_5_20       = 0.018;
-    private final Double FACTOR_PANT_AYA_21         = 0.018;
+    private final Double FACTOR_PANT_AYA_21         = 0.023;
     private final Double FACTOR_PANT_CYT_5_20       = 0.020;  // 2% de los 11 a los 20 aÃ±os
-    private final Double FACTOR_PANT_CYT_21         = 0.020;  // es 2.1" pero aplica cuando el Cimav Cumpla 21 aÃ±os
+    private final Double FACTOR_PANT_CYT_21         = 0.025;  // es 2.1" pero aplica cuando el Cimav Cumpla 21 aÃ±os
     private final String PORCEN_FONDO_AHORRO_CYT    = "0.02";
     private final String PORCEN_FONDO_AHORRO_AYA    = "0.018";
     private final String PORCEN_MATERIALES          = "0.06";
@@ -258,6 +264,10 @@ public class CalculoREST {
         MonetaryAmount seguro_retiro_empresa              = Money.of(0.00, "MXN");
         MonetaryAmount infonavit_empresa              = Money.of(0.00, "MXN");
         
+        MonetaryAmount seg_sep_ind_paramidado = Money.of(0.00, "MXN");
+        MonetaryAmount seg_sep_ind_cimav_emp = Money.of(0.00, "MXN");
+        MonetaryAmount seg_sep_ind_isr = Money.of(0.00, "MXN");
+        
         try {
             
             EmpleadoNomina empleadoNomina = getEntityManager().find(EmpleadoNomina.class, this.idEmpleado);
@@ -372,34 +382,55 @@ public class CalculoREST {
             if (isCYT || isAYA) {
                 // TODO Para PAnt faltan los casos donde cumple aÃ±os (complejo)
 
-                /*
-                Date fAnt = empleadoNomina.getFechaAntiguedad() == null ? new Date() : empleadoNomina.getFechaAntiguedad();
-                Instant instant = Instant.ofEpochMilli(fAnt.getTime());
-                LocalDate lfAnt = LocalDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDate();
-                
-                instant = Instant.ofEpochMilli(quincena.getFechaFin().getTime());
-                LocalDate lfFin = LocalDateTime.ofInstant(instant, ZoneId.systemDefault()).toLocalDate();
-                
-                int yearsCumplidos = Period.between(lfAnt, lfFin).getYears();
-                */
+                Double pant_porcen_tope = 0.525; //default
+                // excepciones 
+                // el tope es %52.5 pero se aplica a partir del 01/Oct/2015
+                // la excepcion es para quienes rebasaron ese tope desde antes de esa fecha
+                // su tope sera el % que alcanzaron esa fecha
+                if ("00076".equals(empleadoNomina.getCode())) { // villafañe
+                    pant_porcen_tope = 0.78; // 20% de 39 años que tenia antes del quiebre. 
+                } else if ("00081".equals(empleadoNomina.getCode())) { // miki
+                    pant_porcen_tope = 0.62; // 20% de 31 años que tenia antes del quiebre
+                }  else if ("00036".equals(empleadoNomina.getCode())) { // Carlos Domingguez
+                    pant_porcen_tope = 0.54; // 
+                }  else if ("00071".equals(empleadoNomina.getCode())) { // MArquez Lucero
+                    pant_porcen_tope = 0.58; // 
+                }  else if ("00064".equals(empleadoNomina.getCode())) { // Matutes
+                    pant_porcen_tope = 0.68; // 
+                }  else if ("00086".equals(empleadoNomina.getCode())) { // Murillo
+                    pant_porcen_tope = 0.54; // 
+                }  else if ("00087".equals(empleadoNomina.getCode())) { // Neri
+                    pant_porcen_tope = 0.64; // 
+                }              
                 
                 Double factorPAnt = 0.00;
                 
                 if (isAYA) {
                     if (yearsCumplidos >= 21 ) {
-                        factorPAnt = FACTOR_PANT_AYA_21;
+                        factorPAnt = (20 * FACTOR_PANT_AYA_5_20);
+                        factorPAnt = factorPAnt + ((yearsCumplidos - 20) * FACTOR_PANT_AYA_21);
                     } else if (yearsCumplidos >= 5 ){
-                        factorPAnt = FACTOR_PANT_AYA_5_20;
+                        factorPAnt = yearsCumplidos * FACTOR_PANT_AYA_5_20;
                     }
                 } else if (isCYT) {
                     if (yearsCumplidos >= 21 ) {
-                        factorPAnt = FACTOR_PANT_CYT_21;
+                        if (empleadoNomina.getPantRegimenAnterior()) {
+                            factorPAnt = yearsCumplidos * FACTOR_PANT_CYT_5_20;
+                        } else {
+                            factorPAnt = (20 * FACTOR_PANT_CYT_5_20);
+                            factorPAnt = factorPAnt + ((yearsCumplidos - 20) * FACTOR_PANT_CYT_21);
+                        }
                     } else if (yearsCumplidos >= 5 ){
-                        factorPAnt = FACTOR_PANT_CYT_5_20;
+                        factorPAnt = yearsCumplidos * FACTOR_PANT_CYT_5_20;
                     }
-                    
                 }
-                factorPAnt = factorPAnt * yearsCumplidos;
+                
+                // topar si aplica
+                if (factorPAnt > pant_porcen_tope) {
+                    factorPAnt = pant_porcen_tope;
+                }
+                
+               // factorPAnt = factorPAnt * yearsCumplidos;
                 prima_antiguedad_tabulador = sueldo_tabulador.multiply(factorPAnt);
                 prima_antiguedad_diaria = sueldo_diario.multiply(factorPAnt);  //prima_antiguedad_tabulador.divide(new BigDecimal(DIAS_MES_30), BIG_SCALE, RoundingMode.HALF_DOWN);
                 // prima_antiguedad = dias_trabajados.multiply(prima_antiguedad_tabulador).divide(new BigDecimal(DIAS_MES_30), BIG_SCALE, RoundingMode.HALF_DOWN);
@@ -490,7 +521,7 @@ public class CalculoREST {
             // por 360 dias tocan 24 dias para CYT y AYA (24 = 40% de 60 dias)
             prima_vacacional_diaria = sueldo_diario.multiply(24).divide(360);
             
-            /* Prima Quinquenal */
+            /* Prima Quinquenal / Seguro de separacion indivudualizado */
             if (isMMS) {
                 if (yearsCumplidos >= 5 && yearsCumplidos < 10) {
                     prima_quinquenal =  Money.of(100.00, "MXN").divide(2);   
@@ -505,6 +536,13 @@ public class CalculoREST {
                 }
                 prima_quinquenal_diaria = prima_quinquenal.divide(DIAS_QUINCENA_15);
                 prima_quinquenal = prima_quinquenal_diaria.multiply(dias_trabajados);
+                
+                // porcentaje por empleado eg 10% para Rangel
+                seg_sep_ind_cimav_emp = sueldo.add(compensa_garantiza).multiply(0.10);
+                // TODO falta piramidar SSI y ISR_SSI y el % por cada MMS, meter el piramidado diario al sdi
+                seg_sep_ind_paramidado = Money.of(0.00, "MXN");
+                seg_sep_ind_isr = Money.of(0.00, "MXN");
+                
             }
             // TODO PrimaQuinquenal y suma para SDI?
             
@@ -689,6 +727,9 @@ public class CalculoREST {
             insertarCalculo(MONEDERO_DESPENSA, mondero_despensa); //TODO la Despensa no suma puesto que se paga con Vales
             insertarCalculo(IMSS, imss_obrero);
 
+            insertarCalculo(SEG_SEPARACION_IND_CIMAV, seg_sep_ind_cimav_emp);
+            insertarCalculo(SEG_SEPARACION_IND_EMPLEADO, seg_sep_ind_cimav_emp);
+            
             insertarCalculo(BASE_GRAVABLE, base_gravable);
             insertarCalculo(BASE_EXENTA, base_exenta);
             
@@ -739,7 +780,9 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + ISR + "\": " + impuesto_antes_subsidio.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + IMSS + "\": " + imss_obrero.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString() + ",";
-            resultJSON = resultJSON + "\"" + APORTACION_FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString();
+            resultJSON = resultJSON + "\"" + APORTACION_FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString()+ ",";
+            resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_CIMAV + "\": " + seg_sep_ind_cimav_emp.getNumber().toString()+ ",";
+            resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_EMPLEADO + "\": " + seg_sep_ind_cimav_emp.getNumber().toString();
         resultJSON = resultJSON + " }";
         
         resultJSON = resultJSON + ",\"BASE_GRAVABLE\": {";

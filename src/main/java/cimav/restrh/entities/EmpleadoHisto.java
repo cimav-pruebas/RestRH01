@@ -38,7 +38,6 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "EmpleadoHisto.findByName", query = "SELECT e FROM EmpleadoHisto e WHERE e.name = :name"),
     @NamedQuery(name = "EmpleadoHisto.findByCode", query = "SELECT e FROM EmpleadoHisto e WHERE e.code = :code"),
     @NamedQuery(name = "EmpleadoHisto.findByIdStatus", query = "SELECT e FROM EmpleadoHisto e WHERE e.idStatus = :idStatus"),
-    @NamedQuery(name = "EmpleadoHisto.findByIdTabulador", query = "SELECT e FROM EmpleadoHisto e WHERE e.idTabulador = :idTabulador"),
     @NamedQuery(name = "EmpleadoHisto.findByIdGrupo", query = "SELECT e FROM EmpleadoHisto e WHERE e.idGrupo = :idGrupo"),
     @NamedQuery(name = "EmpleadoHisto.findByIdDepartamento", query = "SELECT e FROM EmpleadoHisto e WHERE e.idDepartamento = :idDepartamento"),
     @NamedQuery(name = "EmpleadoHisto.findByIdSede", query = "SELECT e FROM EmpleadoHisto e WHERE e.idSede = :idSede"),
@@ -70,8 +69,8 @@ public class EmpleadoHisto implements Serializable {
     private String code;
     @Column(name = "id_status")
     private Short idStatus;
-    @Column(name = "id_tabulador")
-    private Integer idTabulador;
+    @Column(name = "nivel_code")
+    private String nivelCode;
     @Column(name = "id_grupo")
     private Short idGrupo;
     @Column(name = "id_departamento")
@@ -146,14 +145,14 @@ public class EmpleadoHisto implements Serializable {
         this.idStatus = idStatus;
     }
 
-    public Integer getIdTabulador() {
-        return idTabulador;
+    public String getNivelCode() {
+        return nivelCode;
     }
 
-    public void setIdTabulador(Integer idTabulador) {
-        this.idTabulador = idTabulador;
+    public void setNivelCode(String nivelCode) {
+        this.nivelCode = nivelCode;
     }
-
+    
     public Short getIdGrupo() {
         return idGrupo;
     }

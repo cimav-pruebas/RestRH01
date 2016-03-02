@@ -78,6 +78,9 @@ public class MovimientoHisto implements Serializable {
     @Column(name = "quincena")
     private Short quincena;
 
+    @Column(name = "id_movimiento")
+    private Integer idMovimiento;
+    
     public MovimientoHisto() {
     }
 
@@ -171,6 +174,14 @@ public class MovimientoHisto implements Serializable {
 
     public void setQuincena(Short quincena) {
         this.quincena = quincena;
+    }
+
+    public Integer getIdMovimiento() {
+        return idMovimiento;
+    }
+
+    public void setIdMovimiento(Integer idMovimiento) {
+        this.idMovimiento = idMovimiento;
     }
 
     @Override

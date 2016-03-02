@@ -50,4 +50,15 @@ public class EmpleadoNominaFacadeREST extends AbstractFacade<EmpleadoNomina> {
         return emps;
     }
 
+    @GET
+    @Path("/by_code/{code}")
+    @Produces("application/json")
+    public List<EmpleadoNomina> findByCodeEmpleado(@PathParam("code") String code) {
+        
+            String query = "SELECT en FROM EmpleadoNomina en WHERE en.code like '%" + code.trim() +"'";
+            List<EmpleadoNomina>  result = getEntityManager().createQuery(query).getResultList();
+        
+        return result;
+    }
+    
 }

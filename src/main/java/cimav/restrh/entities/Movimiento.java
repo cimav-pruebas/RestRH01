@@ -39,6 +39,11 @@ public class Movimiento implements Serializable {
     
     private static final long serialVersionUID = 1L;
     
+    public static String PAGO           = "P";
+    public static String PERCEPCION     = "P";
+    public static String DEDUCCION      = "D";
+    
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)

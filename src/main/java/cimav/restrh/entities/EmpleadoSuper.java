@@ -74,6 +74,9 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     @Column(name = "pant_days_even")
     private Integer pantDayEven;
 
+    @Column(name = "pant_regimen_anterior") // 01/Oct/2015 punto de quiebre
+    private Boolean pantRegimenAnterior;
+    
 //    @PostLoad
 //    public void reduceJefe() {
 //        // TODO Buscar best approach de reducción profundidad de Entidad en EmpleadoOld.Jefe
@@ -236,5 +239,13 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
 //            this.setPantDayEven(0); // TODO PAnt Odd|Even
 //        }
 //    }
+
+    public Boolean getPantRegimenAnterior() {
+        return pantRegimenAnterior;
+    }
+
+    public void setPantRegimenAnterior(Boolean pantRegimenAnterior) {
+        this.pantRegimenAnterior = pantRegimenAnterior;
+    }
     
 }

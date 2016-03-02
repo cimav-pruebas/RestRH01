@@ -13,12 +13,14 @@ import cimav.restrh.entities.Nomina;
 import cimav.restrh.entities.NominaHisto;
 import cimav.restrh.entities.Parametros;
 import cimav.restrh.entities.QuincenaSingleton;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.money.MonetaryAmount;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -26,6 +28,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import org.javamoney.moneta.Money;
 
 /**
  *
@@ -115,8 +118,12 @@ public class QuincenaREST {
             List<Movimiento> movimientos = movimientosREST.findAll();
             for(Movimiento movimiento : movimientos) {
                 MovimientoHisto movimientoHisto = new MovimientoHisto();
+
                 movimientoHisto.setQuincena(quinNext.shortValue());
                 movimientoHisto.setYear(year.shortValue());
+                
+                movimientoHisto.setIdMovimiento(movimiento.getId());
+                
                 movimientoHisto.setCantidad(movimiento.getCantidad());
                 movimientoHisto.setCantidadEmpresa(movimiento.getCantidadEmpresa());
                 movimientoHisto.setIdConcepto(movimiento.getConcepto().getId());
@@ -127,9 +134,42 @@ public class QuincenaREST {
                 movimientoHisto.setSaldo(movimiento.getSaldo());
 
                 em.persist(movimientoHisto);
-            }
+                
 
-            // vaciar movimientos
+                // Eliminar movimientos tipo Calculos para la siguiente quincena
+                // Actualizar movimientos tipo Pagos (saldos, pago, num_quincenas y permanente).
+                if (Movimiento.PAGO.equals(movimiento.getConcepto().getIdTipoMovimiento())) {
+                    if (movimiento.getPermanente()) {
+                        // si es permanente lo deja todo igual
+                    } else if (movimiento.getNumQuincenas() > 0) {
+                        
+                        short numQuincenas = movimiento.getNumQuincenas();
+                        MonetaryAmount saldo = movimiento.getSaldo();
+                        MonetaryAmount pago = movimiento.getPago();
+                        
+                        assert saldo.isGreaterThanOrEqualTo(pago) : "El saldo no puede ser menor al pago: " + movimiento.getId();
+                        
+                        // nuevo saldo
+                        saldo = saldo.subtract(pago);
+                        // restar 1 periodo
+                        numQuincenas = (short) (numQuincenas - 1);
+
+                        if ((numQuincenas <= 0) || saldo.isLessThanOrEqualTo(Money.of(BigDecimal.ZERO, "MXN"))) {
+                            // si ya no queda saldo, se elimina
+                            em.remove(movimiento);
+                        } else {
+                            // persistir la cobranza
+                            movimiento.setNumQuincenas(numQuincenas);
+                            movimiento.setSaldo(saldo);
+                        }
+                        
+                    }
+                } else {
+                    // Elimina todos los Calculos
+                    em.remove(movimiento);
+                }
+                
+            }
 
             /* Nomina */
 
@@ -160,7 +200,9 @@ public class QuincenaREST {
                 em.persist(nominaHisto);
             }
 
-            // vaciar nomina
+            // Vaciar nomina - 
+            // Cada registro (de Nomina) se inicializa (creacion e inyección en NominaEmpleado)
+            // conforme se Calcula el empleado
 
             /* Empleados */
 
@@ -190,16 +232,18 @@ public class QuincenaREST {
                 empleadoHisto.setIdGrupo(empleado.getIdGrupo().shortValue());
                 empleadoHisto.setIdSede(empleado.getIdSede());
                 empleadoHisto.setIdStatus(empleado.getIdStatus());
-                empleadoHisto.setIdTabulador(empleado.getNivel().getId());
+                empleadoHisto.setNivelCode(empleado.getNivel().getCode());
                 empleadoHisto.setIdTipoAntiguedad(empleado.getIdTipoAntiguedad());
                 empleadoHisto.setName(empleado.getName());
 
                 em.persist(empleadoHisto);
             }
 
-            // Empleados No se Vacia, obviamente
+            // Verificar Empleados dados de Baja, etc.
+            
+            
         } catch (Exception ex) {
-            logger.log(Level.INFO, "cerrarQuincena :: " + ex.getMessage());
+            logger.log(Level.INFO, "cerrarQuincena :: {0}", ex.getMessage());
         }
             
         return quincenaSingleton.toJSON();
