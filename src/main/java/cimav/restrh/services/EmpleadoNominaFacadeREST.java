@@ -5,10 +5,12 @@
  */
 package cimav.restrh.services;
 
+import cimav.restrh.entities.Concepto;
 import cimav.restrh.entities.EmpleadoNomina;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -58,6 +60,19 @@ public class EmpleadoNominaFacadeREST extends AbstractFacade<EmpleadoNomina> {
             String query = "SELECT en FROM EmpleadoNomina en WHERE en.code like '%" + code.trim() +"'";
             List<EmpleadoNomina>  result = getEntityManager().createQuery(query).getResultList();
         
+        return result;
+    }
+    
+    @GET
+    @Path("/pension_alimenticia/{id_empleado}")
+    @Produces("application/json")
+    public List<Concepto> findPensionAlimenticiaByIdEmpleado(@PathParam("id_empleado") Integer idEmp) {
+        String idEmpleado = idEmp == null || idEmp < 0 ? "0" : ""+idEmp;
+        String nativeSql= "SELECT c.* FROM conceptos AS c JOIN pensionalimenticia AS pa ON c.id = pa.id_concepto JOIN empleados AS e ON pa.id_empleado = e.id "
+                + "WHERE e.id = " + idEmpleado;
+        Query query = getEntityManager().createNativeQuery(nativeSql, Concepto.class);
+        query.setParameter("id_empleado", idEmpleado);
+        List<Concepto> result = query.getResultList();
         return result;
     }
     

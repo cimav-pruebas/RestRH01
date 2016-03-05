@@ -214,7 +214,7 @@ public class QuincenaREST {
             query.executeUpdate();
 
             // insertar los registros de empleados en el histórico con year|quincena
-            List<Empleado> empleados = empleadoREST.findAll();
+            List<Empleado> empleados = empleadoREST.findAll(); // TODO .findAllActivos filtrar dados de baja antes y en la quicena 
             for(Empleado empleado : empleados) {
                 EmpleadoHisto empleadoHisto = new EmpleadoHisto();
                 empleadoHisto.setQuincena(quinNext.shortValue());

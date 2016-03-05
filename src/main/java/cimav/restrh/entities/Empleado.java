@@ -142,6 +142,13 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     @Column(name = "email")
     private String emailPersonal;
 
+    @Column(name = "pension_beneficiario")
+    private String pensionBeneficiario;
+    @Column(name = "pension_id_banco")
+    private Short pensionIdBanco;
+    @Column(name = "pension_cuenta")
+    private String pensionCuenta;
+    
     public Empleado() {
         super();
     }
@@ -409,6 +416,30 @@ public class Empleado extends EmpleadoSuper implements Serializable {
 
     public void setEmailPersonal(String emailPersonal) {
         this.emailPersonal = emailPersonal;
+    }
+
+    public String getPensionBeneficiario() {
+        return pensionBeneficiario;
+    }
+
+    public void setPensionBeneficiario(String pensionBeneficiario) {
+        this.pensionBeneficiario = pensionBeneficiario;
+    }
+
+    public Short getPensionIdBanco() {
+        return pensionIdBanco;
+    }
+
+    public void setPensionIdBanco(Short pensionIdBanco) {
+        this.pensionIdBanco = pensionIdBanco;
+    }
+
+    public String getPensionCuenta() {
+        return pensionCuenta;
+    }
+
+    public void setPensionCuenta(String pensionCuenta) {
+        this.pensionCuenta = pensionCuenta;
     }
     
     

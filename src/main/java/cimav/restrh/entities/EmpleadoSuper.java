@@ -74,8 +74,17 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     @Column(name = "pant_days_even")
     private Integer pantDayEven;
 
-    @Column(name = "pant_regimen_anterior") // 01/Oct/2015 punto de quiebre
+    @Column(name = "pant_regimen_anterior") // todo 01/Oct/2015 punto de quiebre
     private Boolean pantRegimenAnterior;
+
+    @Column(name = "porcen_seg_separacion_ind") 
+    private Double porcenSegSeparacionInd;
+    
+    @Column(name = "pension_tipo")
+    private Integer pensionIdTipo;
+    @Column(name = "pension_porcentaje")
+    private Double pensionPorcen;
+    
     
 //    @PostLoad
 //    public void reduceJefe() {
@@ -247,5 +256,30 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     public void setPantRegimenAnterior(Boolean pantRegimenAnterior) {
         this.pantRegimenAnterior = pantRegimenAnterior;
     }
+
+    public Double getPorcenSegSeparacionInd() {
+        return porcenSegSeparacionInd;
+    }
+
+    public void setPorcenSegSeparacionInd(Double porcenSegSeparacionInd) {
+        this.porcenSegSeparacionInd = porcenSegSeparacionInd;
+    }
+
+    public Integer getPensionIdTipo() {
+        return pensionIdTipo;
+    }
+
+    public void setPensionIdTipo(Integer pensionIdTipo) {
+        this.pensionIdTipo = pensionIdTipo;
+    }
+
+    public Double getPensionPorcen() {
+        return pensionPorcen;
+    }
+
+    public void setPensionPorcen(Double pensionPorcen) {
+        this.pensionPorcen = pensionPorcen;
+    }
+
     
 }

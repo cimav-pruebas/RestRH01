@@ -95,9 +95,10 @@ public class CalculoREST {
     private final String HORAS_EXTRAS_GRAVADO           = "00058";
     private final String FONDO_AHORRO                   = "00111";
     private final String APORTACION_FONDO_AHORRO        = "00112";
+    private final String PENSION_ALIMENTICIA            = "00118";
+    private final String PENSION_ALIMENTICIA_MON_DESP   = "00181";
     private final String MONEDERO_DESPENSA              = "00092";
     private final String IMSS                           = "00106";
-    
     private final String SEG_SEPARACION_IND             = "00093";
     private final String SEG_SEPARACION_IND_CIMAV       = "00114";
     private final String SEG_SEPARACION_IND_EMPLEADO   = "00115";
@@ -233,6 +234,8 @@ public class CalculoREST {
         MonetaryAmount fondo_ahorro = Money.of(0.00, "MXN");
         MonetaryAmount mondero_despensa = Money.of(0.00, "MXN");
 
+        MonetaryAmount pension_alimenticia = Money.of(0.00, "MXN");
+        
         MonetaryAmount tiempo_extra_gravado = Money.of(0.00, "MXN");
         MonetaryAmount tiempo_extra_exento = Money.of(0.00, "MXN");
         
@@ -537,8 +540,8 @@ public class CalculoREST {
                 prima_quinquenal_diaria = prima_quinquenal.divide(DIAS_QUINCENA_15);
                 prima_quinquenal = prima_quinquenal_diaria.multiply(dias_trabajados);
                 
-                // porcentaje por empleado eg 10% para Rangel
-                seg_sep_ind_cimav_emp = sueldo.add(compensa_garantiza).multiply(0.10);
+                double porcen = empleadoNomina.getPorcenSegSeparacionInd() / 100;
+                seg_sep_ind_cimav_emp = sueldo.add(compensa_garantiza).multiply(porcen);
                 // TODO falta piramidar SSI y ISR_SSI y el % por cada MMS, meter el piramidado diario al sdi
                 seg_sep_ind_paramidado = Money.of(0.00, "MXN");
                 seg_sep_ind_isr = Money.of(0.00, "MXN");
@@ -578,6 +581,7 @@ public class CalculoREST {
                     tiempo_extra_gravado = tiempo_extra_gravado.add(sueldo_hora.multiply(nomina.getHorasExtrasTriples()));
                 }
             }
+            
 //            // TODO Horas extras gravadas y exentas
 //            if (idEmpleado == 180) {
 //                // aya gonzalez trevizo
@@ -587,8 +591,10 @@ public class CalculoREST {
 //                // aya mariana lopez
 //                base_gravable = Money.of(302.55,MXN);
 //            }
-            
+
+            /**************************************/
             /* Integrar: Salario Diario Integrado */
+            /**************************************/
             
             salario_diario_fijo = salario_diario_fijo.add(sueldo_diario);
             salario_diario_fijo = salario_diario_fijo.add(sueldo_honorarios_diario);
@@ -604,6 +610,8 @@ public class CalculoREST {
             salario_diario_fijo = salario_diario_fijo.add(prima_quinquenal_diaria);
             salario_diario_fijo = salario_diario_fijo.add(apoyo_mto_vehicular_diario);
             // Tiempo extra no cotiza
+            
+            // mondero_despensa no integra pq no es $$$
             
             // TODO otras percepciones capturadas van en Fijo ??
             
@@ -666,42 +674,45 @@ public class CalculoREST {
             seguro_retiro_empresa = salario_diario_cotizado_topado.multiply(0.0200).multiply(dias_trabajados); 
             infonavit_empresa = salario_diario_cotizado_topado.multiply(0.0500).multiply(dias_trabajados); 
             
-        } catch (NullPointerException e1) {
-            return "-1";
-        }
+            // TODO Al termino del ejercicio fiscal (Ãºltima quincena de dic) se acumulan todos los pagos 
+            // por concepto de previsiÃ³n social para gravar la diferencia y / o integrar la diferencia de vales 
+            // como variable para integraciÃ³n del IMSS en enero y febrero del siguiente aÃ±o.
 
-        // TODO Al termino del ejercicio fiscal (Ãºltima quincena de dic) se acumulan todos los pagos 
-        // por concepto de previsiÃ³n social para gravar la diferencia y / o integrar la diferencia de vales 
-        // como variable para integraciÃ³n del IMSS en enero y febrero del siguiente aÃ±o.
-        
-        String resultJSON = "";
-                
-        /* Gravar */
-        
-        base_gravable = base_gravable.add(sueldo_ordinario);
-        base_gravable = base_gravable.add(sueldo_dias_descanso);
-        base_gravable = base_gravable.add(sueldo_honorarios);
-        base_gravable = base_gravable.add(prima_antiguedad);
-        base_gravable = base_gravable.add(materiales);
-        base_gravable = base_gravable.add(estimulos_cyt);
-        base_gravable = base_gravable.add(carga_admin);
-        base_gravable = base_gravable.add(compensa_garantiza);
-        base_gravable = base_gravable.add(fondo_ahorro_gravado);
-        // base_gravable = base_gravable.add(mondero_despensa); // Monedero excenta
-        base_gravable = base_gravable.add(prima_quinquenal);
-        base_gravable = base_gravable.add(apoyo_mto_vehicular);
-        base_gravable = base_gravable.add(tiempo_extra_gravado);
-        
-        /* Exentar */
-        
-        base_exenta = base_exenta.add(fondo_ahorro_exento);
-        base_exenta = base_exenta.add(tiempo_extra_exento);
+            /* Gravar */
 
-            
-        /* Impuesto */
-        impuesto_antes_subsidio = calcularImpuesto(base_gravable);
+            base_gravable = base_gravable.add(sueldo_ordinario);
+            base_gravable = base_gravable.add(sueldo_dias_descanso);
+            base_gravable = base_gravable.add(sueldo_honorarios);
+            base_gravable = base_gravable.add(prima_antiguedad);
+            base_gravable = base_gravable.add(materiales);
+            base_gravable = base_gravable.add(estimulos_cyt);
+            base_gravable = base_gravable.add(carga_admin);
+            base_gravable = base_gravable.add(compensa_garantiza);
+            base_gravable = base_gravable.add(fondo_ahorro_gravado);
+            // base_gravable = base_gravable.add(mondero_despensa); // Monedero excenta
+            base_gravable = base_gravable.add(prima_quinquenal);
+            base_gravable = base_gravable.add(apoyo_mto_vehicular);
+            base_gravable = base_gravable.add(tiempo_extra_gravado);
 
-        try {
+            /* Exentar */
+
+            base_exenta = base_exenta.add(fondo_ahorro_exento);
+            base_exenta = base_exenta.add(tiempo_extra_exento);
+            base_exenta = base_exenta.add(mondero_despensa); // Monedero excenta
+
+            /* Pensiones */
+            if (!isHON && empleadoNomina.getPensionIdTipo() > 0) {
+                // 0 Sin pension, 1 %neto, 2 %percepciones, 3 conceptos
+                if (empleadoNomina.getPensionIdTipo() == 2) {
+                    MonetaryAmount totalPercepciones = base_gravable.add(base_exenta);
+                    pension_alimenticia = totalPercepciones.multiply(empleadoNomina.getPensionPorcen() / 100);
+                }
+            }
+
+
+            /* Impuesto */
+            impuesto_antes_subsidio = calcularImpuesto(base_gravable);
+
             
             // Eliminar los Calculos Previos para evitar conceptos rezagados
             // no incluidos en el este proceso
@@ -729,6 +740,8 @@ public class CalculoREST {
 
             insertarCalculo(SEG_SEPARACION_IND_CIMAV, seg_sep_ind_cimav_emp);
             insertarCalculo(SEG_SEPARACION_IND_EMPLEADO, seg_sep_ind_cimav_emp);
+
+            insertarCalculo(PENSION_ALIMENTICIA, pension_alimenticia);
             
             insertarCalculo(BASE_GRAVABLE, base_gravable);
             insertarCalculo(BASE_EXENTA, base_exenta);
@@ -756,10 +769,10 @@ public class CalculoREST {
             insertarCalculoImssEmpresa(INFONAVIT, Money.of(0.00, "MXN"), infonavit_empresa);
             
         } catch (NullPointerException | RollbackException ex) {
-            return "-2";
+            return "-Unico";
         }
             
-        resultJSON = resultJSON + "\"PERCEPCION\": {";
+        String resultJSON = "\"PERCEPCION\": {";
             resultJSON = resultJSON + "\"" + SUELDO_ORDINARIO + "\": " + sueldo_ordinario.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + SUELDO_DIAS_DESCANSO + "\": " + sueldo_dias_descanso.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + HONORARIOS_ASIMILABLES + "\": " + sueldo_honorarios.getNumber().toString() + ",";
@@ -781,6 +794,7 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + IMSS + "\": " + imss_obrero.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + APORTACION_FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString()+ ",";
+            resultJSON = resultJSON + "\"" + PENSION_ALIMENTICIA + "\": " + pension_alimenticia.getNumber().toString()+ ",";
             resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_CIMAV + "\": " + seg_sep_ind_cimav_emp.getNumber().toString()+ ",";
             resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_EMPLEADO + "\": " + seg_sep_ind_cimav_emp.getNumber().toString();
         resultJSON = resultJSON + " }";
@@ -802,6 +816,7 @@ public class CalculoREST {
         
         resultJSON = resultJSON + ",\"BASE_EXENTA\": {";
             resultJSON = resultJSON + "\"" + "TOTAL" + "\": " + base_exenta.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Monedero despensa" + "\": " + mondero_despensa.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Fondo ahorro" + "\": " + fondo_ahorro_exento.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Tiempo Extra" + "\": " + tiempo_extra_exento.getNumber().toString();
         resultJSON = resultJSON + " }";
