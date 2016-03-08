@@ -33,6 +33,7 @@ import javax.money.MonetaryOperator;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -67,6 +68,8 @@ public class CalculoREST {
 
     @EJB
     private NominaREST nominaREST;
+    @EJB
+    private MovimientoFacadeREST movimientosREST;
     
     public CalculoREST() {
     }
@@ -700,16 +703,6 @@ public class CalculoREST {
             base_exenta = base_exenta.add(tiempo_extra_exento);
             base_exenta = base_exenta.add(mondero_despensa); // Monedero excenta
 
-            /* Pensiones */
-            if (!isHON && empleadoNomina.getPensionIdTipo() > 0) {
-                // 0 Sin pension, 1 %neto, 2 %percepciones, 3 conceptos
-                if (empleadoNomina.getPensionIdTipo() == 2) {
-                    MonetaryAmount totalPercepciones = base_gravable.add(base_exenta);
-                    pension_alimenticia = totalPercepciones.multiply(empleadoNomina.getPensionPorcen() / 100);
-                }
-            }
-
-
             /* Impuesto */
             impuesto_antes_subsidio = calcularImpuesto(base_gravable);
 
@@ -768,6 +761,12 @@ public class CalculoREST {
             insertarCalculoImssEmpresa(SEGURO_RETIRO, Money.of(0.00, "MXN"), seguro_retiro_empresa);
             insertarCalculoImssEmpresa(INFONAVIT, Money.of(0.00, "MXN"), infonavit_empresa);
             
+            /** Pensión Alimenticia (después de calcular y persistir todos los movimientos) **/
+            BigDecimal big_pension_alimenticia = this.getPensionAlimenticia(idEmpleado, empleadoNomina.getPensionIdTipo(), empleadoNomina.getPensionPorcen());
+            pension_alimenticia = Money.of(big_pension_alimenticia.doubleValue(), "MXN");
+
+            insertarCalculoImssEmpresa(PENSION_ALIMENTICIA, Money.of(0.00, "MXN"), pension_alimenticia);
+            
         } catch (NullPointerException | RollbackException ex) {
             return "-Unico";
         }
@@ -796,7 +795,8 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + APORTACION_FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString()+ ",";
             resultJSON = resultJSON + "\"" + PENSION_ALIMENTICIA + "\": " + pension_alimenticia.getNumber().toString()+ ",";
             resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_CIMAV + "\": " + seg_sep_ind_cimav_emp.getNumber().toString()+ ",";
-            resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_EMPLEADO + "\": " + seg_sep_ind_cimav_emp.getNumber().toString();
+            resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_EMPLEADO + "\": " + seg_sep_ind_cimav_emp.getNumber().toString()+ ",";
+            resultJSON = resultJSON + "\"" + PENSION_ALIMENTICIA + "\": " + pension_alimenticia.getNumber().toString();
         resultJSON = resultJSON + " }";
         
         resultJSON = resultJSON + ",\"BASE_GRAVABLE\": {";
@@ -859,11 +859,6 @@ public class CalculoREST {
         
         return resultJSON;
     }
-
-//        int n = 0;
-//        Instant start = Instant.now();
-//        logger.log(Level.INFO, strConcepto + "> " + Duration.between(start, start = Instant.now()));
-
     private  HashMap<String, Concepto> hmapConceptos = new HashMap<>();
     
     private void insertarCalculo(String strConcepto, MonetaryAmount monto) {
@@ -894,7 +889,6 @@ public class CalculoREST {
         
         // persistirlo
         getEntityManager().persist(nomQuin);
-        
     }
 
     private void insertarCalculoImssEmpresa(String strConcepto, MonetaryAmount monto, MonetaryAmount montoEmpresa) {
@@ -910,7 +904,7 @@ public class CalculoREST {
         }
         
         // calculo
-        Movimiento nomQuin = new Movimiento(this.idEmpleado, concepto, monto, montoEmpresa);
+        Movimiento movimiento = new Movimiento(this.idEmpleado, concepto, monto, montoEmpresa);
         // siempre es inserción de nuevo, dado que previo vacié/eliminé todos sus cálculos
         /*
         Movimiento nomQuin = this.findNominaQuincenal(this.idEmpleado, concepto);
@@ -924,7 +918,7 @@ public class CalculoREST {
         */
         
         // persistirlo
-        getEntityManager().persist(nomQuin);
+        getEntityManager().persist(movimiento);
         
     }
     
@@ -1024,4 +1018,52 @@ public class CalculoREST {
         return "-1.00";
     }
 
+    @GET
+    @Path("/pension_alimenticia/{id_empleado}/{tipo}/{percen}")
+    public BigDecimal getPensionAlimenticia(@PathParam("id_empleado") Integer idEmp, @PathParam("tipo") Integer tipo, @PathParam("percen") Double percen) {
+        
+        if (percen > 0) {
+            percen = percen / 100;
+        }
+        
+        String nativeSql= "SELECT CAST(c.id AS Integer) FROM conceptos AS c JOIN pensionalimenticia AS pa ON c.id = pa.id_concepto JOIN empleados AS e ON pa.id_empleado = e.id "
+                + "WHERE e.id = " + idEmp;
+        Query query = getEntityManager().createNativeQuery(nativeSql);
+        query.setParameter("id_empleado", idEmp);
+        List<Integer> pensionConceptoIds = query.getResultList();
+        
+        MonetaryAmount totPercepPension = Money.of(BigDecimal.ZERO, "MXN");
+        MonetaryAmount totDeducPension = Money.of(BigDecimal.ZERO, "MXN");
+        List<Movimiento> movimientos = movimientosREST.findByIdEmpleado(idEmp);
+        for(Movimiento movi : movimientos) {
+            Concepto concepto = movi.getConcepto();
+            if (concepto.getSuma()) {
+                // cosidera solo conceptos que suman
+                if ('P' == concepto.getIdTipoConcepto()) {
+                    // suma todas las percepcions
+                    totPercepPension = totPercepPension.add(movi.getCantidad());
+                } else if ('D' == concepto.getIdTipoConcepto() && pensionConceptoIds.contains(concepto.getId())) {
+                    // suma las deducciones incluidas en Pensiones del empleado
+                    totDeducPension = totDeducPension.add(movi.getCantidad());
+                }
+            }
+        }
+
+        BigDecimal result = BigDecimal.ZERO;
+        
+        if(tipo == 0) {
+            
+        } else if (tipo == 1) {
+        
+        }  else if (tipo == 2) {
+            String str = totPercepPension.subtract(totDeducPension).multiply(percen).getNumber().toString();
+            result = new BigDecimal(str).setScale(5, RoundingMode.HALF_EVEN);
+        }  else if (tipo == 3) {
+            
+        }
+        
+        return result;
+    }
+    
 }
+

@@ -76,4 +76,22 @@ public class EmpleadoNominaFacadeREST extends AbstractFacade<EmpleadoNomina> {
         return result;
     }
     
+    @GET
+    @Path("/pension_alimenticia_ids/{id_empleado}")
+    @Produces("application/json")
+    public String findPensionAlimenticiaIDsByIdEmpleado(@PathParam("id_empleado") Integer idEmp) {
+        String idEmpleado = idEmp == null || idEmp < 0 ? "0" : ""+idEmp;
+        String nativeSql= "SELECT c.id FROM conceptos AS c JOIN pensionalimenticia AS pa ON c.id = pa.id_concepto JOIN empleados AS e ON pa.id_empleado = e.id "
+                + "WHERE e.id = " + idEmpleado;
+        Query query = getEntityManager().createNativeQuery(nativeSql);
+        query.setParameter("id_empleado", idEmpleado);
+        List<Integer> result = query.getResultList();
+        String array = "[";
+        for(int i : result) {
+            array = array + "," + i;
+        }
+        array = array.replace("[,", "");
+        return array;
+    }
+    
 }
