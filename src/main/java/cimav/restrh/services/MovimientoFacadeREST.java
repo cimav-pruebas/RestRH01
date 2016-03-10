@@ -54,8 +54,8 @@ public class MovimientoFacadeREST extends AbstractFacade<Movimiento> {
             // el constructor usa el aliasCantidad porque es del tipo BigDecimal.
             // No usa directamente cantidad porque es del tipo MonetaryAmount que no es reconocido por el JPA
             // TODO podria faltarle el aliasCantidad para cantidadEmpresa
-            String qlString = "SELECT NEW cimav.restrh.entities.Movimiento(0, nq.concepto, SUM(nq.aliasCantidad)) FROM Movimento AS nq " +
-                    " WHERE nq.idEmpleado IN :idList GROUP BY nq.concepto ORDER BY nq.concepto.id";
+            String qlString = "SELECT NEW cimav.restrh.entities.Movimiento(0, m.concepto, SUM(m.aliasCantidad)) FROM Movimiento AS m " +
+                    " WHERE m.idEmpleado IN :idList GROUP BY m.concepto ORDER BY m.concepto.id";
             Query query = getEntityManager().createQuery(qlString, Movimiento.class);
             query.setParameter("idList", idList); //.setParameter("quincena", 1); //quincena.getQuincena());
             result.addAll(query.getResultList());

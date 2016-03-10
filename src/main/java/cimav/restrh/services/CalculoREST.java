@@ -86,25 +86,26 @@ public class CalculoREST {
     //private final String ESTIMULOS_PRODUCTIVIDAD        = "00009";
     private final String COMPENSA_GARANTIZADA           = "00010";
     //private final String VALES_DESPENSA             = "00014";
-    private final String HONORARIOS_ASIMILABLES         = "00027"; // sueldo
     private final String MATERIALES                     = "00012";
     private final String ESTIMULOS_PRODUCTIVIDAD_AYA    = "00018";
     private final String ESTIMULOS_PRODUCTIVIDAD_CYT    = "00019";
     private final String FONDO_AHORRO_EXENTO            = "00021";
     private final String FONDO_AHORRO_GRAVADO           = "00022";
+    private final String HONORARIOS_ASIMILABLES         = "00027"; // sueldo
     private final String APOYO_MANTENIMIENTO_VEHICULAR  = "00035";
-    private final String PRIMA_QUINQUENAL               = "00067";
     private final String HORAS_EXTRAS_EXENTO            = "00056";
     private final String HORAS_EXTRAS_GRAVADO           = "00058";
+    private final String PRIMA_QUINQUENAL               = "00067";
+    private final String MONEDERO_DESPENSA              = "00092";
+//    private final String SEG_SEPARACION_IND             = "00093";
+    private final String ISR                            = "00101";
+    private final String IMSS                           = "00106";
     private final String FONDO_AHORRO                   = "00111";
     private final String APORTACION_FONDO_AHORRO        = "00112";
+    private final String SEG_SEPARACION_IND_CIMAV       = "00114";
+    private final String SEG_SEPARACION_IND_EMPLEADO    = "00115";
     private final String PENSION_ALIMENTICIA            = "00118";
     private final String PENSION_ALIMENTICIA_MON_DESP   = "00181";
-    private final String MONEDERO_DESPENSA              = "00092";
-    private final String IMSS                           = "00106";
-    private final String SEG_SEPARACION_IND             = "00093";
-    private final String SEG_SEPARACION_IND_CIMAV       = "00114";
-    private final String SEG_SEPARACION_IND_EMPLEADO   = "00115";
     private final String SEG_SEPARACION_IND_ISR         = "00182";
     
     // repercuciones
@@ -122,7 +123,6 @@ public class CalculoREST {
     // internos
     private final String BASE_GRAVABLE              = "BG";
     private final String BASE_EXENTA                = "BE";    
-    private final String ISR                        = "00101";
     private final String SUELDO_DIARIO              = "SUD";
     private final String SALARIO_DIARIO_FIJO            = "SDF";
     private final String SALARIO_DIARIO_VARIABLE        = "SDV";
@@ -138,16 +138,23 @@ public class CalculoREST {
     private final String PORCEN_MATERIALES          = "0.06";
     private final Double PORCEN_FONDO_AHORRO        = 0.13;
     private final Double PORCEN_FONDO_AHORRO_EXENTO = 1.3;
-    private final Double SALARIO_MINIMO             = 73.04; //= 70.10; //TODO SM
+    private final Double SALARIO_MINIMO             = 73.04; //= 70.10; //TODO SM tiene que ser historico
     private final Integer SALARIO_DIARIO_TOPE        = 25; // 25 veces el Salario MÃ­nimo
     
     private final Integer DIAS_MES_30           = 30;
     private final Integer DIAS_QUINCENA_15      = 15;
     private final Integer DIAS_AJUSTE_5_6       = 6;
 
+    private final static Integer PENSION_SIN                                    = 0;
+    private final static Integer PENSION_PORCEN_SOBRE_NETO                      = 1;
+    private final static Integer PENSION_PORCEN_SOBRE_TOTAL_PERCEPCIONES        = 2;
+    private final static Integer PENSION_PORCEN_SOBRE_CONCEPTOS_SELECCIONADOS   = 3;
+    private final static Integer PENSION_SOBRE_CANTIDAD_FIJA                    = 4;
+    
     private int idEmpleado;
     
     private List<TarifaAnual> listTarifaAnual;
+    
     
     @POST
     @Consumes(value = "application/json")
@@ -238,6 +245,7 @@ public class CalculoREST {
         MonetaryAmount mondero_despensa = Money.of(0.00, "MXN");
 
         MonetaryAmount pension_alimenticia = Money.of(0.00, "MXN");
+        MonetaryAmount pension_alimenticia_monedero = Money.of(0.00, "MXN");
         
         MonetaryAmount tiempo_extra_gravado = Money.of(0.00, "MXN");
         MonetaryAmount tiempo_extra_exento = Money.of(0.00, "MXN");
@@ -318,9 +326,6 @@ public class CalculoREST {
             Integer faltas = nomina.getFaltas();
             Integer incapacidadesHabiles = nomina.getIncapacidadHabiles();
             Integer incapacidadesInhabiles = nomina.getIncapacidadInhabiles();
-            // TODO faltan dias de ASUETO/VACACIONES  (16 Sept, etc.)
-            
-            // TODO faltan dias de ASUETO/VACACIONES  (16 Sept, etc.) tambien en dias_trabajados
             
             Integer dias_ordinarios = nomina.getOrdinarios(); // dias ordianrios que trabajÃ³
             Integer dias_descanso = nomina.getDescanso(); // los dÃ­as de descanso que si le contaron
@@ -617,6 +622,10 @@ public class CalculoREST {
             // mondero_despensa no integra pq no es $$$
             
             // TODO otras percepciones capturadas van en Fijo ??
+
+            // TODO Rangel
+            //salario_diario_fijo = salario_diario_fijo.add(Money.of(new BigDecimal("1899.64"), MXN));
+            
             
             // TODO Faltan el SDI Variable (Remanente CYT, Estimulo AYA, Bimestre Anterior)
             salario_diario_variable = nomina.getSdiVariableBimestreAnterior();
@@ -697,6 +706,11 @@ public class CalculoREST {
             base_gravable = base_gravable.add(apoyo_mto_vehicular);
             base_gravable = base_gravable.add(tiempo_extra_gravado);
 
+            // TODO Rangel
+            //base_gravable = base_gravable.add(Money.of(new BigDecimal("1899.64"), MXN));
+           
+            // TODO TODO Conceptos capturados que gravan e integran
+            
             /* Exentar */
 
             base_exenta = base_exenta.add(fondo_ahorro_exento);
@@ -734,8 +748,6 @@ public class CalculoREST {
             insertarCalculo(SEG_SEPARACION_IND_CIMAV, seg_sep_ind_cimav_emp);
             insertarCalculo(SEG_SEPARACION_IND_EMPLEADO, seg_sep_ind_cimav_emp);
 
-            insertarCalculo(PENSION_ALIMENTICIA, pension_alimenticia);
-            
             insertarCalculo(BASE_GRAVABLE, base_gravable);
             insertarCalculo(BASE_EXENTA, base_exenta);
             
@@ -762,10 +774,20 @@ public class CalculoREST {
             insertarCalculoImssEmpresa(INFONAVIT, Money.of(0.00, "MXN"), infonavit_empresa);
             
             /** Pensión Alimenticia (después de calcular y persistir todos los movimientos) **/
-            BigDecimal big_pension_alimenticia = this.getPensionAlimenticia(idEmpleado, empleadoNomina.getPensionIdTipo(), empleadoNomina.getPensionPorcen());
-            pension_alimenticia = Money.of(big_pension_alimenticia.doubleValue(), "MXN");
-
-            insertarCalculoImssEmpresa(PENSION_ALIMENTICIA, Money.of(0.00, "MXN"), pension_alimenticia);
+            if (empleadoNomina.getPensionIdTipo() > PENSION_SIN) {
+                if (PENSION_SOBRE_CANTIDAD_FIJA == empleadoNomina.getPensionIdTipo()) {
+                    pension_alimenticia = empleadoNomina.getPensionCantidaFija();
+                } else {
+                    MonetaryAmount pension[] = this.pensionAlimenticia(idEmpleado, empleadoNomina.getPensionIdTipo()
+                            , empleadoNomina.getPensionPorcen(), empleadoNomina.getPensionIncluyeMonedero());
+                    pension_alimenticia = pension[0];
+                    pension_alimenticia_monedero = pension[1];
+    //                BigDecimal big_pension_alimenticia = this.pensionAlimenticia(idEmpleado, empleadoNomina.getPensionIdTipo(), empleadoNomina.getPensionPorcen());
+    //                pension_alimenticia = Money.of(big_pension_alimenticia.doubleValue(), "MXN");
+                }
+                insertarCalculo(PENSION_ALIMENTICIA, pension_alimenticia);
+                insertarCalculo(PENSION_ALIMENTICIA_MON_DESP, pension_alimenticia_monedero);
+            }
             
         } catch (NullPointerException | RollbackException ex) {
             return "-Unico";
@@ -793,10 +815,10 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + IMSS + "\": " + imss_obrero.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + APORTACION_FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString()+ ",";
-            resultJSON = resultJSON + "\"" + PENSION_ALIMENTICIA + "\": " + pension_alimenticia.getNumber().toString()+ ",";
             resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_CIMAV + "\": " + seg_sep_ind_cimav_emp.getNumber().toString()+ ",";
             resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_EMPLEADO + "\": " + seg_sep_ind_cimav_emp.getNumber().toString()+ ",";
-            resultJSON = resultJSON + "\"" + PENSION_ALIMENTICIA + "\": " + pension_alimenticia.getNumber().toString();
+            resultJSON = resultJSON + "\"" + PENSION_ALIMENTICIA + "\": " + pension_alimenticia.getNumber().toString()+ ",";
+            resultJSON = resultJSON + "\"" + PENSION_ALIMENTICIA_MON_DESP + "\": " + pension_alimenticia_monedero.getNumber().toString();
         resultJSON = resultJSON + " }";
         
         resultJSON = resultJSON + ",\"BASE_GRAVABLE\": {";
@@ -1017,15 +1039,19 @@ public class CalculoREST {
         }
         return "-1.00";
     }
-
-    @GET
-    @Path("/pension_alimenticia/{id_empleado}/{tipo}/{percen}")
-    public BigDecimal getPensionAlimenticia(@PathParam("id_empleado") Integer idEmp, @PathParam("tipo") Integer tipo, @PathParam("percen") Double percen) {
+    
+//    @GET
+//    @Path("/pension_alimenticia/{id_empleado}/{tipo}/{percen}")
+//    public MonetaryAmount[] pensionAlimenticia(@PathParam("id_empleado") Integer idEmp, @PathParam("tipo") Integer tipo, @PathParam("percen") Double percen) {
+    public MonetaryAmount[] pensionAlimenticia(Integer idEmp, Integer tipo, Double percen, Boolean incluyeMonedero) {
         
         if (percen > 0) {
             percen = percen / 100;
         }
         
+        MonetaryAmount pensionAlimenticia = Money.of(BigDecimal.ZERO, MXN);
+        MonetaryAmount pensionAlimenticiaMonedero = Money.of(BigDecimal.ZERO, MXN);
+
         String nativeSql= "SELECT CAST(c.id AS Integer) FROM conceptos AS c JOIN pensionalimenticia AS pa ON c.id = pa.id_concepto JOIN empleados AS e ON pa.id_empleado = e.id "
                 + "WHERE e.id = " + idEmp;
         Query query = getEntityManager().createNativeQuery(nativeSql);
@@ -1037,30 +1063,39 @@ public class CalculoREST {
         List<Movimiento> movimientos = movimientosREST.findByIdEmpleado(idEmp);
         for(Movimiento movi : movimientos) {
             Concepto concepto = movi.getConcepto();
-            if (concepto.getSuma()) {
-                // cosidera solo conceptos que suman
-                if ('P' == concepto.getIdTipoConcepto()) {
-                    // suma todas las percepcions
-                    totPercepPension = totPercepPension.add(movi.getCantidad());
-                } else if ('D' == concepto.getIdTipoConcepto() && pensionConceptoIds.contains(concepto.getId())) {
-                    // suma las deducciones incluidas en Pensiones del empleado
-                    totDeducPension = totDeducPension.add(movi.getCantidad());
+            
+            boolean perteneceAlEmpleado = pensionConceptoIds.contains(concepto.getId());
+            // solo considea los conceptos de pension que pertenezcan al empleado
+            if (perteneceAlEmpleado) {
+                if (concepto.getSuma()) {
+                    // considera solo conceptos que suman ya sea Percepción o Deducción
+                    if ('P' == concepto.getIdTipoConcepto()) {
+                        // suma todas las percepcions
+                        totPercepPension = totPercepPension.add(movi.getCantidad());
+                    } else if ('D' == concepto.getIdTipoConcepto()) {
+                        // suma las deducciones incluidas en Pensiones del empleado
+                        totDeducPension = totDeducPension.add(movi.getCantidad());
+                    }
+                } 
+                else if (MONEDERO_DESPENSA.equals(concepto.getCode()) && incluyeMonedero) { 
+                    pensionAlimenticiaMonedero = movi.getCantidad().multiply(percen);
                 }
             }
         }
+        
+        // TODO los conceptos de repercuciones también se consideran para la pensión??
 
-        BigDecimal result = BigDecimal.ZERO;
+        if (tipo == PENSION_PORCEN_SOBRE_NETO) {
         
-        if(tipo == 0) {
-            
-        } else if (tipo == 1) {
-        
-        }  else if (tipo == 2) {
-            String str = totPercepPension.subtract(totDeducPension).multiply(percen).getNumber().toString();
-            result = new BigDecimal(str).setScale(5, RoundingMode.HALF_EVEN);
-        }  else if (tipo == 3) {
-            
+        }  else if (tipo == PENSION_PORCEN_SOBRE_TOTAL_PERCEPCIONES) {
+//            String str = totPercepPension.subtract(totDeducPension).multiply(percen).getNumber().toString();
+//            pensionAlimenticia = new BigDecimal(str).setScale(5, RoundingMode.HALF_EVEN);
+            pensionAlimenticia = totPercepPension.subtract(totDeducPension).multiply(percen);
+        }  else if (tipo == PENSION_PORCEN_SOBRE_CONCEPTOS_SELECCIONADOS) {
+            pensionAlimenticia = totPercepPension.subtract(totDeducPension).multiply(percen);
         }
+        
+        MonetaryAmount[] result = {pensionAlimenticia, pensionAlimenticiaMonedero};
         
         return result;
     }

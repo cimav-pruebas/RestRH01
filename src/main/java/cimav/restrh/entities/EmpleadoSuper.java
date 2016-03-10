@@ -8,7 +8,9 @@ package cimav.restrh.entities;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
+import javax.money.MonetaryAmount;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
@@ -84,6 +86,11 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     private Integer pensionIdTipo;
     @Column(name = "pension_porcentaje")
     private Double pensionPorcen;
+    @Column(name = "pension_cantidad_fija")
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount pensionCantidaFija;
+    @Column(name = "pension_incluye_monedero")
+    private Boolean pensionIncluyeMonedero;
     
     
 //    @PostLoad
@@ -281,5 +288,20 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
         this.pensionPorcen = pensionPorcen;
     }
 
-    
+    public MonetaryAmount getPensionCantidaFija() {
+        return pensionCantidaFija;
+    }
+
+    public void setPensionCantidaFija(MonetaryAmount pensionCantidaFija) {
+        this.pensionCantidaFija = pensionCantidaFija;
+    }
+
+    public Boolean getPensionIncluyeMonedero() {
+        return pensionIncluyeMonedero;
+    }
+
+    public void setPensionIncluyeMonedero(Boolean pensionIncluyeMonedero) {
+        this.pensionIncluyeMonedero = pensionIncluyeMonedero;
+    }
+
 }

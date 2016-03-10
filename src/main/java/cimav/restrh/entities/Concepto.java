@@ -28,6 +28,13 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Concepto.findByCode", query = "SELECT t FROM Concepto t WHERE t.code = :code")})
 public class Concepto extends BaseEntity implements Serializable {
 
+    public static final Integer NO_INTEGRA          = 0;
+    public static final Integer INTEGRA             = 1;
+    public static final Integer INTEGRA_VARIADO     = 2;
+    public static final Integer GRAVA               = 0;
+    public static final Integer EXENTA              = 1;
+    public static final Integer GRAVA_PARCIAL       = 2;
+    
     @Basic(optional = false)
     @NotNull
     @Column(name = "id_tipo_concepto")
@@ -39,6 +46,11 @@ public class Concepto extends BaseEntity implements Serializable {
     @Column(name = "suma")
     private Boolean suma;
 
+    @Column(name = "grava")
+    private Integer grava;
+    @Column(name = "integra")
+    private Integer integra;
+    
     public Concepto() {
         super();
     }
@@ -66,5 +78,22 @@ public class Concepto extends BaseEntity implements Serializable {
     public void setSuma(Boolean suma) {
         this.suma = suma;
     }
+
+    public Integer getGrava() {
+        return grava;
+    }
+
+    public void setGrava(Integer grava) {
+        this.grava = grava;
+    }
+
+    public Integer getIntegra() {
+        return integra;
+    }
+
+    public void setIntegra(Integer integra) {
+        this.integra = integra;
+    }
+
     
 }

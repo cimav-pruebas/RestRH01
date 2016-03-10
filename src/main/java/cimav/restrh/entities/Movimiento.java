@@ -114,7 +114,7 @@ public class Movimiento implements Serializable {
     // constructor usado con aliasCantidad (en lugar de con cantidad)
     // porque el constructor usado en el query de MovimientoFacadeREST.doFindByIds 
     // no entiende el tipo MonetaryAmount
-    public Movimiento(int idEmpleado, Concepto concepto, BigDecimal aliasCantidad) {
+    public Movimiento(Integer idEmpleado, Concepto concepto, BigDecimal aliasCantidad) {
         this();
         this.idEmpleado = idEmpleado;
         this.concepto = concepto;
