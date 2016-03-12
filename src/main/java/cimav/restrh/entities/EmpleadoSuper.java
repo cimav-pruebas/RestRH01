@@ -223,39 +223,6 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
         this.idTipoAntiguedad = idTipoAntiguedad;
     }
 
-//    public void initAntiguedad() {
-//        /*
-//        Inicializa la AntigÃ¼edad del Empleado.
-//        Dias ordinarios, descanso, trabajados de la quincena
-//        Sdi del bimestre para el empleado
-//        */
-//        
-//        LocalDate localDateFinQuincena = Quincena.convert(new Date());//quincena.getFechaFin());
-//        boolean isCYT = this.getIdGrupo().equals(EGrupo.CYT.getId());
-//        boolean isAYA = this.getIdGrupo().equals(EGrupo.AYA.getId());
-//        if (isCYT || isAYA) {
-//
-//            LocalDate localDateFechaAntiguedad = Quincena.convert(this.getFechaAntiguedad());
-//
-//            logger.log(Level.INFO, this.getId() + " | " + this.getName() 
-//                    + " | " + this.getNivel() + " | " + this.getFechaAntiguedad() + " | " + localDateFechaAntiguedad);
-//            // TODO Para cuando la PAnt se cumpla en la quincena, no consideramos incidencias (faltas e incapacidades);
-//            // se debe corregir.
-//
-//            //TODO BUG Muy Lento y problema con JodaTime Resource not found: "org/joda/time/tz/data/ZoneInfoMap"
-//            // TODO Checar que incluya el dia Inicial.
-//            // Se da por hecho q nadie cumple el 28, 29 o 31 
-//            // Se calculan los aÃ±os en base al Ãºltimo dÃ­a de la quincena 
-//
-//            Period period = Period.between(localDateFechaAntiguedad, localDateFinQuincena);
-//
-//            this.setPantYears(period.getYears());
-//            this.setPantMonths(period.getMonths());
-//            this.setPantDayOdd(period.getDays());
-//            this.setPantDayEven(0); // TODO PAnt Odd|Even
-//        }
-//    }
-
     public Boolean getPantRegimenAnterior() {
         return pantRegimenAnterior;
     }

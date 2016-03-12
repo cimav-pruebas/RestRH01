@@ -97,7 +97,7 @@ public class CalculoREST {
     private final String HORAS_EXTRAS_GRAVADO           = "00058";
     private final String PRIMA_QUINQUENAL               = "00067";
     private final String MONEDERO_DESPENSA              = "00092";
-//    private final String SEG_SEPARACION_IND             = "00093";
+    private final String SEG_SEPARACION_IND             = "00093";
     private final String ISR                            = "00101";
     private final String IMSS                           = "00106";
     private final String FONDO_AHORRO                   = "00111";
@@ -278,7 +278,7 @@ public class CalculoREST {
         MonetaryAmount seguro_retiro_empresa              = Money.of(0.00, "MXN");
         MonetaryAmount infonavit_empresa              = Money.of(0.00, "MXN");
         
-        MonetaryAmount seg_sep_ind_paramidado = Money.of(0.00, "MXN");
+        MonetaryAmount seg_sep_ind = Money.of(0.00, "MXN");
         MonetaryAmount seg_sep_ind_cimav_emp = Money.of(0.00, "MXN");
         MonetaryAmount seg_sep_ind_isr = Money.of(0.00, "MXN");
         
@@ -412,7 +412,9 @@ public class CalculoREST {
                     pant_porcen_tope = 0.54; // 
                 }  else if ("00087".equals(empleadoNomina.getCode())) { // Neri
                     pant_porcen_tope = 0.64; // 
-                }              
+                }   else if ("00043".equals(empleadoNomina.getCode())) { // Fuentes
+                    pant_porcen_tope = 0.66; // 
+                }               
                 
                 Double factorPAnt = 0.00;
                 
@@ -508,12 +510,14 @@ public class CalculoREST {
             // La nÃ³mina no incluye  Jovenes Catedras?
             // Si incluye Catedreas Repatriadas
             
+            // NOTA: la compensación garantiza de los MMS es parte del Sueldo.
+            
             /* Ajuste de Calendario */
             // Ajuste aplica para Aya, Cyt y MMS; no para Hon
-            if (isAYA || isCYT /*|| isHON*/) {
+            if (isAYA || isCYT || isMMS) {
                 // TODO Ajuste 5 o 6 aÃ±os Constante
                 // sueldo_diario * 5 /360
-                ajuste_calendario_diario = sueldo_diario.multiply(DIAS_AJUSTE_5_6).divide(360);
+                ajuste_calendario_diario = sueldo_diario.add(compensa_garantiza_diaria).multiply(DIAS_AJUSTE_5_6).divide(360);
                 
                 // Si es quincena de calculo semestral
                 if (false) {
@@ -525,42 +529,41 @@ public class CalculoREST {
             
             /* Aguinaldo */ 
             // por 360 dias tocan 40 dias
-            aguinaldo_diario = sueldo_diario.multiply(40).divide(360);
+            aguinaldo_diario = sueldo_diario.add(compensa_garantiza_diaria).multiply(40).divide(360);
             // TODO para honorarios el aguinaldo juega como variables para ene-feb
             
             /* Prima Vacional */
             // por 360 dias tocan 24 dias para CYT y AYA (24 = 40% de 60 dias)
-            prima_vacacional_diaria = sueldo_diario.multiply(24).divide(360);
-            
-            /* Prima Quinquenal / Seguro de separacion indivudualizado */
             if (isMMS) {
+                //TODO 24 y 12.6 a constantes
+                prima_vacacional_diaria = sueldo_diario.add(compensa_garantiza_diaria).multiply(12.6).divide(360);
+            } else {
+                prima_vacacional_diaria = sueldo_diario.add(compensa_garantiza_diaria).multiply(24).divide(360);
+            }
+            
+            /* Prima Quinquenal */
+            if (isMMS) {
+                // Prima Quinquenal
                 if (yearsCumplidos >= 5 && yearsCumplidos < 10) {
                     prima_quinquenal =  Money.of(100.00, "MXN").divide(2);   
                 } else if (yearsCumplidos >= 10 && yearsCumplidos < 15) {
                     prima_quinquenal =  Money.of(125.00, "MXN").divide(2);   
                 } else if (yearsCumplidos >= 15 && yearsCumplidos < 20) {
-                    prima_quinquenal =  Money.of(175.00, "MXN").divide(2);   
+                    prima_quinquenal =  Money.of(150.00, "MXN").divide(2);    // TODO quinquenal el correcto es 125
                 } else if (yearsCumplidos >= 20 && yearsCumplidos < 25) {
                     prima_quinquenal =  Money.of(200.00, "MXN").divide(2);   
                 }  else if (yearsCumplidos >= 25) {
                     prima_quinquenal =  Money.of(225.00, "MXN").divide(2);   
                 }
                 prima_quinquenal_diaria = prima_quinquenal.divide(DIAS_QUINCENA_15);
-                prima_quinquenal = prima_quinquenal_diaria.multiply(dias_trabajados);
-                
-                double porcen = empleadoNomina.getPorcenSegSeparacionInd() / 100;
-                seg_sep_ind_cimav_emp = sueldo.add(compensa_garantiza).multiply(porcen);
-                // TODO falta piramidar SSI y ISR_SSI y el % por cada MMS, meter el piramidado diario al sdi
-                seg_sep_ind_paramidado = Money.of(0.00, "MXN");
-                seg_sep_ind_isr = Money.of(0.00, "MXN");
-                
+                //prima_quinquenal = prima_quinquenal_diaria.multiply(dias_trabajados);
             }
             // TODO PrimaQuinquenal y suma para SDI?
             
             // Apoyo Mantenimiento Vehicular
             if (nivel.getCode().startsWith("KA")) {
                 // Sólo para el Director General
-                apoyo_mto_vehicular_diario = Money.of(5916 / 2 / 15, "MXN");
+                apoyo_mto_vehicular_diario = Money.of(5916, MXN).divide(2.00).divide(15.00);
                 apoyo_mto_vehicular = apoyo_mto_vehicular_diario.multiply(dias_trabajados);
             }
             
@@ -590,20 +593,32 @@ public class CalculoREST {
                 }
             }
             
-//            // TODO Horas extras gravadas y exentas
-//            if (idEmpleado == 180) {
-//                // aya gonzalez trevizo
-//                base_gravable = Money.of(771.41,MXN);
-//            }
-//            if (idEmpleado == 67) {
-//                // aya mariana lopez
-//                base_gravable = Money.of(302.55,MXN);
-//            }
-
-            /**************************************/
-            /* Integrar: Salario Diario Integrado */
-            /**************************************/
+            //** se acaban los calculos; sigue meterlos a los movimientos
             
+            // Eliminar los Calculos Previos para evitar conceptos rezagados
+            // no incluidos en el este proceso
+            this.vaciarCalculosDeMovimientos(idEmpleado);
+            
+            // Insertar en Movimientos todas las Percepciones y Deducciones Calculadas
+            insertarCalculo(SUELDO_ORDINARIO, sueldo_ordinario);
+            insertarCalculo(SUELDO_DIAS_DESCANSO, sueldo_dias_descanso);
+            insertarCalculo(HONORARIOS_ASIMILABLES, sueldo_honorarios);
+            insertarCalculo(PRIMA_ANTIGUEDAD, prima_antiguedad);
+            insertarCalculo(CARGA_ADMINISTRATIVA, carga_admin);
+            insertarCalculo(MATERIALES, materiales);
+            insertarCalculo(ESTIMULOS_PRODUCTIVIDAD_CYT, estimulos_cyt);
+            insertarCalculo(COMPENSA_GARANTIZADA, compensa_garantiza);
+            insertarCalculo(FONDO_AHORRO_EXENTO, fondo_ahorro_exento);
+            insertarCalculo(FONDO_AHORRO_GRAVADO, fondo_ahorro_gravado);
+            insertarCalculo(FONDO_AHORRO, fondo_ahorro);
+            insertarCalculo(HORAS_EXTRAS_GRAVADO, tiempo_extra_gravado);
+            insertarCalculo(HORAS_EXTRAS_EXENTO, tiempo_extra_exento);
+            insertarCalculo(APORTACION_FONDO_AHORRO, fondo_ahorro);
+            insertarCalculo(PRIMA_QUINQUENAL, prima_quinquenal);
+            insertarCalculo(APOYO_MANTENIMIENTO_VEHICULAR, apoyo_mto_vehicular);
+            insertarCalculo(MONEDERO_DESPENSA, mondero_despensa); 
+            
+            /** Integrar Fijo **/
             salario_diario_fijo = salario_diario_fijo.add(sueldo_diario);
             salario_diario_fijo = salario_diario_fijo.add(sueldo_honorarios_diario);
             salario_diario_fijo = salario_diario_fijo.add(prima_antiguedad_diaria);
@@ -617,26 +632,21 @@ public class CalculoREST {
             salario_diario_fijo = salario_diario_fijo.add(otros_fijos);
             salario_diario_fijo = salario_diario_fijo.add(prima_quinquenal_diaria);
             salario_diario_fijo = salario_diario_fijo.add(apoyo_mto_vehicular_diario);
-            // Tiempo extra no cotiza
+            // agregar las percepciones de pagos que integran (e.g. TODO Ningun pago Integra ??? ).
+            for(Movimiento movPagoIntegra : getPercepcionesCapturadasIntegran(idEmpleado)) {
+                salario_diario_fijo = salario_diario_fijo.add(movPagoIntegra.getCantidad());
+            }
+            //salario_diario_fijo = salario_diario_fijo.add(Money.of(new BigDecimal("1899.64"), MXN));//new BigDecimal("1778.10"), MXN));
             
-            // mondero_despensa no integra pq no es $$$
+            // TODO sacar las percepciones de pagos de integracion_variable para el siguiente bimestre
             
-            // TODO otras percepciones capturadas van en Fijo ??
-
-            // TODO Rangel
-            //salario_diario_fijo = salario_diario_fijo.add(Money.of(new BigDecimal("1899.64"), MXN));
-            
-            
-            // TODO Faltan el SDI Variable (Remanente CYT, Estimulo AYA, Bimestre Anterior)
+            // leer SDI Variable (Remanente CYT, Estimulo AYA, Bimestre Anterior)
             salario_diario_variable = nomina.getSdiVariableBimestreAnterior();
             if (salario_diario_variable == null) {
-                // TODO que pasa si salario_diario_variable es null
                 salario_diario_variable = Money.of(BigDecimal.ZERO, MXN);
             }
-            
             // cotizado = fijo + variables Â¿Equivalente al Mixto del Imss?
             salario_diario_cotizado = salario_diario_fijo.add(salario_diario_variable);
-            
             // cotizado se topa (no el fijo)
             MonetaryAmount topeSalarioDiarioCotizado = Money.of(SALARIO_DIARIO_TOPE * SALARIO_MINIMO, MXN);
             if (salario_diario_cotizado.compareTo(topeSalarioDiarioCotizado) > 0) {
@@ -646,6 +656,12 @@ public class CalculoREST {
                 // Si no rebasa el tope, agarra el cotizado directo
                 salario_diario_cotizado_topado = salario_diario_cotizado;
             }
+            insertarCalculo(SUELDO_DIARIO, sueldo_diario); //??
+            insertarCalculo(SUELDO_DIARIO, sueldo_honorarios_diario); //??
+            insertarCalculo(SALARIO_DIARIO_FIJO, salario_diario_fijo);
+            insertarCalculo(SALARIO_DIARIO_VARIABLE, salario_diario_variable);
+            insertarCalculo(SALARIO_DIARIO_COTIZADO, salario_diario_cotizado);
+            insertarCalculo(SALARIO_DIARIO_COTIZADO_TOPADO, salario_diario_cotizado_topado);
 
             /* IMSS */
        //     Integer dias_reales_bimestre = quincena.getDiasBimestre(); 
@@ -674,6 +690,8 @@ public class CalculoREST {
             imss_obrero = excedente_3SM_diario.add(prestaciones_en_dinero).add(gtos_medicos_y_pension).add(invalidez_y_vida).add(cesantia_y_vejez);
             //imss_obrero = imss_obrero.multiply(dias_trabajados); // TODO ¿Es por dias trabajado o dias quincena o dias reales de la quincena?
             
+            insertarCalculo(IMSS, imss_obrero);
+            
             excedente_3SM_diario_empresa = excedente_3SM_diario_factor.multiply(0.0110).multiply(dias_trabajados); //especie - excedente
             prestaciones_en_dinero_empresa = salario_diario_cotizado_topado.multiply(0.0070).multiply(dias_trabajados); // prestaciones en dinero
             gtos_medicos_y_pension_empresa = salario_diario_cotizado_topado.multiply(0.0105).multiply(dias_trabajados); // pensionados y beneficiarios
@@ -689,79 +707,7 @@ public class CalculoREST {
             // TODO Al termino del ejercicio fiscal (Ãºltima quincena de dic) se acumulan todos los pagos 
             // por concepto de previsiÃ³n social para gravar la diferencia y / o integrar la diferencia de vales 
             // como variable para integraciÃ³n del IMSS en enero y febrero del siguiente aÃ±o.
-
-            /* Gravar */
-
-            base_gravable = base_gravable.add(sueldo_ordinario);
-            base_gravable = base_gravable.add(sueldo_dias_descanso);
-            base_gravable = base_gravable.add(sueldo_honorarios);
-            base_gravable = base_gravable.add(prima_antiguedad);
-            base_gravable = base_gravable.add(materiales);
-            base_gravable = base_gravable.add(estimulos_cyt);
-            base_gravable = base_gravable.add(carga_admin);
-            base_gravable = base_gravable.add(compensa_garantiza);
-            base_gravable = base_gravable.add(fondo_ahorro_gravado);
-            // base_gravable = base_gravable.add(mondero_despensa); // Monedero excenta
-            base_gravable = base_gravable.add(prima_quinquenal);
-            base_gravable = base_gravable.add(apoyo_mto_vehicular);
-            base_gravable = base_gravable.add(tiempo_extra_gravado);
-
-            // TODO Rangel
-            //base_gravable = base_gravable.add(Money.of(new BigDecimal("1899.64"), MXN));
-           
-            // TODO TODO Conceptos capturados que gravan e integran
             
-            /* Exentar */
-
-            base_exenta = base_exenta.add(fondo_ahorro_exento);
-            base_exenta = base_exenta.add(tiempo_extra_exento);
-            base_exenta = base_exenta.add(mondero_despensa); // Monedero excenta
-
-            /* Impuesto */
-            impuesto_antes_subsidio = calcularImpuesto(base_gravable);
-
-            
-            // Eliminar los Calculos Previos para evitar conceptos rezagados
-            // no incluidos en el este proceso
-            this.vaciarCalculos(idEmpleado);
-            
-            insertarCalculo(SUELDO_ORDINARIO, sueldo_ordinario);
-            insertarCalculo(SUELDO_DIAS_DESCANSO, sueldo_dias_descanso);
-            insertarCalculo(HONORARIOS_ASIMILABLES, sueldo_honorarios);
-            insertarCalculo(PRIMA_ANTIGUEDAD, prima_antiguedad);
-            insertarCalculo(CARGA_ADMINISTRATIVA, carga_admin);
-            insertarCalculo(MATERIALES, materiales);
-            insertarCalculo(ESTIMULOS_PRODUCTIVIDAD_CYT, estimulos_cyt);
-            insertarCalculo(COMPENSA_GARANTIZADA, compensa_garantiza);
-            insertarCalculo(FONDO_AHORRO_EXENTO, fondo_ahorro_exento);
-            insertarCalculo(FONDO_AHORRO_GRAVADO, fondo_ahorro_gravado);
-            insertarCalculo(FONDO_AHORRO, fondo_ahorro);
-            insertarCalculo(HORAS_EXTRAS_GRAVADO, tiempo_extra_gravado);
-            insertarCalculo(HORAS_EXTRAS_EXENTO, tiempo_extra_exento);
-            insertarCalculo(APORTACION_FONDO_AHORRO, fondo_ahorro);
-            insertarCalculo(PRIMA_QUINQUENAL, prima_quinquenal);
-            insertarCalculo(APOYO_MANTENIMIENTO_VEHICULAR, apoyo_mto_vehicular);
-            
-            insertarCalculo(MONEDERO_DESPENSA, mondero_despensa); //TODO la Despensa no suma puesto que se paga con Vales
-            insertarCalculo(IMSS, imss_obrero);
-
-            insertarCalculo(SEG_SEPARACION_IND_CIMAV, seg_sep_ind_cimav_emp);
-            insertarCalculo(SEG_SEPARACION_IND_EMPLEADO, seg_sep_ind_cimav_emp);
-
-            insertarCalculo(BASE_GRAVABLE, base_gravable);
-            insertarCalculo(BASE_EXENTA, base_exenta);
-            
-            insertarCalculo(ISR, impuesto_antes_subsidio);
-            
-            insertarCalculo(SUELDO_DIARIO, sueldo_diario);
-            insertarCalculo(SUELDO_DIARIO, sueldo_honorarios_diario);
-            
-            insertarCalculo(SALARIO_DIARIO_FIJO, salario_diario_fijo);
-            insertarCalculo(SALARIO_DIARIO_VARIABLE, salario_diario_variable);
-            insertarCalculo(SALARIO_DIARIO_COTIZADO, salario_diario_cotizado);
-            insertarCalculo(SALARIO_DIARIO_COTIZADO_TOPADO, salario_diario_cotizado_topado);
-
-            //insertarCalculo(EXCEDENTE_3SMG, excedente_3SM_diario);
             insertarCalculoImssEmpresa(EXCEDENTE_3SMG, excedente_3SM_diario, excedente_3SM_diario_empresa);
             insertarCalculoImssEmpresa(PRESTACIONES_EN_DINERO, prestaciones_en_dinero, prestaciones_en_dinero_empresa);
             insertarCalculoImssEmpresa(GTOS_MEDICOS_Y_PENSION, gtos_medicos_y_pension, gtos_medicos_y_pension_empresa);
@@ -773,7 +719,59 @@ public class CalculoREST {
             insertarCalculoImssEmpresa(SEGURO_RETIRO, Money.of(0.00, "MXN"), seguro_retiro_empresa);
             insertarCalculoImssEmpresa(INFONAVIT, Money.of(0.00, "MXN"), infonavit_empresa);
             
-            /** Pensión Alimenticia (después de calcular y persistir todos los movimientos) **/
+
+            /* Gravar */
+            // TODO TODO Conceptos capturados que gravan e integran
+            base_gravable = base_gravable.add(sueldo_ordinario);
+            base_gravable = base_gravable.add(sueldo_dias_descanso);
+            base_gravable = base_gravable.add(sueldo_honorarios);
+            base_gravable = base_gravable.add(prima_antiguedad);
+            base_gravable = base_gravable.add(materiales);
+            base_gravable = base_gravable.add(estimulos_cyt);
+            base_gravable = base_gravable.add(carga_admin);
+            base_gravable = base_gravable.add(compensa_garantiza);
+            base_gravable = base_gravable.add(fondo_ahorro_gravado);
+            base_gravable = base_gravable.add(prima_quinquenal);
+            base_gravable = base_gravable.add(apoyo_mto_vehicular);
+            base_gravable = base_gravable.add(tiempo_extra_gravado);
+            // gravar las percepciones de pagos que gravan (e.g. TODO Ningun pago Grava ??? ).
+            for(Movimiento movPagoGrava : getPercepcionesCapturadasGravan(idEmpleado)) {
+                base_gravable = base_gravable.add(movPagoGrava.getCantidad());
+            }
+
+            /* Exentar */
+            base_exenta = base_exenta.add(fondo_ahorro_exento);
+            base_exenta = base_exenta.add(tiempo_extra_exento);
+            base_exenta = base_exenta.add(mondero_despensa); // Monedero excenta
+
+            insertarCalculo(BASE_GRAVABLE, base_gravable);
+            insertarCalculo(BASE_EXENTA, base_exenta);
+            
+            /* Calcular Impuesto después de obtener la BG */
+            impuesto_antes_subsidio = calcularImpuesto(base_gravable);
+            /* Seguro de separacion indivudualizado - Después del ISR normal pq se "piramida" */
+            if (isMMS) {
+                
+                double porcen = empleadoNomina.getPorcenSegSeparacionInd() / 100;
+                seg_sep_ind = sueldo.add(compensa_garantiza).multiply(porcen);
+                
+                base_gravable = base_gravable.add(seg_sep_ind);
+                MonetaryAmount impuesto_con_ssi = calcularImpuesto(base_gravable);
+                seg_sep_ind_isr = impuesto_con_ssi.subtract(impuesto_antes_subsidio);
+                
+                seg_sep_ind_cimav_emp = seg_sep_ind;
+                seg_sep_ind = seg_sep_ind.add(seg_sep_ind_isr);
+                
+                // TODO aqui el SSI queda fuera del SDI
+                insertarCalculo(SEG_SEPARACION_IND_ISR, seg_sep_ind_isr);
+                insertarCalculo(SEG_SEPARACION_IND, seg_sep_ind);
+                insertarCalculo(SEG_SEPARACION_IND_CIMAV, seg_sep_ind_cimav_emp);
+                insertarCalculo(SEG_SEPARACION_IND_EMPLEADO, seg_sep_ind_cimav_emp);
+            }
+            insertarCalculo(ISR, impuesto_antes_subsidio);
+
+            
+            /** Calcular Pensión Alimenticia (después de calcular y persistir todos los movimientos(percep y deducc)) **/
             if (empleadoNomina.getPensionIdTipo() > PENSION_SIN) {
                 if (PENSION_SOBRE_CANTIDAD_FIJA == empleadoNomina.getPensionIdTipo()) {
                     pension_alimenticia = empleadoNomina.getPensionCantidaFija();
@@ -782,12 +780,11 @@ public class CalculoREST {
                             , empleadoNomina.getPensionPorcen(), empleadoNomina.getPensionIncluyeMonedero());
                     pension_alimenticia = pension[0];
                     pension_alimenticia_monedero = pension[1];
-    //                BigDecimal big_pension_alimenticia = this.pensionAlimenticia(idEmpleado, empleadoNomina.getPensionIdTipo(), empleadoNomina.getPensionPorcen());
-    //                pension_alimenticia = Money.of(big_pension_alimenticia.doubleValue(), "MXN");
                 }
                 insertarCalculo(PENSION_ALIMENTICIA, pension_alimenticia);
                 insertarCalculo(PENSION_ALIMENTICIA_MON_DESP, pension_alimenticia_monedero);
             }
+            
             
         } catch (NullPointerException | RollbackException ex) {
             return "-Unico";
@@ -983,15 +980,53 @@ public class CalculoREST {
 //        return result;
 //    }
     
-    public void vaciarCalculos(int idEmpleado) {
+    private void vaciarCalculosDeMovimientos(int idEmpleado) {
         // Elimina todos los calculos del empleado de Movimiento
         // Solo calculos; no movimientos (saldos y pagos).
         try {
             String query = "DELETE FROM Movimiento n WHERE n.idEmpleado = :id_empleado AND n.concepto.idTipoMovimiento = :id_tipo_mov";
-            getEntityManager().createQuery(query).setParameter("id_empleado", idEmpleado).setParameter("id_tipo_mov", 'C').executeUpdate();
+            getEntityManager().createQuery(query).setParameter("id_empleado", idEmpleado).setParameter("id_tipo_mov", Concepto.MOV_CALCULADO).executeUpdate();
         } catch (Exception e) {
             System.out.println("vaciarCalculos ::> " + e.getMessage());
         }
+    }
+    
+    private List<Movimiento> getPercepcionesCapturadasIntegran(int idEmpleado) {
+        List<Movimiento> result = new ArrayList<>();
+        try {
+            String hsql = "SELECT m FROM Movimiento m WHERE m.idEmpleado = :id_empleado "
+                    + " AND m.concepto.idTipoMovimiento =:id_tipo_mov "
+                    + " AND m.concepto.idTipoConcepto =:id_tipo_con " 
+                    + " AND m.concepto.integra = :integra";
+            Query query = getEntityManager().createQuery(hsql);
+            query.setParameter("id_empleado", idEmpleado);
+            query.setParameter("id_tipo_mov", Concepto.MOV_PAGO);
+            query.setParameter("id_tipo_con", Concepto.TIPO_PERCEPCION);
+            query.setParameter("integra", Concepto.INTEGRA);
+            result = query.getResultList();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "getPercepcionesCapturadasIntegran ::> " + e.getMessage());
+        }
+        return result;
+    }
+    
+    private List<Movimiento> getPercepcionesCapturadasGravan(int idEmpleado) {
+        List<Movimiento> result = new ArrayList<>();
+        try {
+            String hsql = "SELECT m FROM Movimiento m WHERE m.idEmpleado = :id_empleado "
+                    + " AND m.concepto.idTipoMovimiento =:id_tipo_mov "
+                    + " AND m.concepto.idTipoConcepto =:id_tipo_con " 
+                    + " AND m.concepto.grava = :grava";
+            Query query = getEntityManager().createQuery(hsql);
+            query.setParameter("id_empleado", idEmpleado);
+            query.setParameter("id_tipo_mov", Concepto.MOV_PAGO);
+            query.setParameter("id_tipo_con", Concepto.TIPO_PERCEPCION);
+            query.setParameter("grava", Concepto.GRAVA);
+            result = query.getResultList();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "getPercepcionesCapturadasGravan ::> " + e.getMessage());
+        }
+        return result;
     }
     
     private TarifaAnual getTarifaAnual(MonetaryAmount base_gravable) {
@@ -1052,49 +1087,53 @@ public class CalculoREST {
         MonetaryAmount pensionAlimenticia = Money.of(BigDecimal.ZERO, MXN);
         MonetaryAmount pensionAlimenticiaMonedero = Money.of(BigDecimal.ZERO, MXN);
 
-        String nativeSql= "SELECT CAST(c.id AS Integer) FROM conceptos AS c JOIN pensionalimenticia AS pa ON c.id = pa.id_concepto JOIN empleados AS e ON pa.id_empleado = e.id "
-                + "WHERE e.id = " + idEmp;
-        Query query = getEntityManager().createNativeQuery(nativeSql);
-        query.setParameter("id_empleado", idEmp);
-        List<Integer> pensionConceptoIds = query.getResultList();
-        
-        MonetaryAmount totPercepPension = Money.of(BigDecimal.ZERO, "MXN");
-        MonetaryAmount totDeducPension = Money.of(BigDecimal.ZERO, "MXN");
-        List<Movimiento> movimientos = movimientosREST.findByIdEmpleado(idEmp);
-        for(Movimiento movi : movimientos) {
-            Concepto concepto = movi.getConcepto();
-            
-            boolean perteneceAlEmpleado = pensionConceptoIds.contains(concepto.getId());
-            // solo considea los conceptos de pension que pertenezcan al empleado
-            if (perteneceAlEmpleado) {
-                if (concepto.getSuma()) {
-                    // considera solo conceptos que suman ya sea Percepción o Deducción
-                    if ('P' == concepto.getIdTipoConcepto()) {
-                        // suma todas las percepcions
-                        totPercepPension = totPercepPension.add(movi.getCantidad());
-                    } else if ('D' == concepto.getIdTipoConcepto()) {
-                        // suma las deducciones incluidas en Pensiones del empleado
-                        totDeducPension = totDeducPension.add(movi.getCantidad());
+        try {
+            String nativeSql= "SELECT CAST(c.id AS Integer) FROM conceptos AS c JOIN pensionalimenticia AS pa ON c.id = pa.id_concepto JOIN empleados AS e ON pa.id_empleado = e.id "
+                    + "WHERE e.id = " + idEmp;
+            Query query = getEntityManager().createNativeQuery(nativeSql);
+            query.setParameter("id_empleado", idEmp);
+            List<Integer> pensionConceptoIds = query.getResultList();
+
+            MonetaryAmount totPercepPension = Money.of(BigDecimal.ZERO, "MXN");
+            MonetaryAmount totDeducPension = Money.of(BigDecimal.ZERO, "MXN");
+            List<Movimiento> movimientos = movimientosREST.findByIdEmpleado(idEmp);
+            for(Movimiento movi : movimientos) {
+                Concepto concepto = movi.getConcepto();
+
+                boolean perteneceAlEmpleado = pensionConceptoIds.contains(concepto.getId());
+                // solo considea los conceptos de pension que pertenezcan al empleado
+                if (perteneceAlEmpleado) {
+                    if (concepto.getSuma()) {
+                        // considera solo conceptos que suman ya sea Percepción o Deducción
+                        if ('P' == concepto.getIdTipoConcepto()) {
+                            // suma todas las percepcions
+                            totPercepPension = totPercepPension.add(movi.getCantidad());
+                        } else if ('D' == concepto.getIdTipoConcepto()) {
+                            // suma las deducciones incluidas en Pensiones del empleado
+                            totDeducPension = totDeducPension.add(movi.getCantidad());
+                        }
+                    } 
+                    else if (MONEDERO_DESPENSA.equals(concepto.getCode()) && incluyeMonedero) { 
+                        pensionAlimenticiaMonedero = movi.getCantidad().multiply(percen);
                     }
-                } 
-                else if (MONEDERO_DESPENSA.equals(concepto.getCode()) && incluyeMonedero) { 
-                    pensionAlimenticiaMonedero = movi.getCantidad().multiply(percen);
                 }
             }
-        }
-        
-        // TODO los conceptos de repercuciones también se consideran para la pensión??
 
-        if (tipo == PENSION_PORCEN_SOBRE_NETO) {
-        
-        }  else if (tipo == PENSION_PORCEN_SOBRE_TOTAL_PERCEPCIONES) {
-//            String str = totPercepPension.subtract(totDeducPension).multiply(percen).getNumber().toString();
-//            pensionAlimenticia = new BigDecimal(str).setScale(5, RoundingMode.HALF_EVEN);
-            pensionAlimenticia = totPercepPension.subtract(totDeducPension).multiply(percen);
-        }  else if (tipo == PENSION_PORCEN_SOBRE_CONCEPTOS_SELECCIONADOS) {
-            pensionAlimenticia = totPercepPension.subtract(totDeducPension).multiply(percen);
+            // TODO los conceptos de repercuciones también se consideran para la pensión??
+
+            if (tipo == PENSION_PORCEN_SOBRE_NETO) {
+
+            }  else if (tipo == PENSION_PORCEN_SOBRE_TOTAL_PERCEPCIONES) {
+    //            String str = totPercepPension.subtract(totDeducPension).multiply(percen).getNumber().toString();
+    //            pensionAlimenticia = new BigDecimal(str).setScale(5, RoundingMode.HALF_EVEN);
+                pensionAlimenticia = totPercepPension.subtract(totDeducPension).multiply(percen);
+            }  else if (tipo == PENSION_PORCEN_SOBRE_CONCEPTOS_SELECCIONADOS) {
+                pensionAlimenticia = totPercepPension.subtract(totDeducPension).multiply(percen);
+            }
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "pensionAlimenticia emp(" + idEmp + ") " + e.getMessage());
         }
-        
         MonetaryAmount[] result = {pensionAlimenticia, pensionAlimenticiaMonedero};
         
         return result;

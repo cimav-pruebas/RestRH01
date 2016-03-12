@@ -102,20 +102,20 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
     }
 
     @GET
-    @Path("init")
+    @Path("init_antiguedad")
     @Produces("text/plain")
-    public String init() {
+    public String initAntiguedad() {
         List<EmpleadoBase> empleados = this.findAll();
         empleados.stream().forEach((emp) -> {
-            this.init(emp.getId());
+            this.initAntiguedad(emp.getId());
         });
         return "Empleados inicialiados: " + empleados.size();
     }
     
     @GET
-    @Path("init/{id_emp}")
+    @Path("init_antiguedad/{id_emp}")
     @Produces("application/json")
-    public EmpleadoBase init(@PathParam("id_emp") Integer idEmp) {
+    public EmpleadoBase initAntiguedad(@PathParam("id_emp") Integer idEmp) {
         
         EmpleadoBase empBase = null;
         

@@ -28,6 +28,12 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Concepto.findByCode", query = "SELECT t FROM Concepto t WHERE t.code = :code")})
 public class Concepto extends BaseEntity implements Serializable {
 
+    public static final char MOV_CALCULADO       = 'C';
+    public static final char MOV_PAGO            = 'P';
+    public static final char TIPO_PERCEPCION     = 'P';
+    public static final char TIPO_DEDUCCION      = 'D';
+    public static final char TIPO_INTERNO        = 'I';
+    public static final char TIPO_REPERCUCION    = 'R';
     public static final Integer NO_INTEGRA          = 0;
     public static final Integer INTEGRA             = 1;
     public static final Integer INTEGRA_VARIADO     = 2;
