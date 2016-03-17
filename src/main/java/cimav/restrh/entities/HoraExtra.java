@@ -80,6 +80,7 @@ public class HoraExtra implements Serializable {
 
     public Date getDia() {
         Calendar cal = Calendar.getInstance();
+        cal.setFirstDayOfWeek(2); // el lunes
         cal.setTime(dia);
         this.weekOfYear = cal.get(Calendar.WEEK_OF_YEAR);
         return dia;

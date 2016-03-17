@@ -39,10 +39,10 @@ public class Movimiento implements Serializable {
     
     private static final long serialVersionUID = 1L;
     
-    public static String PAGO           = "P";
-    public static String PERCEPCION     = "P";
-    public static String DEDUCCION      = "D";
-    
+    public final static Integer PAGO_QUINCENAL      = 0;
+    public final static Integer PAGO_MENSUAL        = 1;
+    public final static Integer PAGO_BIMESTRAL      = 2;
+    public final static Integer PAGO_CARGO_SALDO    = 5;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -101,6 +101,11 @@ public class Movimiento implements Serializable {
     @Convert(converter = MonetaryAmountConverter.class)
     private MonetaryAmount cantidadEmpresa;
     
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "periocidad")
+    private Integer periocidad;
+    
     public Movimiento() {
         idEmpleado = 0;
         numQuincenas = 1;
@@ -109,6 +114,7 @@ public class Movimiento implements Serializable {
         pago = Money.of(0.00, "MXN");
         permanente = false;
         cantidadEmpresa = Money.of(0.00, "MXN");
+        periocidad = Movimiento.PAGO_QUINCENAL;
     }
 
     // constructor usado con aliasCantidad (en lugar de con cantidad)
@@ -233,6 +239,14 @@ public class Movimiento implements Serializable {
 
     public void setCantidadEmpresa(MonetaryAmount cantidadEmpresa) {
         this.cantidadEmpresa = cantidadEmpresa;
+    }
+
+    public Integer getPeriocidad() {
+        return periocidad;
+    }
+
+    public void setPeriocidad(Integer periocidad) {
+        this.periocidad = periocidad;
     }
     
     @Override

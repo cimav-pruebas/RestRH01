@@ -1,16 +1,13 @@
 
 package cimav.restrh.services;
 
-import cimav.restrh.entities.EGrupo;
 import cimav.restrh.entities.EmpleadoNomina;
 import cimav.restrh.entities.Nomina;
 import cimav.restrh.entities.HoraExtra;
 import cimav.restrh.entities.Incidencia;
 import cimav.restrh.entities.QuincenaSingleton;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -130,18 +127,19 @@ public class NominaREST extends AbstractFacade<Nomina>{
         return nomina;
     }
     
-    @GET
-    @Path("incidencias/{id_empleado}")
-    @Produces("text/plain")
-    public String incidencias(@PathParam("id_empleado") Integer idEmpleado) {
-        Query query = getEntityManager().createQuery("SELECT eq FROM Nomina AS eq WHERE eq.idEmpleado =:id_empleado", Nomina.class);
-        query.setParameter("id_empleado", idEmpleado);
-        Nomina nomina = (Nomina) query.getSingleResult();
-        return this.calcularIncidencias(nomina);
-    }
+//    @GET
+//    @Path("incidencias/{id_empleado}")
+//    @Produces("text/plain")
+//    public String incidencias(@PathParam("id_empleado") Integer idEmpleado) {
+//        Query query = getEntityManager().createQuery("SELECT eq FROM Nomina AS eq WHERE eq.idEmpleado =:id_empleado", Nomina.class);
+//        query.setParameter("id_empleado", idEmpleado);
+//        Nomina nomina = (Nomina) query.getSingleResult();
+//        return this.calcularIncidencias(nomina);
+//    }
     
     public String calcularIncidencias(Nomina nomina) {
-        if (nomina != null) {
+        // se llama desde calculo
+        if (nomina != null && !nomina.getIncidencias().isEmpty()) {
             Integer faltas = 0;
             Integer incapacidadHabiles = 0;
             Integer incapacidadInhabiles = 0;
@@ -170,18 +168,19 @@ public class NominaREST extends AbstractFacade<Nomina>{
         return nomina;
     }
     
-    @GET
-    @Path("tiempo_extra/{id_empleado}")
-    @Produces("text/plain")
-    public String tiempoExtra(@PathParam("id_empleado") Integer idEmpleado) {
-        Query query = getEntityManager().createQuery("SELECT eq FROM Nomina AS eq WHERE eq.idEmpleado =:id_empleado", Nomina.class);
-        query.setParameter("id_empleado", idEmpleado);
-        Nomina nomina = (Nomina) query.getSingleResult();
-        return this.calcularTiempoExtra(nomina);
-    }
+//    @GET
+//    @Path("tiempo_extra/{id_empleado}")
+//    @Produces("text/plain")
+//    public String tiempoExtrax(@PathParam("id_empleado") Integer idEmpleado) {
+//        Query query = getEntityManager().createQuery("SELECT eq FROM Nomina AS eq WHERE eq.idEmpleado =:id_empleado", Nomina.class);
+//        query.setParameter("id_empleado", idEmpleado);
+//        Nomina nomina = (Nomina) query.getSingleResult();
+//        return this.calcularTiempoExtra2(nomina);
+//    }
     
     public String calcularTiempoExtra(Nomina nomina) {
-        if (nomina != null) {
+        // se llama desde calculo
+        if (nomina != null && !nomina.getHorasExtras().isEmpty()) {
             // agrupar hrs extras por semana
             HashMap<Integer, List<HoraExtra>> hashMap = new HashMap<>();
             for (HoraExtra horaExtra : nomina.getHorasExtras()) {

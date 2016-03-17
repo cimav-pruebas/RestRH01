@@ -5,6 +5,7 @@
  */
 package cimav.restrh.services;
 
+import cimav.restrh.entities.Concepto;
 import cimav.restrh.entities.Empleado;
 import cimav.restrh.entities.EmpleadoHisto;
 import cimav.restrh.entities.Movimiento;
@@ -13,14 +14,12 @@ import cimav.restrh.entities.Nomina;
 import cimav.restrh.entities.NominaHisto;
 import cimav.restrh.entities.Parametros;
 import cimav.restrh.entities.QuincenaSingleton;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.money.MonetaryAmount;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -28,7 +27,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import org.javamoney.moneta.Money;
 
 /**
  *
@@ -89,19 +87,20 @@ public class QuincenaREST {
             return quincenaSingleton.toJSON();
         }
 
-        Integer year = quincenaSingleton.getYear();
-        Integer quinActual = quincenaSingleton.getQuincena();
-        Integer quinNext = quinActual + 1;
-        if (quinNext == 25) {
-            quinNext = 1;
-            year = year + 1;
-            parametros.setYear(year);
-        }
-        parametros.setQuincenaActual(quinNext);
-        
-        quincenaSingleton.load();
-
         try {
+            
+            Integer year = quincenaSingleton.getYear();
+            Integer quinActual = quincenaSingleton.getQuincena();
+            Integer quinNext = quinActual + 1;
+            if (quinNext == 25) {
+                quinNext = 1;
+                year = year + 1;
+                parametros.setYear(year);
+            }
+            parametros.setQuincenaActual(quinNext);
+        
+            quincenaSingleton.load();
+
             // usra  @OneToMany(orphanRemoval=true)
             // @OneToOne(cascade=CascadeType.REMOVE)
 
@@ -119,9 +118,10 @@ public class QuincenaREST {
             for(Movimiento movimiento : movimientos) {
                 MovimientoHisto movimientoHisto = new MovimientoHisto();
 
-                movimientoHisto.setQuincena(quinNext.shortValue());
+                movimientoHisto.setQuincena(quinActual.shortValue());
                 movimientoHisto.setYear(year.shortValue());
                 
+                // en historico, el id_movimiento permite el track del movimiento (pago) quincena tras quincena
                 movimientoHisto.setIdMovimiento(movimiento.getId());
                 
                 movimientoHisto.setCantidad(movimiento.getCantidad());
@@ -138,32 +138,36 @@ public class QuincenaREST {
 
                 // Eliminar movimientos tipo Calculos para la siguiente quincena
                 // Actualizar movimientos tipo Pagos (saldos, pago, num_quincenas y permanente).
-                if (Movimiento.PAGO.equals(movimiento.getConcepto().getIdTipoMovimiento())) {
+                if (Concepto.MOV_PAGO == movimiento.getConcepto().getIdTipoMovimiento()) {
                     if (movimiento.getPermanente()) {
                         // si es permanente lo deja todo igual
-                    } else if (movimiento.getNumQuincenas() > 0) {
-                        
-                        short numQuincenas = movimiento.getNumQuincenas();
-                        MonetaryAmount saldo = movimiento.getSaldo();
-                        MonetaryAmount pago = movimiento.getPago();
-                        
-                        assert saldo.isGreaterThanOrEqualTo(pago) : "El saldo no puede ser menor al pago: " + movimiento.getId();
-                        
-                        // nuevo saldo
-                        saldo = saldo.subtract(pago);
-                        // restar 1 periodo
-                        numQuincenas = (short) (numQuincenas - 1);
-
-                        if ((numQuincenas <= 0) || saldo.isLessThanOrEqualTo(Money.of(BigDecimal.ZERO, "MXN"))) {
-                            // si ya no queda saldo, se elimina
-                            em.remove(movimiento);
-                        } else {
-                            // persistir la cobranza
-                            movimiento.setNumQuincenas(numQuincenas);
-                            movimiento.setSaldo(saldo);
-                        }
-                        
-                    }
+                    } 
+                    
+                    // TODO Importante. De momento, quincena 1 a la 2, no actualiza movimientos por seguridad.
+                    // simplemente los deja igual; como si fueran permanentes.
+//                    else if (movimiento.getNumQuincenas() > 0) {
+//                        
+//                        short numQuincenas = movimiento.getNumQuincenas();
+//                        MonetaryAmount saldo = movimiento.getSaldo();
+//                        MonetaryAmount pago = movimiento.getPago();
+//                        
+//                        assert saldo.isGreaterThanOrEqualTo(pago) : "El saldo no puede ser menor al pago: " + movimiento.getId();
+//                        
+//                        // nuevo saldo
+//                        saldo = saldo.subtract(pago);
+//                        // restar 1 periodo
+//                        numQuincenas = (short) (numQuincenas - 1);
+//
+//                        if ((numQuincenas <= 0) || saldo.isLessThanOrEqualTo(Money.of(BigDecimal.ZERO, "MXN"))) {
+//                            // si ya no queda saldo, se elimina
+//                            em.remove(movimiento);
+//                        } else {
+//                            // persistir la cobranza
+//                            movimiento.setNumQuincenas(numQuincenas);
+//                            movimiento.setSaldo(saldo);
+//                        }
+//                    }
+                    
                 } else {
                     // Elimina todos los Calculos
                     em.remove(movimiento);
@@ -184,7 +188,7 @@ public class QuincenaREST {
             List<Nomina> nominas = nominaREST.findAll();
             for(Nomina nomina : nominas) {
                 NominaHisto nominaHisto = new NominaHisto();
-                nominaHisto.setQuincena(quinNext.shortValue());
+                nominaHisto.setQuincena(quinActual.shortValue());
                 nominaHisto.setYear(year.shortValue());
 
                 nominaHisto.setDescanso(nomina.getDescanso().shortValue());
@@ -217,7 +221,7 @@ public class QuincenaREST {
             List<Empleado> empleados = empleadoREST.findAll(); // TODO .findAllActivos filtrar dados de baja antes y en la quicena 
             for(Empleado empleado : empleados) {
                 EmpleadoHisto empleadoHisto = new EmpleadoHisto();
-                empleadoHisto.setQuincena(quinNext.shortValue());
+                empleadoHisto.setQuincena(quinActual.shortValue());
                 empleadoHisto.setYear(year.shortValue());
 
                 String antg = "" + empleado.getPantYears() + " año(s), " + empleado.getPantMonths() + " mes(es), " + empleado.getPantDayEven() + " día(s)";
