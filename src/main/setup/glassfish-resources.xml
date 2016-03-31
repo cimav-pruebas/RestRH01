@@ -34,7 +34,7 @@
         <property name="URL" value="jdbc:postgresql://10.0.4.40:5432/rh_development"/>
         <property name="driverClass" value="org.postgresql.Driver"/>
         <property name="schema" value="public" />
-        <property name="ssl" value="true" />
+        <property name="ssl" value="false" />
     </jdbc-connection-pool>
     <jdbc-resource enabled="true" jndi-name="JNDI_RH_DEV" object-type="user" pool-name="post-gre-sql_rh_development_rh_userPool"/>
     
