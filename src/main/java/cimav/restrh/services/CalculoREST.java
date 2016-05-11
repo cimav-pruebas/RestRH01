@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.security.DeclareRoles;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -55,6 +56,7 @@ import org.javamoney.moneta.function.MonetaryUtil;
  */
 @Stateless
 @Path("calculo")
+@DeclareRoles(AbstractFacade.ADMIN_ROLE)
 public class CalculoREST {
 
     private final static Logger logger = Logger.getLogger(CalculoREST.class.getName() ); 

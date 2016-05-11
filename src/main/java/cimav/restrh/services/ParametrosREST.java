@@ -6,6 +6,7 @@
 package cimav.restrh.services;
 
 import cimav.restrh.entities.Parametros;
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -19,6 +20,7 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("parametros")
+@PermitAll
 public class ParametrosREST {
  
     @PersistenceContext(unitName = "PU_JPA")

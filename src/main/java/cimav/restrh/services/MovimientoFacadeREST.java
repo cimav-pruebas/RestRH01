@@ -9,6 +9,7 @@ import cimav.restrh.entities.Movimiento;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -29,6 +30,7 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("movimientos")
+@PermitAll
 public class MovimientoFacadeREST extends AbstractFacade<Movimiento> {
     
     private final static Logger logger = Logger.getLogger(MovimientoFacadeREST.class.getName() ); 

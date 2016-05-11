@@ -8,6 +8,7 @@ package cimav.restrh.services;
 import cimav.restrh.entities.Concepto;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
@@ -25,6 +26,7 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("concepto")
+@PermitAll 
 public class ConceptoFacadeREST extends AbstractFacade<Concepto> {
     
     private final static Logger logger = Logger.getLogger(ConceptoFacadeREST.class.getName() ); 

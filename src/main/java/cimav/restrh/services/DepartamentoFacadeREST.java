@@ -7,6 +7,7 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.Departamento;
 import java.util.List;
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
@@ -24,6 +25,7 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("departamento")
+@PermitAll
 public class DepartamentoFacadeREST extends AbstractFacade<Departamento> {
 //    @PersistenceContext(unitName = "PU_JPA")
 //    private EntityManager em;
@@ -61,6 +63,8 @@ public class DepartamentoFacadeREST extends AbstractFacade<Departamento> {
         super.remove(super.find(id));
     }
 
+    //@Resource private SessionContext sc;
+    
     @GET
     @Path("{id}")
     @Produces("application/json")
@@ -68,6 +72,7 @@ public class DepartamentoFacadeREST extends AbstractFacade<Departamento> {
         return super.find(id);
     }
 
+    //@RolesAllowed("ADMIN")
     @GET
     @Override
     @Produces("application/json")

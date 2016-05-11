@@ -22,6 +22,7 @@ public class ApplicationConfig extends Application {
         /* aqui para asegurarse que siempre los agregue */
         resources.add(cimav.restrh.services.RESTCorsRequestFilter.class);
         resources.add(cimav.restrh.services.RESTCorsResponseFilter.class);
+        resources.add(cimav.restrh.services.AuthenticationFilter.class);
         return resources;
     }
 
@@ -32,6 +33,7 @@ public class ApplicationConfig extends Application {
      * If required, comment out calling this method in getClasses().
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
+        resources.add(cimav.restrh.services.AuthenticationFilter.class);
         resources.add(cimav.restrh.services.CalculoREST.class);
         resources.add(cimav.restrh.services.ConceptoFacadeREST.class);
         resources.add(cimav.restrh.services.DepartamentoFacadeREST.class);

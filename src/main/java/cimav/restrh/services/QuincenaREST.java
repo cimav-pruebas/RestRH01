@@ -17,6 +17,7 @@ import cimav.restrh.entities.QuincenaSingleton;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.security.PermitAll;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -34,6 +35,7 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("quincena")
+@PermitAll
 public class QuincenaREST {
     
     private final static Logger logger = Logger.getLogger(QuincenaREST.class.getName() ); 

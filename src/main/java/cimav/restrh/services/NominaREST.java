@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.security.DeclareRoles;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -35,6 +36,7 @@ import org.javamoney.moneta.Money;
  */
 @Stateless
 @Path("nomina")
+@DeclareRoles(AbstractFacade.ADMIN_ROLE)
 public class NominaREST extends AbstractFacade<Nomina>{
     
     private final static Logger logger = Logger.getLogger(NominaREST.class.getName() ); 
@@ -139,7 +141,7 @@ public class NominaREST extends AbstractFacade<Nomina>{
     
     public String calcularIncidencias(Nomina nomina) {
         // se llama desde calculo
-        if (nomina != null && !nomina.getIncidencias().isEmpty()) {
+        if (nomina != null /*&& !nomina.getIncidencias().isEmpty()*/) {
             Integer faltas = 0;
             Integer incapacidadHabiles = 0;
             Integer incapacidadInhabiles = 0;

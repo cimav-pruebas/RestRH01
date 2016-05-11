@@ -17,6 +17,9 @@ import javax.ws.rs.core.HttpHeaders;
  * @param <T>
  */
 public abstract class AbstractFacade<T> {
+    
+    public static final String ADMIN_ROLE = "ADMIN_ROLE"; //QURNSU5fUk9MRTphZG1pbg==
+    
     private final Class<T> entityClass;
 
     public AbstractFacade(Class<T> entityClass) {

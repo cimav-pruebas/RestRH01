@@ -7,6 +7,7 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.Incidencia;
 import java.util.List;
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
@@ -24,6 +25,7 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("incidencias")
+@PermitAll
 public class IncidenciaFacadeREST extends AbstractFacade<Incidencia> {
 
 //    @PersistenceContext(unitName = "PU_JPA")

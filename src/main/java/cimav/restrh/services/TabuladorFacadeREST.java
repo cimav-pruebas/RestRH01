@@ -7,6 +7,7 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.Tabulador;
 import java.util.List;
+import javax.annotation.security.DeclareRoles;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -25,6 +26,7 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("tabulador")
+@DeclareRoles(AbstractFacade.ADMIN_ROLE)
 public class TabuladorFacadeREST extends AbstractFacade<Tabulador> {
     @PersistenceContext(unitName = "PU_JPA")
     private EntityManager em;

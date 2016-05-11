@@ -7,6 +7,7 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.TarifaAnual;
 import java.util.List;
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -21,6 +22,7 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("tarifa_anual")
+@PermitAll
 public class TarifaAnualREST extends AbstractFacade<TarifaAnual> {
     
     @PersistenceContext(unitName = "PU_JPA")
