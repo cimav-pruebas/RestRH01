@@ -46,6 +46,11 @@ public class QuincenaSingleton {
     private int mes;
     private int diaInicio;    
     private int diaFinal;
+    
+    private Integer yearSDIVariable;
+    private Integer bimestreSDIVariable;
+    private Integer quinInicialSDIVariable;
+    private Integer quinFinSDIVariable;
 
     @EJB
     private ParametrosREST parametrosREST;
@@ -138,6 +143,16 @@ public class QuincenaSingleton {
 //        DateTime end1 = new DateTime(year, mes, fechaFinCalendarioCal.get(Calendar.DATE), 0, 0, 0, DateTimeZone.UTC);
 //        
 //        int diasImssCount = Days.daysBetween(start, end).getDays();
+
+        // datos para obtener el SDI Variable (acumulado de las 4 quincenas del bimestre anterior)
+        yearSDIVariable = year;
+        bimestreSDIVariable = bimestre - 1;
+        if (bimestreSDIVariable <= 0) {
+            bimestreSDIVariable = 6;
+            yearSDIVariable = yearSDIVariable - 1;
+        }
+        quinFinSDIVariable = bimestreSDIVariable * 4;
+        quinInicialSDIVariable = quinFinSDIVariable - 3;
 
         this.fechaInicio = fechaInicioCal.getTime(); 
         this.fechaFinCalendario = fechaFinCalendarioCal.getTime();
@@ -281,6 +296,18 @@ public class QuincenaSingleton {
     }
     public Integer getDiaFinal() {
         return diaFinal;
+    }
+
+    public Integer getYearSDIVariable() {
+        return yearSDIVariable;
+    }
+
+    public Integer getQuinInicialSDIVariable() {
+        return quinInicialSDIVariable;
+    }
+
+    public Integer getQuinFinSDIVariable() {
+        return quinFinSDIVariable;
     }
     
 }

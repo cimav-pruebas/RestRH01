@@ -6,6 +6,7 @@ import cimav.restrh.entities.Nomina;
 import cimav.restrh.entities.HoraExtra;
 import cimav.restrh.entities.Incidencia;
 import cimav.restrh.entities.QuincenaSingleton;
+import cimav.restrh.entities.SDIVariable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,8 +19,10 @@ import javax.annotation.security.DeclareRoles;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.money.MonetaryAmount;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -59,27 +62,29 @@ public class NominaREST extends AbstractFacade<Nomina>{
         return em;
     }
 
+    /*
+    SELECT MAX(id)+1 FROM nomina;
+    CREATE SEQUENCE nomina_id_seq MINVALUE 446;
+    ALTER TABLE nomina ALTER id SET DEFAULT nextval('nomina_id_seq');
+    ALTER SEQUENCE nomina_id_seq OWNED BY nomina.id
+    */
+    
+    
     @GET
     @Path("init")
     @Produces("text/plain")
+    @Transactional(rollbackOn = Exception.class)
     public String init() {
-        try {
-            
-            // vaciar
-            getEntityManager().createQuery("DELETE FROM Nomina").executeUpdate();
-            //TODO falta cambiar ALTER SEQUENCE empleadoquincenal_id_seq RESTART WITH 1
-            getEntityManager().createNativeQuery("ALTER SEQUENCE empleadoquincenal_id_seq RESTART WITH 1").executeUpdate(); 
+        // vaciar
+        getEntityManager().createQuery("DELETE FROM Nomina").executeUpdate();
+        getEntityManager().createNativeQuery("ALTER SEQUENCE nomina_id_seq RESTART WITH 1").executeUpdate(); 
 
-            // TODO Filtrar que solo inicialize a los empleados activos.
-            List<EmpleadoNomina> empleadosNomina = empleadoNominaFacadeREST.findAll();
-            empleadosNomina.stream().forEach((empleadoNomina) -> {
-                this.inicializar(empleadoNomina);
-            });
-
-        } catch (Exception er){
-            logger.log(Level.INFO, er.getMessage());
-        }
-        return "";
+        // TODO Filtrar que solo inicialize a los empleados activos.
+        List<EmpleadoNomina> empleadosNomina = empleadoNominaFacadeREST.findAll();
+        empleadosNomina.stream().forEach((empleadoNomina) -> {
+            this.inicializar(empleadoNomina);
+        });
+        return "Init Listo";
     }
     
     @GET
@@ -121,12 +126,25 @@ public class NominaREST extends AbstractFacade<Nomina>{
         nomina.setIncapacidadInhabiles(0);
         nomina.setHorasExtrasDobles(0.00);
         nomina.setHorasExtrasTriples(0.00);
-        // TODO falta inicializar el sdiVariableBimestreAnterior
-        nomina.setSdiVariableBimestreAnterior(Money.of(BigDecimal.ZERO, CalculoREST.MXN)); 
+        
+        MonetaryAmount sdiVariableBimestreAnterior = getSDIVariable(empNom.getId());
+        nomina.setSdiVariableBimestreAnterior(sdiVariableBimestreAnterior); 
 
         this.insert(nomina); // insertarlo en la DB
         
         return nomina;
+    }
+    
+    private MonetaryAmount getSDIVariable(Integer idEmpleado) {
+        String qlString = "SELECT SUM(sv.monto) FROM SDIVariable sv WHERE sv.idEmpleado = :p_id_empleado AND sv.year = :p_year AND sv.quincena >= :p_quincenaI AND sv.quincena <= :p_quincenaF";
+        Query query = em.createQuery(qlString, SDIVariable.class);
+        query.setParameter("p_id_empleado", idEmpleado);
+        query.setParameter("p_year", quincena.getYearSDIVariable());
+        query.setParameter("p_quincenaI", quincena.getQuinInicialSDIVariable());
+        query.setParameter("p_quincenaF", quincena.getQuinFinSDIVariable());
+        BigDecimal monto = (BigDecimal) query.getSingleResult();
+        MonetaryAmount result = Money.of(monto,"MXN");
+        return result;
     }
     
 //    @GET

@@ -1090,7 +1090,7 @@ public class CalculoREST {
     @GET
     @Path("/sdi_vinculacion/{id_empleado}")
     @Produces("application/json")
-    public String getSdi(@PathParam("id_empleado") int idEmpleado) {
+    public String getSdiVinculacion(@PathParam("id_empleado") int idEmpleado) {
         Concepto concepto = finConceptoByCode(SALARIO_DIARIO_FIJO);
         if (concepto == null) {
             return "0.00";
