@@ -142,8 +142,12 @@ public class QuincenaREST {
     @Path("cierre/{cerrar}")
     @Produces("application/json")
     @Transactional(rollbackOn = Exception.class)
-    public String cerrarQuincena(@PathParam("cerrar") boolean cerrar) throws Exception {
+    /**
+     * Cierra la quincena actual
+     */
+    public String cierre(@PathParam("cerrar") boolean cerrar) throws Exception {
 
+        
         Parametros parametros = parametrosREST.get();
 
         if (!cerrar) {
@@ -183,7 +187,7 @@ public class QuincenaREST {
         query.setParameter("p_quincena", quinNext); // TODO ¿porque del quinNext?
         query.executeUpdate();
 
-        // insertar los movimientos en el histórico con year|quincena
+        // insertar los movimientos (y cálculos) en el histórico con year|quincena
         List<Movimiento> movimientos = movimientosREST.findAll();
         for (Movimiento movimiento : movimientos) {
             MovimientoHisto movimientoHisto = new MovimientoHisto();

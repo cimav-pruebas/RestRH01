@@ -5,12 +5,14 @@
  */
 package cimav.restrh.entities;
 
+import cimav.restrh.tools.HistoryEmpleadoEventListener;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -28,6 +30,7 @@ import org.apache.commons.lang3.time.DateUtils;
  */
 @Entity
 @Cacheable(false)
+@EntityListeners(HistoryEmpleadoEventListener.class)
 @Table(name = "empleados", catalog = "rh_development", schema = "public")
 @XmlRootElement(name = "empleado")
 public class Empleado extends EmpleadoSuper implements Serializable {
@@ -442,5 +445,4 @@ public class Empleado extends EmpleadoSuper implements Serializable {
         this.pensionCuenta = pensionCuenta;
     }
 
-    
 }
