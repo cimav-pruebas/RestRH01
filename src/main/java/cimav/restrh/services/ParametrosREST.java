@@ -38,6 +38,7 @@ public class ParametrosREST {
     @Produces(value = "application/json")
     public Parametros get() {
         Parametros parametros = getEntityManager().find(Parametros.class, 1);
+        System.out.println("num_quincena_actual ::> " + parametros.getYear());
         return parametros;
     }
     /*

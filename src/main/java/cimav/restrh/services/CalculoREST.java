@@ -103,9 +103,11 @@ public class CalculoREST {
     private final String HORAS_EXTRAS_GRAVADO           = "00058";
     private final String HORAS_EXTRAS_TRIPLE            = "00060";
     private final String PRIMA_QUINQUENAL               = "00067";
+    private final String INDEMNIZACION_CARGA_ADMVA      = "00082";
     private final String MONEDERO_DESPENSA              = "00092";
     private final String SEG_SEPARACION_IND             = "00093";
     private final String ISR                            = "00101";
+    private final String ISR_HONORARIOS                 = "00103";
     private final String IMSS                           = "00106";
     private final String FONDO_AHORRO                   = "00111";
     private final String APORTACION_FONDO_AHORRO        = "00112";
@@ -145,7 +147,7 @@ public class CalculoREST {
     private final String PORCEN_MATERIALES          = "0.06";
     private final Double PORCEN_FONDO_AHORRO        = 0.13;
     private final Double PORCEN_FONDO_AHORRO_EXENTO = 1.3;
-    private final Double SALARIO_MINIMO             = 73.04; //= 70.10; //TODO SM tiene que ser historico
+    //private final Double SALARIO_MINIMO             = 73.04; //= 70.10; //TODO SM tiene que ser historico
     private final Integer SALARIO_DIARIO_TOPE        = 25; // 25 veces el Salario MÃ­nimo
     
     private final Integer DIAS_MES_30           = 30;
@@ -209,6 +211,8 @@ public class CalculoREST {
         
         this.idEmpleado = idEmpleado;
 
+        MonetaryAmount salario_minimo            = Money.of(0.00, "MXN");
+        
         MonetaryAmount sueldo_tabulador;
         MonetaryAmount sueldo_diario            = Money.of(0.00, "MXN");
         MonetaryAmount sueldo_ordinario         = Money.of(0.00, "MXN");
@@ -246,6 +250,8 @@ public class CalculoREST {
         
         MonetaryAmount carga_admin_diaria = Money.of(0.00, "MXN");
         MonetaryAmount carga_admin = Money.of(0.00, "MXN");
+        MonetaryAmount carga_admin_indem = Money.of(0.00, "MXN");
+        
         MonetaryAmount fondo_ahorro_exento = Money.of(0.00, "MXN");
         MonetaryAmount fondo_ahorro_gravado = Money.of(0.00, "MXN");
         MonetaryAmount fondo_ahorro = Money.of(0.00, "MXN");
@@ -262,11 +268,13 @@ public class CalculoREST {
         MonetaryAmount base_exenta = Money.of(0.00, "MXN");
         
         MonetaryAmount impuesto_antes_subsidio = Money.of(0.00, "MXN");
+        MonetaryAmount impuesto_antes_subsidio_honorarios = Money.of(0.00, "MXN");
         
         MonetaryAmount salario_diario_fijo = Money.of(0.00, "MXN"); // Salario Diario Integrado (todas las percepciones fijas)
-        MonetaryAmount salario_diario_variable = Money.of(0.00, "MXN"); // Remanente, EstimulosAYA, etc.
+        MonetaryAmount salario_diario_variable = Money.of(0.00, "MXN"); // Del Bimestre Anterior
         MonetaryAmount salario_diario_cotizado = Money.of(0.00, "MXN"); // Salario Diario de CotizaciÃ³n (SDI + todss las percepciones variables)
         MonetaryAmount salario_diario_cotizado_topado = Money.of(0.00, "MXN"); // Topado a 25 Salarios MÃ­nimos
+        MonetaryAmount integracion_variable = Money.of(0.00, "MXN"); // Remanente, EstimulosAYA, Indemnizaion por Carga, Horas Triples, etc. para el proximo bimestre
         
         MonetaryAmount imss_obrero              = Money.of(0.00, "MXN");
         MonetaryAmount excedente_3SM_diario     = Money.of(0.00, "MXN");
@@ -337,6 +345,8 @@ public class CalculoREST {
             //TODO Falta incluir dÃ­as de Asueto
             
             */
+            
+            salario_minimo = quincenaSingleton.getSalarioMinimo();
             
             // faltas, incapacidades y asueto del empleado en la quincena
             Integer faltas = nomina.getFaltas();
@@ -473,7 +483,7 @@ public class CalculoREST {
             /* Estimulos Productividad */
             if (isCYT) {
                 // Son proporcionales a los DT?
-                estimulos_cyt_diario = Money.of(SALARIO_MINIMO * empleadoNomina.getEstimulosProductividad(), MXN);
+                estimulos_cyt_diario = salario_minimo.multiply(empleadoNomina.getEstimulosProductividad());
                 estimulos_cyt = estimulos_cyt_diario.multiply(dias_trabajados);
             }
             
@@ -484,7 +494,7 @@ public class CalculoREST {
             /* Fondo de Ahorro */
             if (isCYT || isAYA) {
                 fondo_ahorro = sueldo.multiply(PORCEN_FONDO_AHORRO);
-                fondo_ahorro_exento = Money.of(SALARIO_MINIMO * PORCEN_FONDO_AHORRO_EXENTO * DIAS_QUINCENA_15, MXN);
+                fondo_ahorro_exento = salario_minimo.multiply(PORCEN_FONDO_AHORRO_EXENTO * DIAS_QUINCENA_15);
                 if (fondo_ahorro_exento.isGreaterThanOrEqualTo(fondo_ahorro)) {
                     // exenta completo
                     fondo_ahorro_exento = fondo_ahorro;
@@ -504,8 +514,19 @@ public class CalculoREST {
             /* Carga Administrativa */
             if(nivel.getCargaAdmin() != null && !nivel.getCargaAdmin().isZero()) {
                 // El tabulador / 30
-                carga_admin_diaria = nivel.getCargaAdmin().divide(DIAS_MES_30);
+                MonetaryAmount carga_admin_tab = nivel.getCargaAdmin();
+                carga_admin_diaria = carga_admin_tab.divide(DIAS_MES_30);
                 carga_admin = carga_admin_diaria.multiply(dias_trabajados);
+                   
+                /* Indemnizacion carga admin  */
+                if (carga_admin.isGreaterThan(Money.of(0.00, "MXN"))) {
+                    //TODO Excepcion de Licea 01-2016
+                    // Grava, Integra, Variable ???
+                    if ("00283".equals(empleadoNomina.getCode()) && quincenaSingleton.getQuincena() == 1 && quincenaSingleton.getYear() == 2016) {
+                        // 3 veces su carga mensual tabular (90 días de su carga diaria)
+                        carga_admin_indem = carga_admin_tab.multiply(3); //Money.of(32600.00, "MXN");
+                    }
+                }
             }
             
             /* Monedero Despensa */
@@ -609,8 +630,10 @@ public class CalculoREST {
                     tiempo_extra_triple_gravado = sueldo_hora.multiply(3.0).multiply(nomina.getHorasExtrasTriples());
                 }
             }
-            
-            //** se acaban los calculos; sigue meterlos a los movimientos
+
+            /**********************
+             se acaban los calculos; sigue meterlos a los movimientos
+            **********************/
             
             // Eliminar los Calculos Previos para evitar conceptos rezagados
             // no incluidos en el este proceso
@@ -622,6 +645,7 @@ public class CalculoREST {
             insertarCalculo(HONORARIOS_ASIMILABLES, sueldo_honorarios);
             insertarCalculo(PRIMA_ANTIGUEDAD, prima_antiguedad);
             insertarCalculo(CARGA_ADMINISTRATIVA, carga_admin);
+            insertarCalculo(INDEMNIZACION_CARGA_ADMVA, carga_admin_indem);
             insertarCalculo(MATERIALES, materiales);
             insertarCalculo(ESTIMULOS_PRODUCTIVIDAD_CYT, estimulos_cyt);
             insertarCalculo(COMPENSA_GARANTIZADA, compensa_garantiza);
@@ -660,7 +684,9 @@ public class CalculoREST {
             // Ret. credito infonavit incluye Seguro de Vivivienda por 15 pesos. Se paga en la 1era quincena de cada bimestre.
             
             // TODO sacar las percepciones de pagos de integracion_variable para el siguiente bimestre
-            // horas triples integran como variado
+            // horas triples integran como variado, remanente, inmdem x carga, estimulosAYA, etc
+            // Corrección: todo lo que sea indemnizacion no Integra (caso de la indem por carga)
+            // integracion_variable = integracion_variable.add(carga_admin_indem); 
             
             // leer SDI Variable (Remanente CYT, Estimulo AYA, Bimestre Anterior)
             salario_diario_variable = nomina.getSdiVariableBimestreAnterior();
@@ -670,7 +696,7 @@ public class CalculoREST {
             // cotizado = fijo + variables Â¿Equivalente al Mixto del Imss?
             salario_diario_cotizado = salario_diario_fijo.add(salario_diario_variable);
             // cotizado se topa (no el fijo)
-            MonetaryAmount topeSalarioDiarioCotizado = Money.of(SALARIO_DIARIO_TOPE * SALARIO_MINIMO, MXN);
+            MonetaryAmount topeSalarioDiarioCotizado = salario_minimo.multiply(SALARIO_DIARIO_TOPE);
             if (salario_diario_cotizado.compareTo(topeSalarioDiarioCotizado) > 0) {
                 // Si rebasa el tope, agarra el topo
                 salario_diario_cotizado_topado = topeSalarioDiarioCotizado;
@@ -703,7 +729,7 @@ public class CalculoREST {
             // TODO para Imss y repercuciones se usan los días Reales? se les quitan faltas e incapacidades?
             Integer dias_imss = dias_reales_imss - faltas - incapacidadesHabiles - incapacidadesInhabiles;
             
-            MonetaryAmount excedente_3SM_diario_factor = Money.of(3 * SALARIO_MINIMO, MXN);
+            MonetaryAmount excedente_3SM_diario_factor = salario_minimo.multiply(3);
             if (salario_diario_cotizado_topado.compareTo(excedente_3SM_diario_factor) > 0) {
                 excedente_3SM_diario_factor = salario_diario_cotizado_topado.subtract(excedente_3SM_diario_factor);
             }
@@ -724,7 +750,7 @@ public class CalculoREST {
             invalidez_y_vida_empresa = salario_diario_cotizado_topado.multiply(0.0175).multiply(dias_imss);
             cesantia_y_vejez_empresa = salario_diario_cotizado_topado.multiply(0.0315).multiply(dias_imss);
 
-            cuota_fija_empresa = Money.of(SALARIO_MINIMO, MXN).multiply(0.2040).multiply(dias_imss); 
+            cuota_fija_empresa = salario_minimo.multiply(0.2040).multiply(dias_imss); 
             riesgo_trabajo_empresa = salario_diario_cotizado_topado.multiply(0.005436).multiply(dias_imss);
             guarderias_y_prestaciones_sociales_empresa = salario_diario_cotizado_topado.multiply(0.0100).multiply(dias_imss); 
             seguro_retiro_empresa = salario_diario_cotizado_topado.multiply(0.0200).multiply(dias_imss); 
@@ -755,6 +781,7 @@ public class CalculoREST {
             base_gravable = base_gravable.add(materiales);
             base_gravable = base_gravable.add(estimulos_cyt);
             base_gravable = base_gravable.add(carga_admin);
+            base_gravable = base_gravable.add(carga_admin_indem);
             base_gravable = base_gravable.add(compensa_garantiza);
             base_gravable = base_gravable.add(fondo_ahorro_gravado);
             base_gravable = base_gravable.add(prima_quinquenal);
@@ -775,7 +802,11 @@ public class CalculoREST {
             insertarCalculo(BASE_EXENTA, base_exenta);
             
             /* Calcular Impuesto después de obtener la BG */
-            impuesto_antes_subsidio = calcularImpuesto(base_gravable);
+            if (isHON) {
+                impuesto_antes_subsidio_honorarios = calcularImpuesto(base_gravable);
+            } else {
+                impuesto_antes_subsidio = calcularImpuesto(base_gravable);
+            }
             /* Seguro de separacion indivudualizado - Después del ISR normal pq se "piramida" */
             if (isMMS) {
                 
@@ -796,6 +827,7 @@ public class CalculoREST {
                 insertarCalculo(SEG_SEPARACION_IND_EMPLEADO, seg_sep_ind_cimav_emp);
             }
             insertarCalculo(ISR, impuesto_antes_subsidio);
+            insertarCalculo(ISR_HONORARIOS, impuesto_antes_subsidio_honorarios);
 
             
             /** Calcular Pensión Alimenticia (después de calcular y persistir todos los movimientos(percep y deducc)) **/
@@ -823,6 +855,7 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + HONORARIOS_ASIMILABLES + "\": " + sueldo_honorarios.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + PRIMA_ANTIGUEDAD + "\": " + prima_antiguedad.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + CARGA_ADMINISTRATIVA + "\": " + carga_admin.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + INDEMNIZACION_CARGA_ADMVA + "\": " + carga_admin_indem.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + MATERIALES + "\": " + materiales.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + ESTIMULOS_PRODUCTIVIDAD_CYT + "\": " + estimulos_cyt.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + COMPENSA_GARANTIZADA + "\": " + compensa_garantiza.getNumber().toString() + ",";
@@ -836,6 +869,7 @@ public class CalculoREST {
         
         resultJSON = resultJSON + ",\"DEDUCCION\": {";
             resultJSON = resultJSON + "\"" + ISR + "\": " + impuesto_antes_subsidio.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + ISR_HONORARIOS + "\": " + impuesto_antes_subsidio_honorarios.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + IMSS + "\": " + imss_obrero.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + APORTACION_FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString()+ ",";
@@ -853,6 +887,7 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + "Prima antg" + "\": " + prima_antiguedad.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Mater" + "\": " + materiales.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Carga" + "\": " + carga_admin.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Indemnizacion por Carga" + "\": " + carga_admin_indem.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Compensa" + "\": " + compensa_garantiza.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Fondo ahorro" + "\": " + fondo_ahorro_gravado.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Estimulos" + "\": " + estimulos_cyt.getNumber().toString() + ",";
@@ -886,6 +921,12 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + "Estimulos" + "\": " + estimulos_cyt_diario.getNumber().toString();
         resultJSON = resultJSON + " }";
 
+        resultJSON = resultJSON + ",\"SDI_VARIABLE_ACUMULADO\": {";
+            resultJSON = resultJSON + "\"" + "integracion_variable (Total)" + "\": " + integracion_variable.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Indemnizacion por Carga" + "\": " + carga_admin_indem.getNumber().toString();
+            // TODO Falta acumular SDI Variable de Remanente y Otros (¿Otros conceptos no quincenales capturados suman al sdi acumulado?)
+        resultJSON = resultJSON + " }";
+        
         resultJSON = resultJSON + ",\"IMSS_OBRERO\": {";
             resultJSON = resultJSON + "\"" + "IMSS_OBRERO" + "\": " + imss_obrero.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "excedente_3SMG" + "\": " + excedente_3SM_diario.getNumber().toString() + ",";
@@ -1128,7 +1169,7 @@ public class CalculoREST {
                 Concepto concepto = movi.getConcepto();
 
                 boolean perteneceAlEmpleado = pensionConceptoIds.contains(concepto.getId());
-                // solo considea los conceptos de pension que pertenezcan al empleado
+                // solo considera los conceptos de pension que pertenezcan al empleado
                 if (perteneceAlEmpleado) {
                     if (concepto.getSuma()) {
                         // considera solo conceptos que suman ya sea Percepción o Deducción
@@ -1139,10 +1180,10 @@ public class CalculoREST {
                             // suma las deducciones incluidas en Pensiones del empleado
                             totDeducPension = totDeducPension.add(movi.getCantidad());
                         }
-                    } 
-                    else if (MONEDERO_DESPENSA.equals(concepto.getCode()) && incluyeMonedero) { 
+                    } else if (MONEDERO_DESPENSA.equals(concepto.getCode()) && incluyeMonedero) { 
                         pensionAlimenticiaMonedero = movi.getCantidad().multiply(percen);
                     }
+                    logger.log(Level.SEVERE, "" + concepto.getIdTipoConcepto() + " : " + movi.getCantidad().getNumber().floatValue() + " : " + concepto.getName());
                 }
             }
 

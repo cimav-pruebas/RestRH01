@@ -5,7 +5,7 @@
  */
 package cimav.restrh.entities;
 
-import cimav.restrh.services.ParametrosREST;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
@@ -14,9 +14,12 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.money.MonetaryAmount;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 /**
  *
@@ -31,6 +34,9 @@ public class QuincenaSingleton {
     private Integer year;
     private Integer bimestre;
     private Integer quincena;
+    
+    private Integer status;
+    private MonetaryAmount salarioMinimo;
     
     private Date fechaInicio = null;
     private Date fechaFin = null;
@@ -52,9 +58,16 @@ public class QuincenaSingleton {
     private Integer quinInicialSDIVariable;
     private Integer quinFinSDIVariable;
 
-    @EJB
-    private ParametrosREST parametrosREST;
     
+    /*******************
+     Poner un EJB o accesar al em en un Singleton no es recomendable. Se bloquea
+     muy fácil. Para desbloquear hay que reiniciar GlassFish y DB.
+     *******************/
+    
+//    @EJB
+//    private QuincenaREST quincenaREST;
+    @PersistenceContext(unitName = "PU_JPA")
+    EntityManager em;
     
     public QuincenaSingleton() {
         logger.log(Level.INFO, "QuincenaSingleton()");
@@ -66,34 +79,15 @@ public class QuincenaSingleton {
      */
     @PostConstruct
     public void load() {
-        Parametros parametros = parametrosREST.get();
-        //logger.log(Level.INFO, "%%>> " + quin);
-        // TODO 2015
-        this.set(parametros.getYear(), parametros.getQuincenaActual());
-    }
-    
-    public static LocalDate convert(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int day_month = calendar.get(Calendar.DAY_OF_MONTH);
-        LocalDate localDate = LocalDate.of(year, month, day_month);
-        return localDate;
-    }
-    
-    /**
-     * Inicializa la QuincenaSingleton de acuerdo a los parametros.
-     * 
-     * Importante: después de utilizar la quincena con set, 
-     * llamar el método load() para recuperar la quincena actual.
-     * 
-     * @param pyear
-     * @param pquincena 
-     */
-    public void set(int pyear, int pquincena) {
-        this.year = pyear;
-        this.quincena = pquincena;
+
+        Query query = em.createQuery("SELECT q FROM Quincena AS q ORDER BY q.id DESC");
+        Quincena quincenaEntity = (Quincena) query.setMaxResults(1).getSingleResult();
+        //logger.log(Level.SEVERE, "Prueba quincena loaded>" + quincenaEntity);
+        
+        this.status = quincenaEntity.getStatus();
+        this.salarioMinimo = quincenaEntity.getSalarioMinimo();
+        this.year = quincenaEntity.getYear();
+        this.quincena = quincenaEntity.getQuincena();
         
         boolean isQuincenaPar = (quincena & 1) == 0;
         mes = (int)Math.ceil(quincena/2.0);
@@ -183,11 +177,25 @@ public class QuincenaSingleton {
             "\t" + "\"diasOrdinarios\": " + diasOrdinarios + "," +
             "\t" + "\"diasDescando\": " + diasDescanso + "," +
             "\t" + "\"diasAsueto\": " + diasAsueto + "," +
-            "\t" + "\"diasImss\": " + diasImss + "" +
+            "\t" + "\"diasImss\": " + diasImss + "," +
+            "\t" + "\"status\": " + status + "," +
+            "\t" + "\"salarioMinimo\": " + salarioMinimo.getNumber() + "" +
             "}";
     }
     
+    public static LocalDate convert(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day_month = calendar.get(Calendar.DAY_OF_MONTH);
+        LocalDate localDate = LocalDate.of(year, month, day_month);
+        return localDate;
+    }
+        
     public String toJSON() {
+        logger.log(Level.SEVERE, asJson);
+        
         return this.asJson;
     }
     
@@ -309,5 +317,14 @@ public class QuincenaSingleton {
     public Integer getQuinFinSDIVariable() {
         return quinFinSDIVariable;
     }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public MonetaryAmount getSalarioMinimo() {
+        return salarioMinimo;
+    }
+    
     
 }

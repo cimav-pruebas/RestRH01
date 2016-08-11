@@ -12,21 +12,23 @@ import cimav.restrh.entities.Movimiento;
 import cimav.restrh.entities.MovimientoHisto;
 import cimav.restrh.entities.Nomina;
 import cimav.restrh.entities.NominaHisto;
-import cimav.restrh.entities.Parametros;
+import cimav.restrh.entities.Quincena;
 import cimav.restrh.entities.QuincenaSingleton;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.annotation.Resource;
 import javax.annotation.security.PermitAll;
 import javax.ejb.EJB;
-import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -39,67 +41,114 @@ import javax.ws.rs.Produces;
 @Path("quincena")
 @PermitAll
 //@TransactionManagement(TransactionManagementType.BEAN)
-public class QuincenaREST {
+public class QuincenaREST extends AbstractFacade<Quincena>{
 
     private final static Logger logger = Logger.getLogger(QuincenaREST.class.getName() );
 
     @PersistenceContext(unitName = "PU_JPA")
     private EntityManager em;
 
-    @Inject
-    private QuincenaSingleton quincenaSingleton;
-
-    @EJB
-    private ParametrosREST parametrosREST;
     @EJB
     private MovimientoFacadeREST movimientosREST;
     @EJB
     private NominaREST nominaREST;
     @EJB
     private EmpleadoFacadeREST empleadoREST;
+    
+    @Inject
+    private QuincenaSingleton quincenaSingleton;
 
     public QuincenaREST() {
+        super(Quincena.class);
     }
 
+    @Override
+    protected EntityManager getEntityManager() {
+        return em;
+    }
 
     @GET
-    @Path("")
     @Produces("application/json")
-    public String quincena() {
-        String result = quincenaSingleton.toJSON();
+    public String quincenaActual() {
+        return quincenaSingleton.toJSON();
+    }
+    
+    @GET
+    @Path("ultima")
+    @Produces("application/json")
+    public Quincena quincenaUltima() {
+        Query query = getEntityManager().createNativeQuery("SELECT * FROM quincenas ORDER BY id DESC LIMIT 1", Quincena.class);
+        Quincena result = (Quincena) query.getSingleResult();
         return result;
     }
 
     @GET
-    @Path("{year}/{quincena}")
+    @Path("{id}")
     @Produces("application/json")
-    public String quincena(@PathParam("year") int year, @PathParam("quincena") int quin) {
-        quincenaSingleton.set(year, quin);
-        String result = quincenaSingleton.toJSON();
-        quincenaSingleton.load(); // recargar la quincena actual
-        return result;
+    public Quincena find(@PathParam("id") Integer id) {
+        return super.find(id);
     }
-
-    @Resource
-    private SessionContext ctx;
 
     @GET
-    @Path("transaction2/{p}")
-    @Produces("application/text")
-    @Transactional(rollbackOn = Exception.class)
-    // https://en.wikipedia.org/wiki/Java_Transaction_API#Open_source_JTA_implementations
-    public String testTrans2(@PathParam("p") Integer p) throws Exception {
-
-            Parametros parametros = parametrosREST.get();
-            parametros.setStatusQuincena(p);
-
-            if (p % 2 == 0) throw new Exception("Num Par");
-
-            Empleado juan = empleadoREST.find(154);
-            juan.setIdProyecto(p.shortValue());
-
-        return "END";
+    @Path("all")
+    @Override
+    @Produces("application/json")
+    public List<Quincena> findAll() {
+        return super.findAll();
     }
+    
+    @POST
+    @Consumes("application/json")
+    @Produces("application/json")
+    @Override
+    public Quincena insert(Quincena entity) {
+        super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
+        return entity; 
+    }
+    @PUT
+    @Path("{id}")
+    @Consumes("application/json")
+    public void edit(@PathParam("id") Integer id, Quincena entity) {
+        super.edit(entity);
+    }
+
+    @DELETE
+    @Path("{id}")
+    public void remove(@PathParam("id") Integer id) {
+        super.remove(super.find(id));
+    }
+
+    @GET
+    @Path("{from}/{to}")
+    @Produces("application/json")
+    public List<Quincena> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
+        return super.findRange(new int[]{from, to});
+    }
+
+    @GET
+    @Path("count")
+    @Produces("text/plain")
+    public String countREST() {
+        return String.valueOf(super.count());
+    }
+
+//    @GET
+//    @Path("transaction2/{p}")
+//    @Produces("application/text")
+//    @Transactional(rollbackOn = Exception.class)
+//    // https://en.wikipedia.org/wiki/Java_Transaction_API#Open_source_JTA_implementations
+//    public String testTrans2(@PathParam("p") Integer p) throws Exception {
+//
+//            Parametros parametros = parametrosREST.get();
+//            parametros.setStatusQuincena(p);
+//
+//            if (p % 2 == 0) throw new Exception("Num Par");
+//
+//            Empleado juan = empleadoREST.find(154);
+//            juan.setIdProyecto(p.shortValue());
+//
+//        return "END";
+//    }
   /*
     la clase requier @TransactionManagement(TransactionManagementType.BEAN)
 
@@ -148,25 +197,25 @@ public class QuincenaREST {
     public String cierre(@PathParam("cerrar") boolean cerrar) throws Exception {
 
         
-        Parametros parametros = parametrosREST.get();
+//        Parametros parametros = parametrosREST.get();
 
-        if (!cerrar) {
-            // previene cierre por error
-            return quincenaSingleton.toJSON();
-        }
+//        if (!cerrar) {
+//            // previene cierre por error
+//            return quincenaSingleton.toJSON();
+//        }
 
         // determinar quincena & year
-        Integer year = quincenaSingleton.getYear();
-        Integer quinActual = quincenaSingleton.getQuincena();
+        Integer year = 0; //quincenaSingleton.getYear();
+        Integer quinActual = 0;// quincenaSingleton.getQuincena();
         Integer quinNext = quinActual + 1;
         if (quinNext == 25) {
             quinNext = 1;
             year = year + 1;
-            parametros.setYear(year);
+//            parametros.setYear(year);
         }
-        parametros.setQuincenaActual(quinNext);
+//        parametros.setQuincenaActual(quinNext);
 
-        quincenaSingleton.load();
+//        quincenaSingleton.load();
 
         if (false) {
             // para pruebas
@@ -320,7 +369,7 @@ public class QuincenaREST {
         }
 
         // Verificar Empleados dados de Baja, etc.
-        return quincenaSingleton.toJSON();
+        return "{}";// quincenaSingleton.toJSON();
     }
 
 

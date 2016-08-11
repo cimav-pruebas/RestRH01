@@ -143,6 +143,7 @@ public class NominaREST extends AbstractFacade<Nomina>{
         query.setParameter("p_quincenaI", quincena.getQuinInicialSDIVariable());
         query.setParameter("p_quincenaF", quincena.getQuinFinSDIVariable());
         BigDecimal monto = (BigDecimal) query.getSingleResult();
+        monto = monto == null ? BigDecimal.ZERO : monto;
         MonetaryAmount result = Money.of(monto,"MXN");
         return result;
     }
