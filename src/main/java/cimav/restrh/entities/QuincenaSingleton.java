@@ -17,7 +17,8 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.money.MonetaryAmount;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 /**
@@ -29,6 +30,10 @@ import javax.persistence.Query;
 public class QuincenaSingleton {
     
     private final static Logger logger = Logger.getLogger(QuincenaSingleton.class.getName() ); 
+    
+    public static final Integer ABIERTA     = 0;
+    public static final Integer CERRANDOSE  = 1;
+    public static final Integer CERRADA     = 2;
     
     private Integer year;
     private Integer bimestre;
@@ -69,8 +74,8 @@ public class QuincenaSingleton {
     
 //    @EJB
 //    private QuincenaREST quincenaREST;
-    @PersistenceContext(unitName = "PU_JPA")
-    EntityManager em;
+//    @PersistenceContext(unitName = "PU_JPA")
+//    EntityManager em;
     
     public QuincenaSingleton() {
         logger.log(Level.INFO, "QuincenaSingleton()");
@@ -83,7 +88,10 @@ public class QuincenaSingleton {
     @PostConstruct
     public void load() {
 
-        Query query = em.createQuery("SELECT q FROM Quincena AS q ORDER BY q.id DESC");
+        EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "PU_JPA" );
+        EntityManager entitymanager = emfactory.createEntityManager( );
+        
+        Query query = entitymanager.createQuery("SELECT q FROM Quincena AS q ORDER BY q.id DESC");
         Quincena quincenaEntity = (Quincena) query.setMaxResults(1).getSingleResult();
         //logger.log(Level.SEVERE, "Prueba quincena loaded>" + quincenaEntity);
         

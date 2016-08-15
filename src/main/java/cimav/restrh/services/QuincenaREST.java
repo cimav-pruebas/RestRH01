@@ -8,14 +8,15 @@ package cimav.restrh.services;
 import cimav.restrh.entities.Concepto;
 import cimav.restrh.entities.Empleado;
 import cimav.restrh.entities.EmpleadoHisto;
+import cimav.restrh.entities.EmpleadoPlaza;
 import cimav.restrh.entities.Movimiento;
 import cimav.restrh.entities.MovimientoHisto;
 import cimav.restrh.entities.Nomina;
 import cimav.restrh.entities.NominaHisto;
+import cimav.restrh.entities.Plaza;
 import cimav.restrh.entities.Quincena;
 import cimav.restrh.entities.QuincenaSingleton;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.PermitAll;
 import javax.ejb.EJB;
@@ -54,6 +55,8 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
     private NominaREST nominaREST;
     @EJB
     private EmpleadoFacadeREST empleadoREST;
+    @EJB
+    private EmpleadoPlazaREST empleadoPlazaREST;
     
     @Inject
     private QuincenaSingleton quincenaSingleton;
@@ -188,6 +191,65 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
     */
 
     @GET
+    @Path("init")
+    @Produces("text/plain")
+    @Transactional(rollbackOn = Exception.class)
+    public String initTodos() {
+        
+        List<Empleado> empleadosActivos = empleadoREST.findAll();
+        empleadosActivos.stream().forEach((empleado) -> {
+            inicializar(empleado);
+        });
+        
+        return "Init " + empleadosActivos.size() + " empleados";
+    }
+    
+    @GET
+    @Path("init/{id_empleado}")
+    @Produces("application/json")
+    @Transactional(rollbackOn = Exception.class)
+    public EmpleadoPlaza initEmpleado(@PathParam("id_empleado") Integer id_empleado) {
+        
+        Empleado empleadoActivo = empleadoREST.find(id_empleado);
+        EmpleadoPlaza plaza = inicializar(empleadoActivo);
+        
+        return plaza;
+    }
+    
+    public EmpleadoPlaza inicializar(Empleado empleado) {
+        
+        // crear una copia de la plaza del Empleado en el Histo al inicializar la quincena para corroborar cambios en la plaza al cierre
+        // empleado x empleado
+        
+        // 1ero lo borro en caso de que ya exista
+        empleadoPlazaREST.delete(empleado.getId(), quincenaSingleton.getYear(), quincenaSingleton.getQuincena());
+        
+        EmpleadoPlaza empleadoPlaza =  new EmpleadoPlaza();
+        empleadoPlaza.setYear(quincenaSingleton.getYear());
+        empleadoPlaza.setQuincena(quincenaSingleton.getQuincena());
+        empleadoPlaza.setIdEmpleado(empleado.getId());
+        empleadoPlaza.setCode(empleado.getCode());
+        empleadoPlaza.setName(empleado.getName());
+        empleadoPlaza.setAntiguedad(empleado.getPantYears() + " años, " + empleado.getPantMonths() + " meses, " + empleado.getPantDayEven() + " días");
+        empleadoPlaza.setEstimulosProductividad(empleado.getEstimulosProductividad());
+        empleadoPlaza.setFechaAntiguedad(empleado.getFechaAntiguedad());
+        empleadoPlaza.setFechaBaja(empleado.getFechaBaja());
+        empleadoPlaza.setFechaIngreso(empleado.getFechaIngreso());
+        empleadoPlaza.setIdDepartamento(empleado.getDepartamento().getId());
+        empleadoPlaza.setIdGrupo(empleado.getIdGrupo());
+        empleadoPlaza.setIdSede(empleado.getIdSede());
+        empleadoPlaza.setIdStatus(empleado.getIdStatus());
+        empleadoPlaza.setIdTipoAntiguedad(empleado.getIdTipoAntiguedad());
+        empleadoPlaza.setNivelCode(empleado.getNivel().getCode());
+        
+        // insertar la copia
+        empleadoPlazaREST.insert(empleadoPlaza);
+        
+        return empleadoPlaza;
+    }
+    
+    
+    @GET
     @Path("cierre/{cerrar}")
     @Produces("application/json")
     @Transactional(rollbackOn = Exception.class)
@@ -199,14 +261,16 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
         
 //        Parametros parametros = parametrosREST.get();
 
-//        if (!cerrar) {
-//            // previene cierre por error
-//            return quincenaSingleton.toJSON();
-//        }
+        if (!cerrar) {
+            // previene cierre por error
+            return quincenaSingleton.toJSON();
+        }
 
+        // status de cerrando
+        Integer status = QuincenaSingleton.CERRANDOSE;
         // determinar quincena & year
-        Integer year = 0; //quincenaSingleton.getYear();
-        Integer quinActual = 0;// quincenaSingleton.getQuincena();
+        Integer year = quincenaSingleton.getYear();
+        Integer quinActual = quincenaSingleton.getQuincena();
         Integer quinNext = quinActual + 1;
         if (quinNext == 25) {
             quinNext = 1;
@@ -218,7 +282,7 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
 //        quincenaSingleton.load();
 
         if (false) {
-            // para pruebas
+            // para pruebas de transaccion
             throw new Exception("***** Verdadero ******");
         }
 
@@ -333,41 +397,52 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
 
         /********
          * Empleados 
+         * Guarda los cambios en la Plaza (EmpleadosHisto)
          ********/
         
-        // asegurarse no haya registro del year|quincena en el histórico
+        // asegurarse no haya registro del year|quincenaNUEVA en el histórico
         qlString = "DELETE FROM EmpleadoHisto eh WHERE eh.year = :p_year AND eh.quincena = :p_quincena";
         query = em.createQuery(qlString, EmpleadoHisto.class);
         query.setParameter("p_year", year);
-        query.setParameter("p_quincena", quinNext);
+        query.setParameter("p_quincena", quinNext); 
         query.executeUpdate();
 
         // insertar los registros de empleados en el histórico con year|quincena
         List<Empleado> empleados = empleadoREST.findAll(); // TODO .findAllActivos filtrar dados de baja antes y en la quicena
-        for (Empleado empleado : empleados) {
-            EmpleadoHisto empleadoHisto = new EmpleadoHisto();
-            empleadoHisto.setQuincena(quinActual.shortValue());
-            empleadoHisto.setYear(year.shortValue());
+        for(Empleado empleado : empleados) {
+            EmpleadoPlaza empleadoPlaza = empleadoPlazaREST.findByIdEmpleado(empleado.getId());
+            if (empleadoPlaza != null && !empleadoPlaza.equivalente(empleado)) {
 
-            String antg = "" + empleado.getPantYears() + " año(s), " + empleado.getPantMonths() + " mes(es), " + empleado.getPantDayEven() + " día(s)";
-            empleadoHisto.setAntiguedad(antg);
-            empleadoHisto.setCode(empleado.getCode());
-            empleadoHisto.setEstimulosProductividad(empleado.getEstimulosProductividad());
-            empleadoHisto.setFechaAntiguedad(empleado.getFechaAntiguedad());
-            empleadoHisto.setFechaBaja(empleado.getFechaBaja());
-            empleadoHisto.setFechaIngreso(empleado.getFechaIngreso());
-            empleadoHisto.setIdDepartamento(empleado.getDepartamento().getId());
-            empleadoHisto.setIdEmpleado(empleado.getId());
-            empleadoHisto.setIdGrupo(empleado.getIdGrupo().shortValue());
-            empleadoHisto.setIdSede(empleado.getIdSede());
-            empleadoHisto.setIdStatus(empleado.getIdStatus());
-            empleadoHisto.setNivelCode(empleado.getNivel().getCode());
-            empleadoHisto.setIdTipoAntiguedad(empleado.getIdTipoAntiguedad());
-            empleadoHisto.setName(empleado.getName());
+                EmpleadoHisto empleadoHisto = new EmpleadoHisto();
+                empleadoHisto.setQuincena(quinActual);
+                empleadoHisto.setYear(year);
 
-            em.persist(empleadoHisto);
+                String antg = "" + empleado.getPantYears() + " año(s), " + empleado.getPantMonths() + " mes(es), " + empleado.getPantDayEven() + " día(s)";
+                empleadoHisto.setAntiguedad(antg);
+                empleadoHisto.setCode(empleado.getCode());
+                empleadoHisto.setEstimulosProductividad(empleado.getEstimulosProductividad());
+                empleadoHisto.setFechaAntiguedad(empleado.getFechaAntiguedad());
+                empleadoHisto.setFechaBaja(empleado.getFechaBaja());
+                empleadoHisto.setFechaIngreso(empleado.getFechaIngreso());
+                empleadoHisto.setIdDepartamento(empleado.getDepartamento().getId());
+                empleadoHisto.setIdEmpleado(empleado.getId());
+                empleadoHisto.setIdGrupo(empleado.getIdGrupo());
+                empleadoHisto.setIdSede(empleado.getIdSede());
+                empleadoHisto.setIdStatus(empleado.getIdStatus());
+                empleadoHisto.setNivelCode(empleado.getNivel().getCode());
+                empleadoHisto.setIdTipoAntiguedad(empleado.getIdTipoAntiguedad());
+                empleadoHisto.setName(empleado.getName());
+            
+                em.persist(empleadoHisto);
+            }
         }
 
+        /*
+        INSERT INTO empleadoshisto 
+            (id, id_empleado, year, quincena, name, code, id_status, id_grupo, id_departamento, id_sede, id_tipo_antiguedad, fecha_antiguedad, antiguedad, fecha_ingreso, 
+            fecha_baja, estimulos_productividad, nivel_code, porcen_seg_separacion_ind, pension_tipo, pension_porcentaje, pension_cantidad_fija) 
+        VALUES (0, 0, 0, 0, '', '', 0, 0, 0, 0, 0, '', '', '', '', 0, '', 0, 0, 0, 0);
+        */
         // Verificar Empleados dados de Baja, etc.
         return "{}";// quincenaSingleton.toJSON();
     }

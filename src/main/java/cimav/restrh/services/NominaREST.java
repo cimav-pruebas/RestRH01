@@ -75,22 +75,26 @@ public class NominaREST extends AbstractFacade<Nomina>{
     @Produces("text/plain")
     @Transactional(rollbackOn = Exception.class)
     public String init() {
+        // uso desarrollador
+        
         // vaciar
         getEntityManager().createQuery("DELETE FROM Nomina").executeUpdate();
         getEntityManager().createNativeQuery("ALTER SEQUENCE nomina_id_seq RESTART WITH 1").executeUpdate(); 
 
         // TODO Filtrar que solo inicialize a los empleados activos.
         List<EmpleadoNomina> empleadosNomina = empleadoNominaFacadeREST.findAll();
-        empleadosNomina.stream().forEach((empleadoNomina) -> {
+        empleadosNomina.stream().forEach((EmpleadoNomina empleadoNomina) -> {
             this.inicializar(empleadoNomina);
         });
-        return "Init Listo";
+        return "Init " + empleadosNomina.size() + " empleados";
     }
     
     @GET
     @Path("init/{id_emp}")
     @Produces(value = "application/json")
     public Nomina init(@PathParam("id_emp") Integer idEmp) {
+        // uso desarrollador 
+        
         // inicializa un empleado
         Nomina result = null;
         try {
@@ -103,6 +107,7 @@ public class NominaREST extends AbstractFacade<Nomina>{
     }
     
     public Nomina inicializar(EmpleadoNomina empNom) {
+        
         /*
         Dias ordinarios, descanso, trabajados de la quincena
         Sdi del bimestre para el empleado

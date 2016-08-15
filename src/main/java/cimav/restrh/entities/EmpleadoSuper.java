@@ -28,7 +28,7 @@ import org.apache.commons.lang3.time.DateUtils;
 public class EmpleadoSuper extends BaseEntity implements Serializable {
 
     @Column(name = "id_status")
-    private Short idStatus;
+    private Integer idStatus;
 
     @Size(max = 300)
     @Column(name = "url_photo")
@@ -51,10 +51,10 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     private Departamento departamento;
 
     @Column(name = "id_sede")
-    private Short idSede;
+    private Integer idSede;
 
     @Column(name = "id_tipo_antiguedad")
-    private Short idTipoAntiguedad;
+    private Integer idTipoAntiguedad;
     
     @Column(name = "fecha_antiguedad")
     @Temporal(TemporalType.DATE)
@@ -110,11 +110,11 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
         super();
     }
 
-    public Short getIdStatus() {
+    public Integer getIdStatus() {
         return idStatus;
     }
 
-    public void setIdStatus(Short idStatus) {
+    public void setIdStatus(Integer idStatus) {
         this.idStatus = idStatus;
     }
 
@@ -150,11 +150,11 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
         this.departamento = departamento;
     }
 
-    public Short getIdSede() {
+    public Integer getIdSede() {
         return idSede;
     }
 
-    public void setIdSede(Short idSede) {
+    public void setIdSede(Integer idSede) {
         this.idSede = idSede;
     }
 
@@ -215,11 +215,11 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
         this.pantDayEven = pantDayEven;
     }
 
-    public Short getIdTipoAntiguedad() {
+    public Integer getIdTipoAntiguedad() {
         return idTipoAntiguedad;
     }
 
-    public void setIdTipoAntiguedad(Short idTipoAntiguedad) {
+    public void setIdTipoAntiguedad(Integer idTipoAntiguedad) {
         this.idTipoAntiguedad = idTipoAntiguedad;
     }
 

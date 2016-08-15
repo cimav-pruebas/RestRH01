@@ -5,7 +5,7 @@
  */
 package cimav.restrh.services;
 
-import cimav.restrh.entities.EmpleadoHisto;
+import cimav.restrh.entities.EmpleadoPlaza;
 import java.util.List;
 import javax.annotation.security.DeclareRoles;
 import javax.ejb.Stateless;
@@ -22,12 +22,12 @@ import javax.ws.rs.Produces;
  * @author calderon
  */
 @Stateless
-@Path("empleado_histo")
+@Path("empleado_plaza")
 @DeclareRoles(AbstractFacade.ADMIN_ROLE)
-public class EmpleadoHistoREST extends AbstractFacade<EmpleadoHisto> {
+public class EmpleadoPlazaREST extends AbstractFacade<EmpleadoPlaza> {
     
-    public EmpleadoHistoREST() {
-        super(EmpleadoHisto.class);
+    public EmpleadoPlazaREST() {
+        super(EmpleadoPlaza.class);
     }
 
     @Override
@@ -38,26 +38,37 @@ public class EmpleadoHistoREST extends AbstractFacade<EmpleadoHisto> {
     @GET
     @Path("{id}")
     @Produces("application/json")
-    public EmpleadoHisto find(@PathParam("id") Integer id) {
-        EmpleadoHisto empleadoHisto = super.find(id);
-        return empleadoHisto;
+    public EmpleadoPlaza find(@PathParam("id") Integer id) {
+        EmpleadoPlaza empleadoPlaza = super.find(id);
+        return empleadoPlaza;
     }
 
     @GET
     @Override
     @Produces("application/json")
-    public List<EmpleadoHisto> findAll() {
-        List<EmpleadoHisto> emps = super.findAll();
+    public List<EmpleadoPlaza> findAll() {
+        List<EmpleadoPlaza> emps = super.findAll();
         return emps;
     }
 
     @GET
+    @Path("/by_id_empleado/{idEmpleado}")
+    @Produces("application/json")
+    public EmpleadoPlaza findByIdEmpleado(@PathParam("idEmpleado") Integer idEmpleado) {
+        
+            String query = "SELECT en FROM EmpleadoPlaza en WHERE en.idEmpleado = " + idEmpleado;
+            EmpleadoPlaza result = (EmpleadoPlaza) getEntityManager().createQuery(query).getSingleResult();
+        
+        return result;
+    }
+    
+    @GET
     @Path("/by_code/{code}")
     @Produces("application/json")
-    public List<EmpleadoHisto> findByCodeEmpleado(@PathParam("code") String code) {
+    public List<EmpleadoPlaza> findByCodeEmpleado(@PathParam("code") String code) {
         
-            String query = "SELECT en FROM EmpleadoHisto en WHERE en.code like '%" + code.trim() +"'";
-            List<EmpleadoHisto>  result = getEntityManager().createQuery(query).getResultList();
+            String query = "SELECT en FROM EmpleadoPlaza en WHERE en.code like '%" + code.trim() +"'";
+            List<EmpleadoPlaza>  result = getEntityManager().createQuery(query).getResultList();
         
         return result;
     }
@@ -66,7 +77,7 @@ public class EmpleadoHistoREST extends AbstractFacade<EmpleadoHisto> {
     @Path("{id_empleado}/{year}/{quincena}")
     @Produces("application/text")
     public String delete(@PathParam("id_empleado") Integer id_empleado, @PathParam("year") Integer year, @PathParam("quincena") Integer quincena) {
-        Query query = em.createQuery("DELETE FROM EmpleadoHisto eh WHERE eh.idEmpleado = :id_empleado AND eh.year = :year AND eh.quincena = :quincena");
+        Query query = em.createQuery("DELETE FROM EmpleadoPlaza eh WHERE eh.idEmpleado = :id_empleado AND eh.year = :year AND eh.quincena = :quincena");
         int deletedCount = query
                 .setParameter("id_empleado", id_empleado)
                 .setParameter("year", year)
