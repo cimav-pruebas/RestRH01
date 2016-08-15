@@ -16,7 +16,6 @@ import cimav.restrh.entities.TarifaAnual;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -207,7 +206,9 @@ public class CalculoREST {
     
     private String calcular(int idEmpleado) {
 
-        Instant a = Instant.now();
+        logger.log(Level.WARNING, AuthenticationFilter.usuario);    
+        
+        //Instant a = Instant.now();
         
         this.idEmpleado = idEmpleado;
 

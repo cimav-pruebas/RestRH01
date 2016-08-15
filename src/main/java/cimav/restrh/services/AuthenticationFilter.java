@@ -35,22 +35,22 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
     // http://howtodoinjava.com/jersey/jersey-rest-security/
     
     //QURNSU5fUk9MRTphZG1pbg==
+    
+    public static String usuario = "none";
      
     @Context
     private ResourceInfo resourceInfo;
      
     private static final String AUTHORIZATION_PROPERTY = "Authorization";
     private static final String AUTHENTICATION_SCHEME = "Basic";
-    private static final Response ACCESS_DENIED = Response.status(Response.Status.UNAUTHORIZED)
-                                                        .entity("You cannot access this resource").build();
-    private static final Response ACCESS_FORBIDDEN = Response.status(Response.Status.FORBIDDEN)
-                                                        .entity("Access blocked for all users !!").build();
+    private static final Response ACCESS_DENIED = Response.status(Response.Status.UNAUTHORIZED).entity("You cannot access this resource").build();
+    private static final Response ACCESS_FORBIDDEN = Response.status(Response.Status.FORBIDDEN).entity("Access blocked for all users !!").build();
       
     @Override
     public void filter(ContainerRequestContext requestContext)
     {
-        Class clase =  resourceInfo.getResourceClass();
-        Method method = resourceInfo.getResourceMethod();
+        Class clase =  resourceInfo.getResourceClass(); 
+        Method method = resourceInfo.getResourceMethod(); 
         
         //Access allowed for all
         if(!clase.isAnnotationPresent(PermitAll.class) && !method.isAnnotationPresent(PermitAll.class)) {
@@ -87,12 +87,17 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
             final String username = tokenizer.nextToken();
             final String password = tokenizer.nextToken();
               
+            // Inyecta el usuario en cada clase o método que requiere autentificarse
+            usuario = username;
+            
             //Verify user access
             if(clase.isAnnotationPresent(DeclareRoles.class)) {
-                if(!username.equals(AbstractFacade.ADMIN_ROLE) || !password.equals("admin")) {
+                if(/*!username.equals(AbstractFacade.ADMIN_ROLE) ||*/ !password.equals("admin")) {
+                    // No importa el usuario; solo estoy verificando el password
                     requestContext.abortWith(ACCESS_DENIED);
                 }
             } else if(method.isAnnotationPresent(RolesAllowed.class)) {
+                // Todo es a nivel clases, no estoy haciendolo por metodos
                 RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
                 Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
                 //Is user valid?
@@ -112,8 +117,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
         //Access the database and do this part yourself
         //String userRole = userMgr.getUserRole(username);
          
-        if(username.equals(AbstractFacade.ADMIN_ROLE) && password.equals("admin"))
-        {
+        if(username.equals(AbstractFacade.ADMIN_ROLE) && password.equals("admin")) {
             String userRole = AbstractFacade.ADMIN_ROLE;
              
             //Step 2. Verify user role

@@ -5,7 +5,6 @@
  */
 package cimav.restrh.entities;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
@@ -58,6 +57,10 @@ public class QuincenaSingleton {
     private Integer quinInicialSDIVariable;
     private Integer quinFinSDIVariable;
 
+    private String fi;
+    private String ffr;
+    private String fff;
+    private int diaFinalCalendario;
     
     /*******************
      Poner un EJB o accesar al em en un Singleton no es recomendable. Se bloquea
@@ -99,7 +102,7 @@ public class QuincenaSingleton {
         fechaInicioCal.set(year, mes-1, diaInicio, 0, 0, 0);
         
         // si es quincena non, dia real y topado coinciden en 15
-        int diaFinalCalendario = 15;
+        diaFinalCalendario = 15;
         diaFinal = 15;
         if (isQuincenaPar) {
             // último día real del mes
@@ -157,9 +160,9 @@ public class QuincenaSingleton {
         this.diasAsueto = 0; // TODO faltan los días de Asueto
         
         String formatStr = "\"yyyy-MM-dd'T'HH:mm:ssZ\""; //"\"yyyy-MM-dd'T'HH:mm:ssXXX\"";
-        String fi = new SimpleDateFormat(formatStr).format(this.fechaInicio);
-        String ffr = new SimpleDateFormat(formatStr).format(this.fechaFinCalendario);
-        String fff = new SimpleDateFormat(formatStr).format(this.fechaFin);
+        fi = new SimpleDateFormat(formatStr).format(this.fechaInicio);
+        ffr = new SimpleDateFormat(formatStr).format(this.fechaFinCalendario);
+        fff = new SimpleDateFormat(formatStr).format(this.fechaFin);
         
         this.asJson = 
             "{ " + "\"quincena\": " + quincena + "," +
@@ -179,7 +182,7 @@ public class QuincenaSingleton {
             "\t" + "\"diasAsueto\": " + diasAsueto + "," +
             "\t" + "\"diasImss\": " + diasImss + "," +
             "\t" + "\"status\": " + status + "," +
-            "\t" + "\"salarioMinimo\": " + salarioMinimo.getNumber() + "" +
+            "\t" + "\"salarioMinimo\": " + salarioMinimo.getNumber() +
             "}";
     }
     
@@ -194,7 +197,7 @@ public class QuincenaSingleton {
     }
         
     public String toJSON() {
-        logger.log(Level.SEVERE, asJson);
+        //logger.log(Level.SEVERE, asJson);
         
         return this.asJson;
     }
@@ -325,6 +328,5 @@ public class QuincenaSingleton {
     public MonetaryAmount getSalarioMinimo() {
         return salarioMinimo;
     }
-    
-    
+
 }

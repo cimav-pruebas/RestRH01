@@ -15,13 +15,13 @@ import cimav.restrh.entities.NominaHisto;
 import cimav.restrh.entities.Quincena;
 import cimav.restrh.entities.QuincenaSingleton;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.PermitAll;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
@@ -45,8 +45,8 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
 
     private final static Logger logger = Logger.getLogger(QuincenaREST.class.getName() );
 
-    @PersistenceContext(unitName = "PU_JPA")
-    private EntityManager em;
+//    @PersistenceContext(unitName = "PU_JPA")
+//    private EntityManager em;
 
     @EJB
     private MovimientoFacadeREST movimientosREST;
@@ -69,7 +69,7 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
 
     @GET
     @Produces("application/json")
-    public String quincenaActual() {
+    public String quincenaInit() {
         return quincenaSingleton.toJSON();
     }
     
