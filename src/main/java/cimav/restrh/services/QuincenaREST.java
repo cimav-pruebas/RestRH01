@@ -13,7 +13,6 @@ import cimav.restrh.entities.Movimiento;
 import cimav.restrh.entities.MovimientoHisto;
 import cimav.restrh.entities.Nomina;
 import cimav.restrh.entities.NominaHisto;
-import cimav.restrh.entities.Plaza;
 import cimav.restrh.entities.Quincena;
 import cimav.restrh.entities.QuincenaSingleton;
 import java.util.List;
@@ -73,6 +72,19 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
     @GET
     @Produces("application/json")
     public String quincenaInit() {
+        // Carga la quincena
+        
+        // Este debe ser el 1er método que lea.
+
+        Query query = getEntityManager().createQuery("SELECT q FROM Quincena AS q ORDER BY q.id DESC");
+        Quincena quincenaEntity = (Quincena) query.setMaxResults(1).getSingleResult();
+        quincenaSingleton.setYear(quincenaEntity.getYear());
+        quincenaSingleton.setQuincena(quincenaEntity.getQuincena());
+        quincenaSingleton.setSalarioMinimo(quincenaEntity.getSalarioMinimo());
+        quincenaSingleton.setStatus(quincenaEntity.getStatus());
+        
+        quincenaSingleton.load();
+        
         return quincenaSingleton.toJSON();
     }
     
@@ -266,21 +278,10 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
             return quincenaSingleton.toJSON();
         }
 
-        // status de cerrando
-        Integer status = QuincenaSingleton.CERRANDOSE;
         // determinar quincena & year
         Integer year = quincenaSingleton.getYear();
         Integer quinActual = quincenaSingleton.getQuincena();
-        Integer quinNext = quinActual + 1;
-        if (quinNext == 25) {
-            quinNext = 1;
-            year = year + 1;
-//            parametros.setYear(year);
-        }
-//        parametros.setQuincenaActual(quinNext);
-
-//        quincenaSingleton.load();
-
+        
         if (false) {
             // para pruebas de transaccion
             throw new Exception("***** Verdadero ******");
@@ -293,11 +294,11 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
          * Movimientos 
          ********/
         
-        // eliminar posibles registros del year|quincena en el histórico
+        // eliminar posibles registros en el histórico 
         String qlString = "DELETE FROM MovimientoHisto mh WHERE mh.year = :p_year AND mh.quincena = :p_quincena";
         Query query = em.createQuery(qlString, MovimientoHisto.class);
         query.setParameter("p_year", year);
-        query.setParameter("p_quincena", quinNext); // TODO ¿porque del quinNext?
+        query.setParameter("p_quincena", quinActual); 
         query.executeUpdate();
 
         // insertar los movimientos (y cálculos) en el histórico con year|quincena
@@ -364,11 +365,11 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
          * Nomina 
          *********/
         
-        // asegurarse no haya registros del year|quincena en el histórico
+        // asegurarse no haya registros del year|quincena en el histórico 
         qlString = "DELETE FROM NominaHisto nh WHERE nh.year = :p_year AND nh.quincena = :p_quincena";
         query = em.createQuery(qlString, NominaHisto.class);
         query.setParameter("p_year", year);
-        query.setParameter("p_quincena", quinNext);
+        query.setParameter("p_quincena", quinActual);
         query.executeUpdate();
 
         // insertar los registros de nómina en el histórico con year|quincena
@@ -391,20 +392,22 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
             em.persist(nominaHisto);
         }
 
-        // Vaciar nomina - se realiza en NominaREST.init()
+        // Vaciar nomina - se realiza de nuevo en NominaREST.init()
         // Cada registro (de Nomina) se inicializa (creacion e inyección en NominaEmpleado)
         // conforme se Calcula el empleado
+        getEntityManager().createQuery("DELETE FROM Nomina").executeUpdate();
+        getEntityManager().createNativeQuery("ALTER SEQUENCE nomina_id_seq RESTART WITH 1").executeUpdate(); 
 
         /********
          * Empleados 
          * Guarda los cambios en la Plaza (EmpleadosHisto)
          ********/
         
-        // asegurarse no haya registro del year|quincenaNUEVA en el histórico
+        // asegurarse no haya registro del year|quincena en el histórico
         qlString = "DELETE FROM EmpleadoHisto eh WHERE eh.year = :p_year AND eh.quincena = :p_quincena";
         query = em.createQuery(qlString, EmpleadoHisto.class);
         query.setParameter("p_year", year);
-        query.setParameter("p_quincena", quinNext); 
+        query.setParameter("p_quincena", quinActual); 
         query.executeUpdate();
 
         // insertar los registros de empleados en el histórico con year|quincena
@@ -436,6 +439,10 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
                 em.persist(empleadoHisto);
             }
         }
+        
+        // vaciar plazas
+        getEntityManager().createQuery("DELETE FROM EmpleadoPlaza").executeUpdate();
+        getEntityManager().createNativeQuery("ALTER SEQUENCE empleadosplaza_id_seq RESTART WITH 1").executeUpdate();         
 
         /*
         INSERT INTO empleadoshisto 
@@ -443,6 +450,26 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
             fecha_baja, estimulos_productividad, nivel_code, porcen_seg_separacion_ind, pension_tipo, pension_porcentaje, pension_cantidad_fija) 
         VALUES (0, 0, 0, 0, '', '', 0, 0, 0, 0, 0, '', '', '', '', 0, '', 0, 0, 0, 0);
         */
+        
+        // Status Cerrada quincena actual
+        query = getEntityManager().createQuery("SELECT q FROM Quincena q WHERE q.year = :year AND q.quincena = :quincena", Quincena.class);
+        Quincena quincenaActual = (Quincena) query.setParameter("year", year).setParameter("quincena", quinActual).getSingleResult();
+        quincenaActual.setStatus(QuincenaSingleton.CERRADA);
+        em.persist(quincenaActual);
+        
+        Integer quinNext = quinActual + 1;
+        if (quinNext == 25) {
+            quinNext = 1;
+            year = year + 1;
+        }
+        // Crear nueva quincena 
+        Quincena quincenaNueva = new Quincena();
+        quincenaNueva.setYear(year);
+        quincenaNueva.setQuincena(quinNext);
+        quincenaNueva.setSalarioMinimo(quincenaActual.getSalarioMinimo());
+        quincenaNueva.setStatus(QuincenaSingleton.ABIERTA);
+        em.persist(quincenaNueva);
+        
         // Verificar Empleados dados de Baja, etc.
         return "{}";// quincenaSingleton.toJSON();
     }

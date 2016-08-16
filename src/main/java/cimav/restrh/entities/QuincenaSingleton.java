@@ -16,16 +16,12 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.money.MonetaryAmount;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
 
 /**
  *
  * @author juan.calderon
  */
-@Singleton
+@Singleton // TODO checar el alcance del Sigleton: session del usuario? app en el server? etc.
 @Startup
 public class QuincenaSingleton {
     
@@ -88,6 +84,7 @@ public class QuincenaSingleton {
     @PostConstruct
     public void load() {
 
+        /* // Se movió de aqui porque el EntityManagerFactory causa problemas en un Singleton
         EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "PU_JPA" );
         EntityManager entitymanager = emfactory.createEntityManager( );
         
@@ -99,6 +96,11 @@ public class QuincenaSingleton {
         this.salarioMinimo = quincenaEntity.getSalarioMinimo();
         this.year = quincenaEntity.getYear();
         this.quincena = quincenaEntity.getQuincena();
+        */
+        
+        if (quincena == null) {
+            return;
+        }
         
         boolean isQuincenaPar = (quincena & 1) == 0;
         mes = (int)Math.ceil(quincena/2.0);
@@ -337,4 +339,13 @@ public class QuincenaSingleton {
         return salarioMinimo;
     }
 
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public void setSalarioMinimo(MonetaryAmount salarioMinimo) {
+        this.salarioMinimo = salarioMinimo;
+    }
+
+    
 }
