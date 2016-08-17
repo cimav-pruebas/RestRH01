@@ -16,6 +16,7 @@ import cimav.restrh.entities.NominaHisto;
 import cimav.restrh.entities.Quincena;
 import cimav.restrh.entities.QuincenaSingleton;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 import javax.annotation.security.PermitAll;
 import javax.ejb.EJB;
@@ -56,6 +57,8 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
     private EmpleadoFacadeREST empleadoREST;
     @EJB
     private EmpleadoPlazaREST empleadoPlazaREST;
+    @EJB
+    private EmpleadoBaseFacadeREST empleadoBaseREST;
     
     @Inject
     private QuincenaSingleton quincenaSingleton;
@@ -81,6 +84,24 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
         quincenaSingleton.setYear(quincenaEntity.getYear());
         quincenaSingleton.setQuincena(quincenaEntity.getQuincena());
         quincenaSingleton.setSalarioMinimo(quincenaEntity.getSalarioMinimo());
+        
+        // Si es Inicial
+        if (Objects.equals(QuincenaSingleton.INICIAL, quincenaSingleton.getStatus())) {
+            
+            // inicializar la antiguedad de todos los empleados
+            empleadoBaseREST.initAntiguedad();
+            
+            // incializar las Plazas (auxiliar) de todos los empleados
+            empleadoREST.findAll().stream().forEach((empleado) -> {
+                // TODO Filtrar solo Activos
+                initPlaza(empleado);
+            });
+            
+            // actualizar a Quicena Abierta
+            quincenaEntity.setStatus(QuincenaSingleton.ABIERTA);
+            getEntityManager().persist(quincenaEntity);
+            
+        }
         quincenaSingleton.setStatus(quincenaEntity.getStatus());
         
         quincenaSingleton.load();
@@ -202,6 +223,7 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
     }
     */
 
+    /*
     @GET
     @Path("init")
     @Produces("text/plain")
@@ -227,8 +249,9 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
         
         return plaza;
     }
+    */
     
-    public EmpleadoPlaza inicializar(Empleado empleado) {
+    private EmpleadoPlaza initPlaza(Empleado empleado) {
         
         // crear una copia de la plaza del Empleado en el Histo al inicializar la quincena para corroborar cambios en la plaza al cierre
         // empleado x empleado
@@ -467,7 +490,7 @@ public class QuincenaREST extends AbstractFacade<Quincena>{
         quincenaNueva.setYear(year);
         quincenaNueva.setQuincena(quinNext);
         quincenaNueva.setSalarioMinimo(quincenaActual.getSalarioMinimo());
-        quincenaNueva.setStatus(QuincenaSingleton.ABIERTA);
+        quincenaNueva.setStatus(QuincenaSingleton.INICIAL);
         em.persist(quincenaNueva);
         
         // Verificar Empleados dados de Baja, etc.

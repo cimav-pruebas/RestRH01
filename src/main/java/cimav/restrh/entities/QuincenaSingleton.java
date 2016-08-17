@@ -27,6 +27,7 @@ public class QuincenaSingleton {
     
     private final static Logger logger = Logger.getLogger(QuincenaSingleton.class.getName() ); 
     
+    public static final Integer INICIAL     = -1;
     public static final Integer ABIERTA     = 0;
     public static final Integer CERRANDOSE  = 1;
     public static final Integer CERRADA     = 2;
@@ -81,7 +82,7 @@ public class QuincenaSingleton {
      * Inicializa la QuincenaSingleton con el Year y QuincenaSingleton acuales
  traídos desde la DB
      */
-    @PostConstruct
+    //@PostConstruct
     public void load() {
 
         /* // Se movió de aqui porque el EntityManagerFactory causa problemas en un Singleton

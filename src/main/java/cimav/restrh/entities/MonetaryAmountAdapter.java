@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import javax.money.MonetaryAmount;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import org.javamoney.moneta.Money;
-import org.javamoney.moneta.FastMoney;
 
 /**
  *

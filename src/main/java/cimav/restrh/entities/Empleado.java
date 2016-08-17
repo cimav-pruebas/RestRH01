@@ -7,22 +7,19 @@ package cimav.restrh.entities;
 
 import cimav.restrh.tools.HistoryEmpleadoEventListener;
 import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
 /**
  *
@@ -82,20 +79,24 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     private Short idTipoContrato;
     
     @Column(name = "fecha_ingreso")
-    @Temporal(TemporalType.DATE)
-    private Date fechaIngreso;
+    //@Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaIngreso;
 
     @Column(name = "fecha_inicio_contrato")
-    @Temporal(TemporalType.DATE)
-    private Date fechaInicioContrato;
+    //@Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaInicioContrato;
     
     @Column(name = "fecha_fin_contrato")
-    @Temporal(TemporalType.DATE)
-    private Date fechaFinContrato;
+    //@Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaFinContrato;
     
     @Column(name = "fecha_baja")
-    @Temporal(TemporalType.DATE)
-    private Date fechaBaja;
+    //@Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaBaja;
     
 //    @Column(name = "id_tipo_antiguedad")
 //    private Short idTipoAntiguedad;
@@ -112,8 +113,9 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     private String numSni;
     
     @Column(name = "fecha_sni")
-    @Temporal(TemporalType.DATE)
-    private Date fechaSni;
+    //@Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaSni;
       
     @XmlElement(name = "jefe")
     @JoinColumn(name = "id_jefe", referencedColumnName = "id")
@@ -121,8 +123,9 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     private EmpleadoBase jefe;
     
     @Column(name = "fecha_nacimiento")
-    @Temporal(TemporalType.DATE)
-    private Date fechaNacimiento;
+    //@Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaNacimiento;
 
     @Column(name = "id_sexo")
     private Integer idSexo;
@@ -269,39 +272,39 @@ public class Empleado extends EmpleadoSuper implements Serializable {
         this.idTipoContrato = idTipoContrato;
     }
 
-    public Date getFechaIngreso() {
+    public LocalDate getFechaIngreso() {
         return fechaIngreso;
     }
 
-    public void setFechaIngreso(Date fechaIngreso) {
+    public void setFechaIngreso(LocalDate fechaIngreso) {
         this.fechaIngreso = fechaIngreso;
     }
 
-    public Date getFechaInicioContrato() {
+    public LocalDate getFechaInicioContrato() {
         return fechaInicioContrato;
     }
 
-    public void setFechaInicioContrato(Date fechaInicioContrato) {
+    public void setFechaInicioContrato(LocalDate fechaInicioContrato) {
         //this.fechaInicioContrato = fechaInicioContrato;
-        this.fechaInicioContrato = DateUtils.truncate(fechaInicioContrato, Calendar.DAY_OF_MONTH);
+        this.fechaInicioContrato = fechaInicioContrato;// DateUtils.truncate(fechaInicioContrato, Calendar.DAY_OF_MONTH);
     }
 
-    public Date getFechaFinContrato() {
+    public LocalDate getFechaFinContrato() {
         return fechaFinContrato;
     }
 
-    public void setFechaFinContrato(Date fechaFinContrato) {
+    public void setFechaFinContrato(LocalDate fechaFinContrato) {
         //this.fechaFinContrato = fechaFinContrato;
-        this.fechaFinContrato = DateUtils.truncate(fechaFinContrato, Calendar.DAY_OF_MONTH);
+        this.fechaFinContrato = fechaFinContrato; // DateUtils.truncate(fechaFinContrato, Calendar.DAY_OF_MONTH);
     }
 
-    public Date getFechaBaja() {
+    public LocalDate getFechaBaja() {
         return fechaBaja;
     }
 
-    public void setFechaBaja(Date fechaBaja) {
+    public void setFechaBaja(LocalDate fechaBaja) {
         //this.fechaBaja = fechaBaja;
-        this.fechaBaja = DateUtils.truncate(fechaBaja, Calendar.DAY_OF_MONTH);
+        this.fechaBaja = fechaBaja; //DateUtils.truncate(fechaBaja, Calendar.DAY_OF_MONTH);
     }
 
 //    public Short getIdTipoAntiguedad() {
@@ -339,13 +342,13 @@ public class Empleado extends EmpleadoSuper implements Serializable {
         this.numSni = numSni;
     }
 
-    public Date getFechaSni() {
+    public LocalDate getFechaSni() {
         return fechaSni;
     }
 
-    public void setFechaSni(Date fechaSni) {
+    public void setFechaSni(LocalDate fechaSni) {
         //this.fechaSni = fechaSni;
-        this.fechaSni = DateUtils.truncate(fechaSni, Calendar.DAY_OF_MONTH);
+        this.fechaSni = fechaSni; //DateUtils.truncate(fechaSni, Calendar.DAY_OF_MONTH);
     }
 
     public EmpleadoBase getJefe() {
@@ -356,13 +359,13 @@ public class Empleado extends EmpleadoSuper implements Serializable {
         this.jefe = jefe;
     }
 
-    public Date getFechaNacimiento() {
+    public LocalDate getFechaNacimiento() {
         return fechaNacimiento;
     }
 
-    public void setFechaNacimiento(Date fechaNacimiento) {
+    public void setFechaNacimiento(LocalDate fechaNacimiento) {
         //this.fechaNacimiento = fechaNacimiento;
-        this.fechaNacimiento = DateUtils.truncate(fechaNacimiento, Calendar.DAY_OF_MONTH);
+        this.fechaNacimiento = fechaNacimiento; //DateUtils.truncate(fechaNacimiento, Calendar.DAY_OF_MONTH);
     }
 
     public Integer getIdSexo() {

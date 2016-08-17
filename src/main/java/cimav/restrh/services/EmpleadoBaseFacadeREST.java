@@ -131,11 +131,11 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
         
             empBase = this.find(idEmp);
             
-            LocalDate localDateFinQuincena = QuincenaSingleton.convert(quincena.getFechaFin());
+            LocalDate localDateFinQuincena = QuincenaSingleton.convert(quincena.getFechaFin()); //OJO con los 00:00 en -6 y -7
             boolean isCYT = empBase.getIdGrupo().equals(EGrupo.CYT.getId());
             boolean isAYA = empBase.getIdGrupo().equals(EGrupo.AYA.getId());
 
-            LocalDate localDateFechaAntiguedad = QuincenaSingleton.convert(empBase.getFechaAntiguedad());
+            LocalDate localDateFechaAntiguedad = empBase.getFechaAntiguedad(); //QuincenaSingleton.convert(empBase.getFechaAntiguedad());
 
             logger.log(Level.INFO, empBase.getId() + " | " + empBase.getName() 
                     + " | " + empBase.getNivel() + " | " + empBase.getFechaAntiguedad() + " | " + localDateFechaAntiguedad

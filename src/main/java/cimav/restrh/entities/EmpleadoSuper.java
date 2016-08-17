@@ -6,19 +6,15 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 import javax.money.MonetaryAmount;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
-import org.apache.commons.lang3.time.DateUtils;
 
 /**
  *
@@ -57,8 +53,9 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     private Integer idTipoAntiguedad;
     
     @Column(name = "fecha_antiguedad")
-    @Temporal(TemporalType.DATE)
-    private Date fechaAntiguedad;
+    //@Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaAntiguedad;
     
     @Column(name = "estimulos_productividad")
     private Double estimulosProductividad;
@@ -166,13 +163,13 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
         this.idGrupo = idGrupo;
     }
 
-    public Date getFechaAntiguedad() {
+    public LocalDate getFechaAntiguedad() {
         return fechaAntiguedad;
     }
 
-    public void setFechaAntiguedad(Date fechaAntiguedad) {
+    public void setFechaAntiguedad(LocalDate fechaAntiguedad) {
         //this.fechaAntiguedad = fechaAntiguedad;
-        this.fechaAntiguedad = DateUtils.truncate(fechaAntiguedad, Calendar.DAY_OF_MONTH);
+        this.fechaAntiguedad = this.fechaAntiguedad; //DateUtils.truncate(fechaAntiguedad, Calendar.DAY_OF_MONTH);
     }
 
     public Double getEstimulosProductividad() {

@@ -6,16 +6,15 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
 
 /**
@@ -55,16 +54,19 @@ public class Plaza extends BaseEntity implements Serializable {
     @Column(name = "id_tipo_antiguedad")
     private Integer idTipoAntiguedad;
     @Column(name = "fecha_antiguedad")
-    @Temporal(TemporalType.DATE)
-    private Date fechaAntiguedad;
+    //@Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaAntiguedad;
     @Column(name = "antiguedad")
     private String antiguedad;
     @Column(name = "fecha_ingreso")
-    @Temporal(TemporalType.DATE)
-    private Date fechaIngreso;
+    //@Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaIngreso;
     @Column(name = "fecha_baja")
-    @Temporal(TemporalType.DATE)
-    private Date fechaBaja;
+    //@Temporal(TemporalType.DATE)
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaBaja;
     @Column(name = "estimulos_productividad")
     private Double estimulosProductividad;
     
@@ -136,11 +138,11 @@ public class Plaza extends BaseEntity implements Serializable {
         this.idTipoAntiguedad = idTipoAntiguedad;
     }
 
-    public Date getFechaAntiguedad() {
+    public LocalDate getFechaAntiguedad() {
         return fechaAntiguedad;
     }
 
-    public void setFechaAntiguedad(Date fechaAntiguedad) {
+    public void setFechaAntiguedad(LocalDate fechaAntiguedad) {
         this.fechaAntiguedad = fechaAntiguedad;
     }
 
@@ -152,19 +154,19 @@ public class Plaza extends BaseEntity implements Serializable {
         this.antiguedad = antiguedad;
     }
 
-    public Date getFechaIngreso() {
+    public LocalDate getFechaIngreso() {
         return fechaIngreso;
     }
 
-    public void setFechaIngreso(Date fechaIngreso) {
+    public void setFechaIngreso(LocalDate fechaIngreso) {
         this.fechaIngreso = fechaIngreso;
     }
 
-    public Date getFechaBaja() {
+    public LocalDate getFechaBaja() {
         return fechaBaja;
     }
 
-    public void setFechaBaja(Date fechaBaja) {
+    public void setFechaBaja(LocalDate fechaBaja) {
         this.fechaBaja = fechaBaja;
     }
 
