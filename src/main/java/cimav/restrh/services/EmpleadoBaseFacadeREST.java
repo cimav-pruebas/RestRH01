@@ -69,6 +69,28 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
     }
 
     @GET
+    @Path("/activos")
+    @Produces("application/json")
+    public List<EmpleadoBase> findActivos() {
+        
+        Query query = getEntityManager().createQuery("SELECT eb FROM EmpleadoBase eb WHERE eb.idStatus = " + EmpleadoBase.ACTIVO, EmpleadoBase.class);
+        List<EmpleadoBase> result = query.getResultList();
+        
+        return result;
+    }
+
+    @GET
+    @Path("/baja")
+    @Produces("application/json")
+    public List<EmpleadoBase> findBaja() {
+        
+        Query query = getEntityManager().createQuery("SELECT eb FROM EmpleadoBase eb WHERE eb.idStatus = " + EmpleadoBase.BAJA, EmpleadoBase.class);
+        List<EmpleadoBase> result = query.getResultList();
+        
+        return result;
+    }
+
+    @GET
     @Path("{from}/{to}")
     @Produces("application/json")
     public List<EmpleadoBase> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {

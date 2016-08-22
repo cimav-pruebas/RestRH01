@@ -21,6 +21,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "empleado_base")
 public class EmpleadoBase extends EmpleadoSuper implements Serializable{
 
+    public static final Integer ACTIVO  = 0;
+    public static final Integer BAJA    = 1;
+    
     public EmpleadoBase() {
         super();
     }

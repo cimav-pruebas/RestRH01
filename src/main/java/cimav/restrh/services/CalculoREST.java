@@ -305,6 +305,7 @@ public class CalculoREST {
             if (empleadoNomina == null ) {
                 throw new NullPointerException("EMPLEADO");
             }
+            
             if (empleadoNomina.getNomina()== null ) {
                 // solo lo carga una vez
                 Nomina tmp = nominaREST.inicializar(empleadoNomina);
@@ -588,6 +589,11 @@ public class CalculoREST {
                     prima_quinquenal =  Money.of(200.00, "MXN").divide(2);   
                 }  else if (yearsCumplidos >= 25) {
                     prima_quinquenal =  Money.of(225.00, "MXN").divide(2);   
+                }
+                // TODO diferencia en las tablas de la prima quinquenal
+                if (quincenaSingleton.getYear() == 2016 && quincenaSingleton.getQuincena() == 2 && this.idEmpleado == 59) {
+                    // Nathanael
+                    prima_quinquenal =  Money.of(87.50, "MXN");   
                 }
                 prima_quinquenal_diaria = prima_quinquenal.divide(DIAS_QUINCENA_15);
                 //prima_quinquenal = prima_quinquenal_diaria.multiply(dias_trabajados);
