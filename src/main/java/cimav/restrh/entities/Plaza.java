@@ -70,11 +70,6 @@ public class Plaza extends BaseEntity implements Serializable {
     @Column(name = "estimulos_productividad")
     private Double estimulosProductividad;
     
-    @Column(name = "year")
-    private Integer year;
-    @Column(name = "quincena")
-    private Integer quincena;
-
     public Plaza() {
     }
 
@@ -176,22 +171,6 @@ public class Plaza extends BaseEntity implements Serializable {
 
     public void setEstimulosProductividad(Double estimulosProductividad) {
         this.estimulosProductividad = estimulosProductividad;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public Integer getQuincena() {
-        return quincena;
-    }
-
-    public void setQuincena(Integer quincena) {
-        this.quincena = quincena;
     }
 
     @Override

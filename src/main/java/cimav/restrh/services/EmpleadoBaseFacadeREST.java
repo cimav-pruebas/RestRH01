@@ -22,6 +22,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -42,7 +43,7 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
 //    private EntityManager em;
 
     @Inject
-    private QuincenaSingleton quincena;
+    private QuincenaSingleton quincenaSingleton;
     
     public EmpleadoBaseFacadeREST() {
         super(EmpleadoBase.class);
@@ -133,12 +134,13 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
         empleados.stream().forEach((emp) -> {
             this.initAntiguedad(emp.getId());
         });
-        return "Empleados inicialiados: " + empleados.size();
+        return "Empleados inicializados: " + empleados.size();
     }
     
     @GET
     @Path("init_antiguedad/{id_emp}")
     @Produces("application/json")
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = Exception.class)
     public EmpleadoBase initAntiguedad(@PathParam("id_emp") Integer idEmp) {
         
         EmpleadoBase empBase = null;
@@ -153,7 +155,7 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
         
             empBase = this.find(idEmp);
             
-            LocalDate localDateFinQuincena = QuincenaSingleton.convert(quincena.getFechaFin()); //OJO con los 00:00 en -6 y -7
+            LocalDate localDateFinQuincena = QuincenaSingleton.convert(quincenaSingleton.getFechaFin()); //OJO con los 00:00 en -6 y -7
             boolean isCYT = empBase.getIdGrupo().equals(EGrupo.CYT.getId());
             boolean isAYA = empBase.getIdGrupo().equals(EGrupo.AYA.getId());
 

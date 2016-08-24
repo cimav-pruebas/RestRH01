@@ -12,7 +12,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.money.MonetaryAmount;
@@ -27,10 +26,10 @@ public class QuincenaSingleton {
     
     private final static Logger logger = Logger.getLogger(QuincenaSingleton.class.getName() ); 
     
-    public static final Integer INICIAL     = -1;
-    public static final Integer ABIERTA     = 0;
-    public static final Integer CERRANDOSE  = 1;
-    public static final Integer CERRADA     = 2;
+    public static final Integer INICIAL     = 0;
+    public static final Integer ABIERTA     = 1;
+    public static final Integer CERRANDOSE  = 2;
+    public static final Integer CERRADA     = 3;
     
     private Integer year;
     private Integer bimestre;

@@ -6,10 +6,12 @@
 package cimav.restrh.services;
 
 import cimav.restrh.entities.Empleado;
+import cimav.restrh.entities.EmpleadoBase;
 import java.util.List;
 import javax.annotation.security.DeclareRoles;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -86,6 +88,17 @@ public class EmpleadoFacadeREST extends AbstractFacade<Empleado> {
         return emps;
     }
 
+    @GET
+    @Path("/activos")
+    @Produces("application/json")
+    public List<Empleado> findActivos() {
+        
+        Query query = getEntityManager().createQuery("SELECT e FROM Empleado e WHERE e.idStatus = " + EmpleadoBase.ACTIVO, Empleado.class);
+        List<Empleado> result = query.getResultList();
+        
+        return result;
+    }
+    
     @GET
     @Path("{from}/{to}")
     @Produces("application/json")

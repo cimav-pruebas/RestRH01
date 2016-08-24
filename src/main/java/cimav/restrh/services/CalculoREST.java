@@ -595,6 +595,10 @@ public class CalculoREST {
                     // Nathanael
                     prima_quinquenal =  Money.of(87.50, "MXN");   
                 }
+                if (quincenaSingleton.getYear() == 2016 && quincenaSingleton.getQuincena() == 3 && this.idEmpleado == 59) {
+                    // Nathanael
+                    prima_quinquenal =  Money.of(87.50, "MXN");   
+                }
                 prima_quinquenal_diaria = prima_quinquenal.divide(DIAS_QUINCENA_15);
                 //prima_quinquenal = prima_quinquenal_diaria.multiply(dias_trabajados);
             }

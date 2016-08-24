@@ -73,7 +73,7 @@ public class NominaREST extends AbstractFacade<Nomina>{
     @GET
     @Path("init")
     @Produces("text/plain")
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = Exception.class)
     public String init() {
         // uso desarrollador
         
@@ -92,6 +92,7 @@ public class NominaREST extends AbstractFacade<Nomina>{
     @GET
     @Path("init/{id_emp}")
     @Produces(value = "application/json")
+    @Transactional(value = Transactional.TxType.REQUIRED, rollbackOn = Exception.class)
     public Nomina init(@PathParam("id_emp") Integer idEmp) {
         // uso desarrollador 
         

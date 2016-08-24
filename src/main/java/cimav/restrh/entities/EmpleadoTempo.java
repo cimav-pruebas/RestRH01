@@ -18,11 +18,11 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "empleadosplaza", catalog = "rh_development", schema = "public")
+@Table(name = "empleadostempo", catalog = "rh_development", schema = "public")
 @XmlRootElement
-public class EmpleadoPlaza extends Plaza implements Serializable {
+public class EmpleadoTempo extends Plaza implements Serializable {
 
-    public EmpleadoPlaza() {
+    public EmpleadoTempo() {
         super();
     }
 
