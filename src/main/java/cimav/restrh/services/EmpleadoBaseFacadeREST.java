@@ -7,6 +7,7 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.Departamento;
 import cimav.restrh.entities.EGrupo;
+import cimav.restrh.entities.Empleado;
 import cimav.restrh.entities.EmpleadoBase;
 import cimav.restrh.entities.QuincenaSingleton;
 import java.time.LocalDate;
@@ -65,8 +66,8 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
     @Override
     @Produces("application/json")
     public List<EmpleadoBase> findAll() {
-        List<EmpleadoBase> emps = super.findAll();
-        return emps;
+        List<EmpleadoBase> result = super.findAll();
+        return result;
     }
 
     @GET

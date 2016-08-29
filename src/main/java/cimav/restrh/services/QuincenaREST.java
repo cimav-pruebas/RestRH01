@@ -100,7 +100,7 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
             // incializar las Plazas (auxiliar) de todos los empleados
             empleadoREST.findAll().stream().forEach((empleado) -> {
                 // TODO Filtrar solo Activos
-                this.initPlaza(empleado);
+                this.initEmpleadoTempo(empleado);
             });
 
             // re-actualizar a Quincena Abierta y Singleton
@@ -113,6 +113,36 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
         return quincenaSingleton.toJSON();
     }
 
+    private EmpleadoTempo initEmpleadoTempo(Empleado empleado) {
+
+        // crear una copia de la plaza del Empleado en el Histo al inicializar la quincena para corroborar cambios en la plaza al cierre
+        // empleado x empleado
+        // 1ero lo borro en caso de que ya exista
+        empleadoTempoREST.delete(empleado.getId());
+
+        EmpleadoTempo empleadoTempo = new EmpleadoTempo();
+        empleadoTempo.setIdEmpleado(empleado.getId());
+        empleadoTempo.setCode(empleado.getCode());
+        empleadoTempo.setName(empleado.getName());
+        empleadoTempo.setAntiguedad(empleado.getPantYears() + " años, " + empleado.getPantMonths() + " meses, " + empleado.getPantDayEven() + " días");
+        empleadoTempo.setEstimulosProductividad(empleado.getEstimulosProductividad());
+        empleadoTempo.setFechaAntiguedad(empleado.getFechaAntiguedad());
+        empleadoTempo.setFechaBaja(empleado.getFechaBaja());
+        empleadoTempo.setFechaIngreso(empleado.getFechaIngreso());
+        empleadoTempo.setIdDepartamento(empleado.getDepartamento().getId());
+        empleadoTempo.setIdGrupo(empleado.getIdGrupo());
+        empleadoTempo.setIdSede(empleado.getIdSede());
+        empleadoTempo.setIdStatus(empleado.getIdStatus());
+        empleadoTempo.setIdTipoAntiguedad(empleado.getIdTipoAntiguedad());
+        empleadoTempo.setNivelCode(empleado.getNivel().getCode());
+
+        // insertar la copia
+        empleadoTempoREST.insert(empleadoTempo);
+
+        return empleadoTempo;
+    }
+
+    
     @GET
     @Path("ultima")
     @Produces("application/json")
@@ -255,35 +285,7 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
         return plaza;
     }
      */
-    private EmpleadoTempo initPlaza(Empleado empleado) {
-
-        // crear una copia de la plaza del Empleado en el Histo al inicializar la quincena para corroborar cambios en la plaza al cierre
-        // empleado x empleado
-        // 1ero lo borro en caso de que ya exista
-        empleadoTempoREST.delete(empleado.getId());
-
-        EmpleadoTempo empleadoTempo = new EmpleadoTempo();
-        empleadoTempo.setIdEmpleado(empleado.getId());
-        empleadoTempo.setCode(empleado.getCode());
-        empleadoTempo.setName(empleado.getName());
-        empleadoTempo.setAntiguedad(empleado.getPantYears() + " años, " + empleado.getPantMonths() + " meses, " + empleado.getPantDayEven() + " días");
-        empleadoTempo.setEstimulosProductividad(empleado.getEstimulosProductividad());
-        empleadoTempo.setFechaAntiguedad(empleado.getFechaAntiguedad());
-        empleadoTempo.setFechaBaja(empleado.getFechaBaja());
-        empleadoTempo.setFechaIngreso(empleado.getFechaIngreso());
-        empleadoTempo.setIdDepartamento(empleado.getDepartamento().getId());
-        empleadoTempo.setIdGrupo(empleado.getIdGrupo());
-        empleadoTempo.setIdSede(empleado.getIdSede());
-        empleadoTempo.setIdStatus(empleado.getIdStatus());
-        empleadoTempo.setIdTipoAntiguedad(empleado.getIdTipoAntiguedad());
-        empleadoTempo.setNivelCode(empleado.getNivel().getCode());
-
-        // insertar la copia
-        empleadoTempoREST.insert(empleadoTempo);
-
-        return empleadoTempo;
-    }
-
+    
     @GET
     @Path("cierre/{cerrar}")
     @Produces("application/json")
