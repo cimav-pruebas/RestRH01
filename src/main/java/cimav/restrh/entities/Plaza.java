@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -55,17 +54,17 @@ public class Plaza extends BaseEntity implements Serializable {
     private Integer idTipoAntiguedad;
     @Column(name = "fecha_antiguedad")
     //@Temporal(TemporalType.DATE)
-    @Convert(converter = LocalDateConverter.class)
+//    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaAntiguedad;
     @Column(name = "antiguedad")
     private String antiguedad;
     @Column(name = "fecha_ingreso")
     //@Temporal(TemporalType.DATE)
-    @Convert(converter = LocalDateConverter.class)
+//    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaIngreso;
     @Column(name = "fecha_baja")
     //@Temporal(TemporalType.DATE)
-    @Convert(converter = LocalDateConverter.class)
+//    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaBaja;
     @Column(name = "estimulos_productividad")
     private Double estimulosProductividad;

@@ -25,20 +25,20 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
-import net.sf.dynamicreports.report.builder.DynamicReports;
-import static net.sf.dynamicreports.report.builder.DynamicReports.col;
-import net.sf.dynamicreports.report.builder.column.Columns;
-import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
-import net.sf.dynamicreports.report.builder.component.Components;
-import net.sf.dynamicreports.report.builder.datatype.BigDecimalType;
-import net.sf.dynamicreports.report.builder.datatype.DataTypes;
-import net.sf.dynamicreports.report.builder.datatype.DoubleType;
-import net.sf.dynamicreports.report.builder.datatype.NumberType;
-import net.sf.dynamicreports.report.builder.datatype.StringType;
-import net.sf.dynamicreports.report.constant.HorizontalAlignment;
-import net.sf.dynamicreports.report.exception.DRException;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+//import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
+//import net.sf.dynamicreports.report.builder.DynamicReports;
+//import static net.sf.dynamicreports.report.builder.DynamicReports.col;
+//import net.sf.dynamicreports.report.builder.column.Columns;
+//import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
+//import net.sf.dynamicreports.report.builder.component.Components;
+//import net.sf.dynamicreports.report.builder.datatype.BigDecimalType;
+//import net.sf.dynamicreports.report.builder.datatype.DataTypes;
+//import net.sf.dynamicreports.report.builder.datatype.DoubleType;
+//import net.sf.dynamicreports.report.builder.datatype.NumberType;
+//import net.sf.dynamicreports.report.builder.datatype.StringType;
+//import net.sf.dynamicreports.report.constant.HorizontalAlignment;
+//import net.sf.dynamicreports.report.exception.DRException;
+//import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.javamoney.moneta.spi.DefaultNumberValue;
 
 /**
@@ -57,7 +57,7 @@ public class Reportes {
     
     public Reportes() {
     }
-
+/*
     @GET
     @Path("{id}")
     @Produces("application/pdf")
@@ -96,5 +96,5 @@ public class Reportes {
         Response r = res.build();
         return r; 
     }
-        
+  */      
 }

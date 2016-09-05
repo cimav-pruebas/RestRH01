@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.JoinColumn;
@@ -79,23 +78,15 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     private Short idTipoContrato;
     
     @Column(name = "fecha_ingreso")
-    //@Temporal(TemporalType.DATE)
-    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaIngreso;
 
     @Column(name = "fecha_inicio_contrato")
-    //@Temporal(TemporalType.DATE)
-    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaInicioContrato;
     
     @Column(name = "fecha_fin_contrato")
-    //@Temporal(TemporalType.DATE)
-    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaFinContrato;
     
     @Column(name = "fecha_baja")
-    //@Temporal(TemporalType.DATE)
-    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaBaja;
     
 //    @Column(name = "id_tipo_antiguedad")
@@ -114,7 +105,7 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     
     @Column(name = "fecha_sni")
     //@Temporal(TemporalType.DATE)
-    @Convert(converter = LocalDateConverter.class)
+//    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaSni;
       
     @XmlElement(name = "jefe")
@@ -124,7 +115,7 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     
     @Column(name = "fecha_nacimiento")
     //@Temporal(TemporalType.DATE)
-    @Convert(converter = LocalDateConverter.class)
+//    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaNacimiento;
 
     @Column(name = "id_sexo")

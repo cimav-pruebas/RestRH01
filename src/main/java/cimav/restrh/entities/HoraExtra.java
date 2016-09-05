@@ -6,8 +6,8 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
 import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Cacheable;
@@ -19,8 +19,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -50,8 +48,8 @@ public class HoraExtra implements Serializable {
     private Integer idEmpleado;
     
     @Column(name = "dia")
-    @Temporal(TemporalType.DATE)
-    private Date dia;
+   // @Convert(converter = LocalDateConverter.class)
+    private LocalDate dia;
 
     @Column(name = "horas")
     private Double horas;
@@ -78,15 +76,22 @@ public class HoraExtra implements Serializable {
         this.idEmpleado = idEmpleado;
     }
 
-    public Date getDia() {
-        Calendar cal = Calendar.getInstance();
-        cal.setFirstDayOfWeek(2); // el lunes
-        cal.setTime(dia);
-        this.weekOfYear = cal.get(Calendar.WEEK_OF_YEAR);
+    public LocalDate getDia() {
+        
+        WeekFields weekFields = WeekFields.SUNDAY_START;
+        this.weekOfYear = dia.get(weekFields.weekOfWeekBasedYear());
         return dia;
+        
+//        Calendar cal = Calendar.getInstance();
+//        cal.setFirstDayOfWeek(1); // el Domingo
+//        cal.setTime(dia);
+//        this.weekOfYear = cal.get(Calendar.WEEK_OF_YEAR);
+//        return dia;
+        
+        
     }
 
-    public void setDia(Date dia) {
+    public void setDia(LocalDate dia) {
         this.dia = dia;
     }
 

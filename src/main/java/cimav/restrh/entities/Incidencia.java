@@ -6,8 +6,7 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Basic;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
@@ -18,10 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.apache.commons.lang3.time.DateUtils;
 
 /**
  *
@@ -61,8 +57,9 @@ public class Incidencia implements Serializable {
     private Integer diasInhabiles;
 
     @Column(name = "fecha_inicio")
-    @Temporal(TemporalType.DATE)
-    private Date fechaInicial;
+    //@Temporal(TemporalType.DATE)
+    //@Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaInicial;
     
     @Column(name = "folio")
     private String folio;
@@ -117,13 +114,14 @@ public class Incidencia implements Serializable {
         this.diasInhabiles = diasInhabiles;
     }
 
-    public Date getFechaInicial() {
+    public LocalDate getFechaInicial() {
         return fechaInicial;
     }
 
-    public void setFechaInicial(Date fechaInicial) {
+    public void setFechaInicial(LocalDate fechaInicial) {
         this.fechaInicial = fechaInicial;
-        this.fechaInicial = DateUtils.truncate(fechaInicial, Calendar.DAY_OF_MONTH);
+        // TODO Checar
+        //this.fechaInicial = DateUtils.truncate(fechaInicial, Calendar.DAY_OF_MONTH);
     }
 
     public String getFolio() {

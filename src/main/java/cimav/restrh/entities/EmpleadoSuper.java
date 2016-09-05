@@ -53,8 +53,6 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     private Integer idTipoAntiguedad;
     
     @Column(name = "fecha_antiguedad")
-    //@Temporal(TemporalType.DATE)
-    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaAntiguedad;
     
     @Column(name = "estimulos_productividad")
@@ -105,6 +103,7 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
 //    }
     public EmpleadoSuper() {
         super();
+        
     }
 
     public Integer getIdStatus() {
@@ -164,12 +163,11 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     }
 
     public LocalDate getFechaAntiguedad() {
-        return fechaAntiguedad;
+        return fechaAntiguedad.plusYears(1); 
     }
 
     public void setFechaAntiguedad(LocalDate fechaAntiguedad) {
-        //this.fechaAntiguedad = fechaAntiguedad;
-        this.fechaAntiguedad = this.fechaAntiguedad; //DateUtils.truncate(fechaAntiguedad, Calendar.DAY_OF_MONTH);
+        this.fechaAntiguedad = fechaAntiguedad; //DateUtils.truncate(fechaAntiguedad, Calendar.DAY_OF_MONTH);
     }
 
     public Double getEstimulosProductividad() {

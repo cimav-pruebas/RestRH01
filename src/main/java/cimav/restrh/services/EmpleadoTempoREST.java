@@ -10,6 +10,8 @@ import java.util.List;
 import javax.annotation.security.DeclareRoles;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -57,7 +59,12 @@ public class EmpleadoTempoREST extends AbstractFacade<EmpleadoTempo> {
     public EmpleadoTempo findByIdEmpleado(@PathParam("idEmpleado") Integer idEmpleado) {
         
             String query = "SELECT en FROM EmpleadoTempo en WHERE en.idEmpleado = " + idEmpleado;
-            EmpleadoTempo result = (EmpleadoTempo) getEntityManager().createQuery(query).getSingleResult();
+            EmpleadoTempo result = null;
+            try {
+                result = (EmpleadoTempo) getEntityManager().createQuery(query).getSingleResult();
+            } catch (NoResultException | NonUniqueResultException e) {
+                // los dados de alta no aparecen aqui
+            }
         
         return result;
     }

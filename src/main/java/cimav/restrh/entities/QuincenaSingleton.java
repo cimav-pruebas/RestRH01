@@ -5,11 +5,9 @@
  */
 package cimav.restrh.entities;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Singleton;
@@ -38,9 +36,9 @@ public class QuincenaSingleton {
     private Integer status;
     private MonetaryAmount salarioMinimo;
     
-    private Date fechaInicio = null;
-    private Date fechaFin = null;
-    private Date fechaFinCalendario = null;
+    private LocalDate fechaInicio = null;
+    private LocalDate fechaFin = null;
+    private LocalDate fechaFinCalendario = null;
     
     private Integer diasOrdinarios = null;
     private Integer diasDescanso = null;
@@ -58,11 +56,18 @@ public class QuincenaSingleton {
     private Integer quinInicialSDIVariable;
     private Integer quinFinSDIVariable;
 
-    private String fi;
-    private String ffr;
-    private String fff;
+//    private String fi;
+//    private String ffr;
+//    private String fff;
     private int diaFinalCalendario;
     
+    private LocalDate fechaInicioYear = null;
+    private LocalDate fechaFinYear = null;
+    private LocalDate fechaInicioSemestre = null;
+    private LocalDate fechaFinSemestre = null;
+    
+    private Boolean loaded = false;
+
     /*******************
      Poner un EJB o accesar al em en un Singleton no es recomendable. Se bloquea
      muy fácil. Para desbloquear hay que reiniciar GlassFish y DB.
@@ -75,6 +80,7 @@ public class QuincenaSingleton {
     
     public QuincenaSingleton() {
         logger.log(Level.INFO, "QuincenaSingleton()");
+        loaded = false;
     }
     
     /**
@@ -138,6 +144,7 @@ public class QuincenaSingleton {
             } else {
                 diasOrdinariosCount++;
             }
+            // TODO faltan los asueto
             fechaAvanzaCal.add(Calendar.DATE, 1);
         }
         
@@ -161,18 +168,56 @@ public class QuincenaSingleton {
         quinFinSDIVariable = bimestreSDIVariable * 4;
         quinInicialSDIVariable = quinFinSDIVariable - 3;
 
-        this.fechaInicio = fechaInicioCal.getTime(); 
-        this.fechaFinCalendario = fechaFinCalendarioCal.getTime();
-        this.fechaFin = fechaFinCalculoCal.getTime();
+        this.fechaInicio = LocalDate.now(); // fechaInicioCal.getTime(); 
+        this.fechaFinCalendario = convert(fechaFinCalendarioCal);
+        this.fechaFin = convert(fechaFinCalculoCal);
         this.diasOrdinarios = diasOrdinariosCount;
         this.diasDescanso = diasDescansoCount;
         this.diasImss = diasImssCount;
         this.diasAsueto = 0; // TODO faltan los días de Asueto
+
+        // fin e inicio de anio
+        fechaInicioYear = LocalDate.of(year, 1, 1);
+        fechaFinYear = LocalDate.of(year, 12, 31);
+        // fin e inicio de semestre
+        fechaInicioSemestre = LocalDate.of(year, mes<=6?1: 7,  1);
+        fechaFinSemestre = LocalDate.of(year,    mes<=6?6:12,  mes<=6?30:31);
         
-        String formatStr = "\"yyyy-MM-dd'T'HH:mm:ssZ\""; //"\"yyyy-MM-dd'T'HH:mm:ssXXX\"";
-        fi = new SimpleDateFormat(formatStr).format(this.fechaInicio);
-        ffr = new SimpleDateFormat(formatStr).format(this.fechaFinCalendario);
-        fff = new SimpleDateFormat(formatStr).format(this.fechaFin);
+//        String formatStr = "\"yyyy-MM-dd'T'HH:mm:ssZ\""; //"\"yyyy-MM-dd'T'HH:mm:ssXXX\"";
+//        fi = new SimpleDateFormat(formatStr).format(this.fechaInicio);
+//        ffr = new SimpleDateFormat(formatStr).format(this.fechaFinCalendario);
+//        fff = new SimpleDateFormat(formatStr).format(this.fechaFin);
+        
+        
+        /*
+// Get the current date and time
+      LocalDateTime currentTime = LocalDateTime.now();
+      System.out.println("Current DateTime: " + currentTime);
+		
+      LocalDate date1 = currentTime.toLocalDate();
+      System.out.println("date1: " + date1);
+		
+      Month month = currentTime.getMonth();
+      int day = currentTime.getDayOfMonth();
+      int seconds = currentTime.getSecond();
+		
+      System.out.println("Month: " + month +"day: " + day +"seconds: " + seconds);
+		
+      LocalDateTime date2 = currentTime.withDayOfMonth(10).withYear(2012);
+      System.out.println("date2: " + date2);
+		
+      //12 december 2014
+      LocalDate date3 = LocalDate.of(2014, Month.DECEMBER, 12);
+      System.out.println("date3: " + date3);
+		
+      //22 hour 15 minutes
+      LocalTime date4 = LocalTime.of(22, 15);
+      System.out.println("date4: " + date4);
+		
+      //parse a string
+      LocalTime date5 = LocalTime.parse("20:15:30");
+      System.out.println("date5: " + date5);        
+        */
         
         this.asJson = 
             "{ " + "\"quincena\": " + quincena + "," +
@@ -180,25 +225,42 @@ public class QuincenaSingleton {
             "\t" + "\"bimestre\": " + bimestre + "," +
             "\t" + "\"dias_bimestre\": " + this.getDiasBimestre() + "," +
             "\t" + "\"year\": " + year + "," +
-            "\t" + "\"fechaInicio\": " + fi + "," +
+            "\t" + "\"fechaInicio\": \"" + fechaInicio + "\"," +
             "\t" + "\"diaInicio\": " + diaInicio + "," +
             "\t" + "\"diaFin\": " + diaFinal + "," +
             "\t" + "\"diaFinCalendario\": " + diaFinalCalendario + "," +
-            "\t" + "\"fechaFin\": " + fff + "," +
-            "\t" + "\"fechaFinCalendario\": " + ffr + "," +
+            "\t" + "\"fechaFin\": \"" + fechaFin + "\"," +
+            "\t" + "\"fechaFinCalendario\": \"" + fechaFinCalendario + "\"," +
             "\t" + "\"dias\": " + (diasOrdinarios + diasDescanso) + "," +
             "\t" + "\"diasOrdinarios\": " + diasOrdinarios + "," +
-            "\t" + "\"diasDescando\": " + diasDescanso + "," +
+            "\t" + "\"diasDescanso\": " + diasDescanso + "," +
             "\t" + "\"diasAsueto\": " + diasAsueto + "," +
             "\t" + "\"diasImss\": " + diasImss + "," +
             "\t" + "\"status\": " + status + "," +
-            "\t" + "\"salarioMinimo\": " + salarioMinimo.getNumber() +
+            "\t" + "\"salarioMinimo\": " + salarioMinimo.getNumber() + "," +
+                
+            "\t" + "\"fechaInicioYear\": \"" + fechaInicioYear + "\"," +
+            "\t" + "\"fechaFinYear\": \"" + fechaFinYear + "\"," +
+            "\t" + "\"fechaInicioSemestre\": \"" + fechaInicioSemestre + "\"," +
+            "\t" + "\"fechaFinSemestre\": \"" + fechaFinSemestre + "\"" +
+                
             "}";
+        
+        loaded = true;
     }
     
+    /*
     public static LocalDate convert(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day_month = calendar.get(Calendar.DAY_OF_MONTH);
+        LocalDate localDate = LocalDate.of(year, month, day_month);
+        return localDate;
+    }
+     */   
+    public static LocalDate convert(Calendar calendar) {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;
         int day_month = calendar.get(Calendar.DAY_OF_MONTH);
@@ -273,18 +335,18 @@ public class QuincenaSingleton {
         this.quincena = quincena;
     }
     
-    public Date getFechaInicio() {
-        return fechaInicio;
-    }
+//    public Date getFechaInicio() {
+//        return fechaInicio;
+//    }
 
-    public Date getFechaFinCalendario() {
+    public LocalDate getFechaFinCalendario() {
         return fechaFinCalendario;
     }
 /**
  * 
  * @return  Fecha Fin de la QuincenaSingleton
  */
-    public Date getFechaFin() {
+    public LocalDate getFechaFin() {
         return fechaFin;
     }
 
@@ -347,5 +409,31 @@ public class QuincenaSingleton {
         this.salarioMinimo = salarioMinimo;
     }
 
+    public LocalDate getFechaInicioYear() {
+        return fechaInicioYear;
+    }
+
+    public LocalDate getFechaFinYear() {
+        return fechaFinYear;
+    }
+
+    public LocalDate getFechaInicioSemestre() {
+        return fechaInicioSemestre;
+    }
+
+    public LocalDate getFechaFinSemestre() {
+        return fechaFinSemestre;
+    }
+
+    public Boolean isLoaded() {
+        return loaded != null && loaded;
+    }
+    
+    public Boolean isSemestral() {
+        return quincena == 12;
+    }
+    public Boolean isAnual() {
+        return quincena == 24;
+    }
     
 }

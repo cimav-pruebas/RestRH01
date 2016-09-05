@@ -51,7 +51,7 @@ public class NominaREST extends AbstractFacade<Nomina>{
 //    private EntityManager em;
 
     @Inject
-    private QuincenaSingleton quincena;
+    private QuincenaSingleton quincenaSingleton;
     
     public NominaREST() {
         super(Nomina.class);
@@ -124,8 +124,9 @@ public class NominaREST extends AbstractFacade<Nomina>{
         nomina.setIdEmpleado(empNom.getId());
         nomina.setDescanso(0);
         nomina.setOrdinarios(0);
-        nomina.setDiasDescansoDeLaQuincena(quincena.getDiasDescanso());
-        nomina.setDiasOrdinariosDeLaQuincena(quincena.getDiasOrdinarios());
+        nomina.setDiasDescansoDeLaQuincena(quincenaSingleton.getDiasDescanso());
+        //TODO FIX deberia ser en base a 15 y no ordinarios reales
+        nomina.setDiasOrdinariosDeLaQuincena(quincenaSingleton.getDiasOrdinarios());
         //TODO faltan días de asueto
         nomina.setFaltas(0);
         nomina.setIncapacidadHabiles(0);
@@ -145,9 +146,9 @@ public class NominaREST extends AbstractFacade<Nomina>{
         String qlString = "SELECT SUM(sv.monto) FROM SDIVariable sv WHERE sv.idEmpleado = :p_id_empleado AND sv.year = :p_year AND sv.quincena >= :p_quincenaI AND sv.quincena <= :p_quincenaF";
         Query query = em.createQuery(qlString, SDIVariable.class);
         query.setParameter("p_id_empleado", idEmpleado);
-        query.setParameter("p_year", quincena.getYearSDIVariable());
-        query.setParameter("p_quincenaI", quincena.getQuinInicialSDIVariable());
-        query.setParameter("p_quincenaF", quincena.getQuinFinSDIVariable());
+        query.setParameter("p_year", quincenaSingleton.getYearSDIVariable());
+        query.setParameter("p_quincenaI", quincenaSingleton.getQuinInicialSDIVariable());
+        query.setParameter("p_quincenaF", quincenaSingleton.getQuinFinSDIVariable());
         BigDecimal monto = (BigDecimal) query.getSingleResult();
         monto = monto == null ? BigDecimal.ZERO : monto;
         MonetaryAmount result = Money.of(monto,"MXN");
@@ -195,37 +196,40 @@ public class NominaREST extends AbstractFacade<Nomina>{
         return nomina;
     }
     
-//    @GET
-//    @Path("tiempo_extra/{id_empleado}")
-//    @Produces("text/plain")
-//    public String tiempoExtrax(@PathParam("id_empleado") Integer idEmpleado) {
-//        Query query = getEntityManager().createQuery("SELECT eq FROM Nomina AS eq WHERE eq.idEmpleado =:id_empleado", Nomina.class);
-//        query.setParameter("id_empleado", idEmpleado);
-//        Nomina nomina = (Nomina) query.getSingleResult();
-//        return this.calcularTiempoExtra2(nomina);
-//    }
+    @GET
+    @Path("tiempo_extra/{id_empleado}")
+    @Produces("text/plain")
+    public String tiempoExtrax(@PathParam("id_empleado") Integer idEmpleado) {
+        Query query = getEntityManager().createQuery("SELECT eq FROM Nomina AS eq WHERE eq.idEmpleado =:id_empleado", Nomina.class);
+        query.setParameter("id_empleado", idEmpleado);
+        Nomina nomina = (Nomina) query.getSingleResult();
+        return this.calcularTiempoExtra(nomina);
+    }
     
     public String calcularTiempoExtra(Nomina nomina) {
+        //final HashMap<Integer, List<HoraExtra>> semanaHorasHashMap = null;
         // se llama desde calculo
         if (nomina != null && !nomina.getHorasExtras().isEmpty()) {
             // agrupar hrs extras por semana
-            HashMap<Integer, List<HoraExtra>> hashMap = new HashMap<>();
+            final HashMap<Integer, List<HoraExtra>> semanaHorasHashMap = new HashMap<>();
+            /*
             for (HoraExtra horaExtra : nomina.getHorasExtras()) {
-                if (!hashMap.containsKey(horaExtra.getWeekOfYear())) {
+                if (!semanaHorasHashMap.containsKey(horaExtra.getWeekOfYear())) {
                     List<HoraExtra> hrs = new ArrayList<>();
                     hrs.add(horaExtra);
-                    hashMap.put(horaExtra.getWeekOfYear(), hrs);
+                    semanaHorasHashMap.put(horaExtra.getWeekOfYear(), hrs);
                 } else {
-                    hashMap.get(horaExtra.getWeekOfYear()).add(horaExtra);
+                    semanaHorasHashMap.get(horaExtra.getWeekOfYear()).add(horaExtra);
                 }
             }
+            */
             nomina.getHorasExtras().stream().forEach((horaExtra) -> {
-                if (!hashMap.containsKey(horaExtra.getWeekOfYear())) {
+                if (!semanaHorasHashMap.containsKey(horaExtra.getWeekOfYear())) {
                     List<HoraExtra> hrs = new ArrayList<>();
                     hrs.add(horaExtra);
-                    hashMap.put(horaExtra.getWeekOfYear(), hrs);
+                    semanaHorasHashMap.put(horaExtra.getWeekOfYear(), hrs);
                 } else {
-                    hashMap.get(horaExtra.getWeekOfYear()).add(horaExtra);
+                    semanaHorasHashMap.get(horaExtra.getWeekOfYear()).add(horaExtra);
                 }
             });
 
@@ -233,7 +237,7 @@ public class NominaREST extends AbstractFacade<Nomina>{
             Double hrsTriples = 0.00;
 
             // agrupar total hrs pero contabilizadas por semana
-            Iterator it = hashMap.entrySet().iterator();
+            Iterator it = semanaHorasHashMap.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry)it.next();
                 List<HoraExtra> hrs = (List<HoraExtra>) pair.getValue();
@@ -254,7 +258,7 @@ public class NominaREST extends AbstractFacade<Nomina>{
 
             //TODO Â¿Cuando se persiste? Lo hace pero no sÃ© cuando.
         }
-        return "aucune";
+        return "D:" + nomina.getHorasExtrasDobles() + ",  T:" + nomina.getHorasExtrasTriples();
     }
     
     @POST

@@ -7,7 +7,6 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.Departamento;
 import cimav.restrh.entities.EGrupo;
-import cimav.restrh.entities.Empleado;
 import cimav.restrh.entities.EmpleadoBase;
 import cimav.restrh.entities.QuincenaSingleton;
 import java.time.LocalDate;
@@ -156,7 +155,7 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
         
             empBase = this.find(idEmp);
             
-            LocalDate localDateFinQuincena = QuincenaSingleton.convert(quincenaSingleton.getFechaFin()); //OJO con los 00:00 en -6 y -7
+            LocalDate localDateFinQuincena = quincenaSingleton.getFechaFin(); //QuincenaSingleton.convert(quincenaSingleton.getFechaFin()); //OJO con los 00:00 en -6 y -7
             boolean isCYT = empBase.getIdGrupo().equals(EGrupo.CYT.getId());
             boolean isAYA = empBase.getIdGrupo().equals(EGrupo.AYA.getId());
 

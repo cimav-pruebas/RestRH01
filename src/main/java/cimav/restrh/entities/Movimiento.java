@@ -68,7 +68,7 @@ public class Movimiento implements Serializable {
     @Column(name = "cantidad")
     @Convert(converter = MonetaryAmountConverter.class)
     private MonetaryAmount cantidad;
-
+    
     // aliasCantidad (tipo BigDecimal) es alias de cantidad (tipo MonetaryaAmount)
     // porque el constructor usado en el query de NominaQuincenalFacadeREST.doFindByIds 
     // no entiende el tipo MonetaryAmount

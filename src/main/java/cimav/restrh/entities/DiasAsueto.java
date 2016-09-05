@@ -6,7 +6,7 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Cacheable;
@@ -16,8 +16,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -42,8 +40,8 @@ public class DiasAsueto implements Serializable  {
     private Integer dias;
 
     @Column(name = "fecha")
-    @Temporal(TemporalType.DATE)
-    private Date fecha;
+//    @Temporal(TemporalType.DATE)
+    private LocalDate fecha;
     
     @Column(name = "descripcion")
     private String descripcion;
@@ -67,11 +65,11 @@ public class DiasAsueto implements Serializable  {
         this.dias = dias;
     }
 
-    public Date getFecha() {
+    public LocalDate getFecha() {
         return fecha;
     }
 
-    public void setFecha(Date fecha) {
+    public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
     }
 

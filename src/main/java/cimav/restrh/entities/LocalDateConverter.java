@@ -15,7 +15,7 @@ import javax.persistence.Converter;
  *
  * @author calderon
  */
-@Converter(autoApply = true)
+@Converter(autoApply = true) // <---- Importante
 public class LocalDateConverter implements AttributeConverter<LocalDate, Date> {
 
     @Override

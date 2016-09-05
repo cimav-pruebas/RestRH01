@@ -94,6 +94,9 @@ public class Nomina implements Serializable {
     @Column(name = "horas_extras_triples") 
     private Double horasExtrasTriples;
     
+    @Column(name = "baja")
+    private Boolean baja;
+    
     public Nomina() {
         this.diasDescansoDeLaQuincena = 4;
         this.diasOrdinariosDeLaQuincena = 11;
@@ -101,6 +104,7 @@ public class Nomina implements Serializable {
         this.horasExtrasTriples = 0.00;
         this.sdiVariableBimestreAnterior = Money.of(BigDecimal.ZERO, CalculoREST.MXN);
         // TODO Falta iniciarlizar el sdiVariableBimestreAnterior
+        this.baja =false;
     }
     
     public Integer getId() {
@@ -226,6 +230,13 @@ public class Nomina implements Serializable {
     public void setIncidencias(Collection<Incidencia> incidencias) {
         this.incidencias = incidencias;
     }
-    
+
+    public Boolean getBaja() {
+        return baja;
+    }
+
+    public void setBaja(Boolean baja) {
+        this.baja = baja;
+    }
     
 }

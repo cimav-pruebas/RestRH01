@@ -9,7 +9,7 @@ package cimav.restrh.tools;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.beanutils.PropertyUtils;
+//import org.apache.commons.beanutils.PropertyUtils;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
 import org.eclipse.persistence.queries.UpdateObjectQuery;
@@ -41,7 +41,8 @@ public class HistoryEmpleadoEventListener extends DescriptorEventAdapter {
         }
         
         */
-        
+    
+        /*
         UpdateObjectQuery query = (UpdateObjectQuery) event.getQuery();
         for (ChangeRecord changeRecord : query.getObjectChangeSet().getChanges()) {
             try {
@@ -56,6 +57,7 @@ public class HistoryEmpleadoEventListener extends DescriptorEventAdapter {
                 Logger.getLogger(HistoryEmpleadoEventListener.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+*/
         
     }
     
