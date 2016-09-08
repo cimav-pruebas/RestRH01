@@ -83,13 +83,9 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
          * // Este debe ser el 1er método que lea.
         ****************
          */
-        Query query = getEntityManager().createQuery("SELECT q FROM Quincena AS q ORDER BY q.id DESC");
-        Quincena quincenaEntity = (Quincena) query.setMaxResults(1).getSingleResult();
-        quincenaSingleton.setYear(quincenaEntity.getYear());
-        quincenaSingleton.setQuincena(quincenaEntity.getQuincena());
-        quincenaSingleton.setSalarioMinimo(quincenaEntity.getSalarioMinimo());
-        quincenaSingleton.setStatus(quincenaEntity.getStatus());
-        quincenaSingleton.load();
+        
+        
+        Quincena quincenaEntity = cargarEQuicenaEnSingleton();
 
         // Si es Inicial
         if (Objects.equals(QuincenaSingleton.INICIAL, quincenaSingleton.getStatus())) {
@@ -113,6 +109,17 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
         return quincenaSingleton.toJSON();
     }
 
+    public Quincena cargarEQuicenaEnSingleton() {
+        Query query = getEntityManager().createQuery("SELECT q FROM Quincena AS q ORDER BY q.id DESC");
+        Quincena quincenaEntity = (Quincena) query.setMaxResults(1).getSingleResult();
+        quincenaSingleton.setYear(quincenaEntity.getYear());
+        quincenaSingleton.setQuincena(quincenaEntity.getQuincena());
+        quincenaSingleton.setSalarioMinimo(quincenaEntity.getSalarioMinimo());
+        quincenaSingleton.setStatus(quincenaEntity.getStatus());
+        quincenaSingleton.load();
+        return quincenaEntity;
+    }
+    
     private EmpleadoTempo initEmpleadoTempo(Empleado empleado) {
 
         // crear una copia de la plaza del Empleado en el Histo al inicializar la quincena para corroborar cambios en la plaza al cierre
@@ -301,6 +308,8 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
             return quincenaSingleton.toJSON();
         }
 
+        //TODO agregar estado de LISTA PARA CIERRE
+        
         try {
             // determinar quincena & year
             Integer year = quincenaSingleton.getYear();
@@ -500,7 +509,7 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
         }
 
         // Verificar Empleados dados de Baja, etc.
-        return "{}";// quincenaSingleton.toJSON();
+        return "{\"estado\":\"listo\"}";// quincenaSingleton.toJSON();
     }
 
 }

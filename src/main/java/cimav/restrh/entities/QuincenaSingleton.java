@@ -5,9 +5,13 @@
  */
 package cimav.restrh.entities;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Singleton;
@@ -66,8 +70,6 @@ public class QuincenaSingleton {
     private LocalDate fechaInicioSemestre = null;
     private LocalDate fechaFinSemestre = null;
     
-    private Boolean loaded = false;
-
     /*******************
      Poner un EJB o accesar al em en un Singleton no es recomendable. Se bloquea
      muy fácil. Para desbloquear hay que reiniciar GlassFish y DB.
@@ -80,7 +82,6 @@ public class QuincenaSingleton {
     
     public QuincenaSingleton() {
         logger.log(Level.INFO, "QuincenaSingleton()");
-        loaded = false;
     }
     
     /**
@@ -168,7 +169,7 @@ public class QuincenaSingleton {
         quinFinSDIVariable = bimestreSDIVariable * 4;
         quinInicialSDIVariable = quinFinSDIVariable - 3;
 
-        this.fechaInicio = LocalDate.now(); // fechaInicioCal.getTime(); 
+        this.fechaInicio = convert(fechaInicioCal); 
         this.fechaFinCalendario = convert(fechaFinCalendarioCal);
         this.fechaFin = convert(fechaFinCalculoCal);
         this.diasOrdinarios = diasOrdinariosCount;
@@ -245,11 +246,73 @@ public class QuincenaSingleton {
             "\t" + "\"fechaFinSemestre\": \"" + fechaFinSemestre + "\"" +
                 
             "}";
-        
-        loaded = true;
     }
     
     /*
+    QA = dentro de la QuincenaActual
+    */
+    public static int diasQADescanso(LocalDate start, LocalDate end) {
+        List<DayOfWeek> ignore = new ArrayList<>();
+        ignore.add(DayOfWeek.SATURDAY);
+        ignore.add(DayOfWeek.SUNDAY);
+        int r = 0;
+        while (end.isAfter(start) || end.equals(start)) {
+            if (ignore.contains(start.getDayOfWeek())) {
+                r++;
+            }
+            // TODO faltan los asueto
+            start = start.plusDays(1);
+        }
+        return r;
+    }
+    public static int diasQAOrdinarios(LocalDate start, LocalDate end) {
+        List<DayOfWeek> ignore = new ArrayList<>();
+        ignore.add(DayOfWeek.MONDAY);
+        ignore.add(DayOfWeek.TUESDAY);
+        ignore.add(DayOfWeek.WEDNESDAY);
+        ignore.add(DayOfWeek.THURSDAY);
+        ignore.add(DayOfWeek.FRIDAY);
+        int r = 0;
+        while (end.isAfter(start) || end.equals(start)) {
+            if (ignore.contains(start.getDayOfWeek())) {
+                r++;
+            }
+            // TODO faltan los asueto
+            start = start.plusDays(1);
+        }
+        return r;
+    }
+    public static int diasQACronologicos(LocalDate start, LocalDate end) {
+        int r = 0;
+        while (end.isAfter(start) || end.equals(start)) {
+                r++;
+            start = start.plusDays(1);
+        }
+        return r;
+    }
+    public int diasFiscales(LocalDate inicio, LocalDate fin) {
+        // 30 dias x cada mes completo
+        int dias = ((int)ChronoUnit.MONTHS.between(inicio, fin)) * 30;
+        if (this.isQuincenaPar()) {
+            // 15 dias de la quincena none
+            dias+=15;
+        }
+        // dias cronologicos de la actual
+        int diasQuincena = this.diasQACronologicos(this.getFechaInicio(), fin);
+        if (diasQuincena >= 15) {
+            if (quincena == 4) {
+                diasQuincena = isLeapYear() ? 14 : 13;
+            } else {
+                diasQuincena = 15;
+            }
+        }
+        dias+=diasQuincena;
+        return dias;
+    }
+    
+    
+    
+    /*    
     public static LocalDate convert(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -426,7 +489,7 @@ public class QuincenaSingleton {
     }
 
     public Boolean isLoaded() {
-        return loaded != null && loaded;
+        return year!=null && quincena != null && ((year+quincena) > 2000);
     }
     
     public Boolean isSemestral() {
@@ -434,6 +497,14 @@ public class QuincenaSingleton {
     }
     public Boolean isAnual() {
         return quincena == 24;
+    }
+
+    public LocalDate getFechaInicio() {
+        return fechaInicio;
+    }
+ 
+    public boolean isQuincenaPar() {
+        return (quincena & 1) == 0;
     }
     
 }

@@ -87,6 +87,8 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     @Column(name = "pension_incluye_monedero")
     private Boolean pensionIncluyeMonedero;
     
+    @Column(name = "fecha_baja")
+    private LocalDate fechaBaja;
     
 //    @PostLoad
 //    public void reduceJefe() {
@@ -163,7 +165,7 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     }
 
     public LocalDate getFechaAntiguedad() {
-        return fechaAntiguedad.plusYears(1); 
+        return fechaAntiguedad; 
     }
 
     public void setFechaAntiguedad(LocalDate fechaAntiguedad) {
@@ -265,5 +267,15 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     public void setPensionIncluyeMonedero(Boolean pensionIncluyeMonedero) {
         this.pensionIncluyeMonedero = pensionIncluyeMonedero;
     }
+
+    public LocalDate getFechaBaja() {
+        return fechaBaja;
+    }
+
+    public void setFechaBaja(LocalDate fechaBaja) {
+        //this.fechaBaja = fechaBaja;
+        this.fechaBaja = fechaBaja; //DateUtils.truncate(fechaBaja, Calendar.DAY_OF_MONTH);
+    }
+
 
 }

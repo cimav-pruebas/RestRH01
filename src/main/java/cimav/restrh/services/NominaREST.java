@@ -8,6 +8,7 @@ import cimav.restrh.entities.Incidencia;
 import cimav.restrh.entities.QuincenaSingleton;
 import cimav.restrh.entities.SDIVariable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -138,10 +139,29 @@ public class NominaREST extends AbstractFacade<Nomina>{
         nomina.setSdiVariableBimestreAnterior(sdiVariableBimestreAnterior); 
 
         this.insert(nomina); // insertarlo en la DB
+        //getEntityManager().persist(nomina);
         
         return nomina;
     }
     
+    public Nomina darBaja(EmpleadoNomina empleadoNomina) {
+        Query query = getEntityManager().createNativeQuery("SELECT * FROM Nomina WHERE id_empleado = " + empleadoNomina.getId(), Nomina.class);
+        Nomina nomina = (Nomina) query.getSingleResult();
+        if (nomina == null) {
+            nomina = this.inicializar(empleadoNomina);
+        }
+        LocalDate fechaBaja = empleadoNomina.getFechaBaja() == null ? quincenaSingleton.getFechaFin() : empleadoNomina.getFechaBaja();
+        int diasOrdinarios = QuincenaSingleton.diasQAOrdinarios(quincenaSingleton.getFechaInicio(), fechaBaja);
+        nomina.setDiasOrdinariosDeLaQuincena(diasOrdinarios);
+        int diasDescanso = QuincenaSingleton.diasQADescanso(quincenaSingleton.getFechaInicio(), fechaBaja);
+        nomina.setDiasDescansoDeLaQuincena(diasDescanso);
+        
+        this.edit(nomina);
+        //getEntityManager().persist(nomina);
+        
+        return nomina;        
+    }
+
     private MonetaryAmount getSDIVariable(Integer idEmpleado) {
         String qlString = "SELECT SUM(sv.monto) FROM SDIVariable sv WHERE sv.idEmpleado = :p_id_empleado AND sv.year = :p_year AND sv.quincena >= :p_quincenaI AND sv.quincena <= :p_quincenaF";
         Query query = em.createQuery(qlString, SDIVariable.class);
