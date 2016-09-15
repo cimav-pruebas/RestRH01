@@ -48,7 +48,7 @@ public class EmpleadoTempo extends Plaza implements Serializable {
         if (!Objects.equals(this.getIdGrupo(), empleado.getIdGrupo())) {
             return false;
         }
-        if (!Objects.equals(this.getIdDepartamento(), empleado.getDepartamento().getId())) {
+        if (!Objects.equals(this.getDepartamento(), empleado.getDepartamento())) {
             return false;
         }
         if (!Objects.equals(this.getIdSede(), empleado.getIdSede())) {

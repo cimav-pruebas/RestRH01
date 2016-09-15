@@ -136,7 +136,7 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
         empleadoTempo.setFechaAntiguedad(empleado.getFechaAntiguedad());
         empleadoTempo.setFechaBaja(empleado.getFechaBaja());
         empleadoTempo.setFechaIngreso(empleado.getFechaIngreso());
-        empleadoTempo.setIdDepartamento(empleado.getDepartamento().getId());
+        empleadoTempo.setDepartamento(empleado.getDepartamento());
         empleadoTempo.setIdGrupo(empleado.getIdGrupo());
         empleadoTempo.setIdSede(empleado.getIdSede());
         empleadoTempo.setIdStatus(empleado.getIdStatus());
@@ -461,7 +461,7 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
                     empleadoHisto.setFechaAntiguedad(empleado.getFechaAntiguedad());
                     empleadoHisto.setFechaBaja(empleado.getFechaBaja());
                     empleadoHisto.setFechaIngreso(empleado.getFechaIngreso());
-                    empleadoHisto.setIdDepartamento(empleado.getDepartamento().getId());
+                    empleadoHisto.setDepartamento(empleado.getDepartamento());
                     empleadoHisto.setIdEmpleado(empleado.getId());
                     empleadoHisto.setIdGrupo(empleado.getIdGrupo());
                     empleadoHisto.setIdSede(empleado.getIdSede());

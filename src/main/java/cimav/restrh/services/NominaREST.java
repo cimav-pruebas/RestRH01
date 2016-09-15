@@ -229,6 +229,10 @@ public class NominaREST extends AbstractFacade<Nomina>{
     public String calcularTiempoExtra(Nomina nomina) {
         //final HashMap<Integer, List<HoraExtra>> semanaHorasHashMap = null;
         // se llama desde calculo
+        
+        Double hrsDobles = 0.00;
+        Double hrsTriples = 0.00;
+        
         if (nomina != null && !nomina.getHorasExtras().isEmpty()) {
             // agrupar hrs extras por semana
             final HashMap<Integer, List<HoraExtra>> semanaHorasHashMap = new HashMap<>();
@@ -253,9 +257,6 @@ public class NominaREST extends AbstractFacade<Nomina>{
                 }
             });
 
-            Double hrsDobles = 0.00;
-            Double hrsTriples = 0.00;
-
             // agrupar total hrs pero contabilizadas por semana
             Iterator it = semanaHorasHashMap.entrySet().iterator();
             while (it.hasNext()) {
@@ -273,11 +274,11 @@ public class NominaREST extends AbstractFacade<Nomina>{
                     hrsTriples = hrsTriples + ht;
                 }
             }
-            nomina.setHorasExtrasDobles(hrsDobles);
-            nomina.setHorasExtrasTriples(hrsTriples);
 
             //TODO Â¿Cuando se persiste? Lo hace pero no sÃ© cuando.
         }
+        nomina.setHorasExtrasDobles(hrsDobles);
+        nomina.setHorasExtrasTriples(hrsTriples);
         return "D:" + nomina.getHorasExtrasDobles() + ",  T:" + nomina.getHorasExtrasTriples();
     }
     

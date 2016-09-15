@@ -62,6 +62,17 @@ public class EmpleadoHistoREST extends AbstractFacade<EmpleadoHisto> {
         return result;
     }
     
+    @GET
+    @Path("/by_id_empleado/{id_empleado}")
+    @Produces("application/json")
+    public List<EmpleadoHisto> findByCodeEmpleado(@PathParam("id_empleado") Integer id_empleado) {
+        
+            String query = "SELECT en FROM EmpleadoHisto en WHERE en.idEmpleado = " + id_empleado;
+            List<EmpleadoHisto>  result = getEntityManager().createQuery(query).getResultList();
+        
+        return result;
+    }
+    
     @DELETE
     @Path("{id_empleado}/{year}/{quincena}")
     @Produces("application/text")

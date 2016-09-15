@@ -16,6 +16,9 @@ import cimav.restrh.entities.TarifaAnual;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.Year;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +72,8 @@ public class CalculoREST {
     @PersistenceContext(unitName = "PU_JPA")
     EntityManager em;
 
+    @EJB
+    private QuincenaREST quincenaREST;
     @Inject
     private QuincenaSingleton quincenaSingleton;
     @EJB
@@ -96,13 +101,20 @@ public class CalculoREST {
     private final String ESTIMULOS_PRODUCTIVIDAD_CYT    = "00019";
     private final String FONDO_AHORRO_EXENTO            = "00021";
     private final String FONDO_AHORRO_GRAVADO           = "00022";
+    private final String SUBSIDIO_EMPLEADO_EFECTIVO     = "00023";
     private final String HONORARIOS_ASIMILABLES         = "00027"; // sueldo
+    private final String AJUSTE_CALENDARIO              = "00029";
+    private final String VACACIONES                     = "00031";
     private final String APOYO_MANTENIMIENTO_VEHICULAR  = "00035";
     private final String HORAS_EXTRAS_EXENTO            = "00056";
     private final String HORAS_EXTRAS_GRAVADO           = "00058";
     private final String HORAS_EXTRAS_TRIPLE            = "00060";
     private final String PRIMA_QUINQUENAL               = "00067";
     private final String INDEMNIZACION_CARGA_ADMVA      = "00082";
+    private final String PRIMA_VACACIONAL_GRA           = "00086";
+    private final String PRIMA_VACACIONAL_EXE           = "00087";
+    private final String AGUINALDO_GRA                  = "00088";
+    private final String AGUINALDO_EXE                  = "00089";
     private final String MONEDERO_DESPENSA              = "00092";
     private final String SEG_SEPARACION_IND             = "00093";
     private final String ISR                            = "00101";
@@ -136,6 +148,10 @@ public class CalculoREST {
     private final String SALARIO_DIARIO_VARIABLE        = "SDV";
     private final String SALARIO_DIARIO_COTIZADO        = "SDC";
     private final String SALARIO_DIARIO_COTIZADO_TOPADO = "SDCT";
+    private final String AGUINALDO_DIARIO               = "AGUINDIA";
+    private final String AJUSTE_DIARIO                  = "AJUSTEDIA";
+    private final String PRIMA_VACACIONAL_DIARIO        = "PVDIA";
+    private final String PRIMA_ANTIGUEDAD_DIARIA        = "PANTDIA";
     
     private final Double FACTOR_PANT_AYA_5_20       = 0.018;
     private final Double FACTOR_PANT_AYA_21         = 0.023;
@@ -143,7 +159,8 @@ public class CalculoREST {
     private final Double FACTOR_PANT_CYT_21         = 0.025;  // es 2.1" pero aplica cuando el Cimav Cumpla 21 aÃ±os
     private final String PORCEN_FONDO_AHORRO_CYT    = "0.02";
     private final String PORCEN_FONDO_AHORRO_AYA    = "0.018";
-    private final String PORCEN_MATERIALES          = "0.06";
+    private final String PORCEN_MATERIALES_2015     = "0.06";
+    private final String PORCEN_MATERIALES_2016     = "0.03";
     private final Double PORCEN_FONDO_AHORRO        = 0.13;
     private final Double PORCEN_FONDO_AHORRO_EXENTO = 1.3;
     //private final Double SALARIO_MINIMO             = 73.04; //= 70.10; //TODO SM tiene que ser historico
@@ -151,7 +168,7 @@ public class CalculoREST {
     
     private final Integer DIAS_MES_30           = 30;
     private final Integer DIAS_QUINCENA_15      = 15;
-    private final Integer DIAS_AJUSTE_5_6       = 6;
+    //private final Integer DIAS_AJUSTE_5_6       = 6;
 
     private final static Integer PENSION_SIN                                    = 0;
     private final static Integer PENSION_PORCEN_SOBRE_NETO                      = 1;
@@ -242,9 +259,13 @@ public class CalculoREST {
         MonetaryAmount ajuste_calendario_diario = Money.of(0.00, "MXN");
         MonetaryAmount ajuste_calendario = Money.of(0.00, "MXN");
         MonetaryAmount aguinaldo_diario = Money.of(0.00, "MXN");
-        MonetaryAmount aguinaldo = Money.of(0.00, "MXN");
+        MonetaryAmount aguinaldo_gravado = Money.of(0.00, "MXN");
+        MonetaryAmount aguinaldo_exento = Money.of(0.00, "MXN");
         MonetaryAmount prima_vacacional_diaria = Money.of(0.00, "MXN");
-        MonetaryAmount prima_vacacional = Money.of(0.00, "MXN");
+        MonetaryAmount prima_vacacional_gravable = Money.of(0.00, "MXN");
+        MonetaryAmount prima_vacacional_exenta = Money.of(0.00, "MXN");
+
+        MonetaryAmount vacaciones = Money.of(0.00, "MXN");
         
         MonetaryAmount compensa_garantiza_diaria = Money.of(0.00, "MXN");
         MonetaryAmount compensa_garantiza = Money.of(0.00, "MXN");
@@ -270,6 +291,7 @@ public class CalculoREST {
         
         MonetaryAmount impuesto_antes_subsidio = Money.of(0.00, "MXN");
         MonetaryAmount impuesto_antes_subsidio_honorarios = Money.of(0.00, "MXN");
+        MonetaryAmount impuesto_a_cargo = Money.of(0.00, "MXN");
         
         MonetaryAmount salario_diario_fijo = Money.of(0.00, "MXN"); // Salario Diario Integrado (todas las percepciones fijas)
         MonetaryAmount salario_diario_variable = Money.of(0.00, "MXN"); // Del Bimestre Anterior
@@ -301,6 +323,10 @@ public class CalculoREST {
         
         try {
             
+            if (!quincenaSingleton.isLoaded()) {
+                quincenaREST.cargarEQuicenaEnSingleton();
+            }
+            
             EmpleadoNomina empleadoNomina = getEntityManager().find(EmpleadoNomina.class, this.idEmpleado);
             if (empleadoNomina == null ) {
                 throw new NullPointerException("EMPLEADO");
@@ -322,6 +348,12 @@ public class CalculoREST {
             boolean isHON = Objects.equals(EGrupo.HON.getId(), empleadoNomina.getIdGrupo());
             
             Nomina nomina = empleadoNomina.getNomina();
+            
+            if (nomina.getBaja()) {
+                Nomina tmp = nominaREST.darBaja(empleadoNomina);
+                empleadoNomina.setNomina(tmp);
+            }
+            
             nominaREST.calcularIncidencias(nomina);
             if (isAYA) {
                 nominaREST.calcularTiempoExtra(nomina);
@@ -355,10 +387,16 @@ public class CalculoREST {
             Integer incapacidadesHabiles = nomina.getIncapacidadHabiles();
             Integer incapacidadesInhabiles = nomina.getIncapacidadInhabiles();
             
-            Integer dias_ordinarios = nomina.getOrdinarios(); // dias ordianrios que trabajÃ³
-            Integer dias_descanso = nomina.getDescanso(); // los dÃ­as de descanso que si le contaron
+            // TODO FIX Ordinarios por default son 11 pero en Febrero los pone en 10
+            Integer dias_ordinarios = nomina.getOrdinarios(); // dias ordianrios que trabajO
+            Integer dias_descanso = nomina.getDescanso(); // los dIas de descanso que si le contaron
             Integer dias_trabajados = nomina.getDiasTrabajados(); //dias_ordinarios + dias_descanso; // los dias ordinarios y de descanso q si le contaron
             Integer dias_reales_imss = quincenaSingleton.getDiasImss();
+            if (nomina.getBaja()) {
+                LocalDate fechaBaja = empleadoNomina.getFechaBaja() == null ? quincenaSingleton.getFechaFin() : empleadoNomina.getFechaBaja();
+                dias_reales_imss = quincenaSingleton.diasQACronologicos(quincenaSingleton.getFechaInicio(), fechaBaja);
+            }
+            Integer dias_imss = dias_reales_imss - faltas - incapacidadesHabiles - incapacidadesInhabiles;
             
             Tabulador nivel = empleadoNomina.getNivel();
             if (nivel == null) {
@@ -451,7 +489,7 @@ public class CalculoREST {
                     }
                 } else if (isCYT) {
                     if (yearsCumplidos >= 21 ) {
-                        if (empleadoNomina.getPantRegimenAnterior()) {
+                        if (false  && empleadoNomina.getPantRegimenAnterior()) {
                             factorPAnt = yearsCumplidos * FACTOR_PANT_CYT_5_20;
                         } else {
                             factorPAnt = (20 * FACTOR_PANT_CYT_5_20);
@@ -473,13 +511,26 @@ public class CalculoREST {
                 // prima_antiguedad = dias_trabajados.multiply(prima_antiguedad_tabulador).divide(new BigDecimal(DIAS_MES_30), BIG_SCALE, RoundingMode.HALF_DOWN);
                 // Proporcionales al Sueldo o con regla de tres con dÃ­as trabajados dan el mismo resultado
                 prima_antiguedad = sueldo.multiply(factorPAnt);
+                
+                //TODO Casos de PAnt donde cumple anios a mitada de quincena 
+                // simplemente hay que sacar cuandos dias con 20 y cuantos con 21
+                // la mitad se paga con los old_years y la otra mitada con new_years. Son 2 factores
+                if (idEmpleado == 78 && quincenaSingleton.getYear() == 2016 && quincenaSingleton.getQuincena() == 5) {
+                    // luis arzaga
+                    prima_antiguedad = Money.of(1485.04, MXN);
+                    prima_antiguedad_diaria = Money.of(97.75, MXN);
+                }
+                
             }
 
             /* Materiales */
             if (isCYT) {
-                materiales_tabulador = sueldo_tabulador.multiply(new BigDecimal(PORCEN_MATERIALES).setScale(BIG_SCALE, RoundingMode.HALF_DOWN));
-                materiales_diario = sueldo_diario.multiply(new BigDecimal(PORCEN_MATERIALES).setScale(BIG_SCALE, RoundingMode.HALF_DOWN));
-                materiales = sueldo.multiply(new BigDecimal(PORCEN_MATERIALES).setScale(BIG_SCALE, RoundingMode.HALF_DOWN));
+                BigDecimal mat_factor = empleadoNomina.getFechaAntiguedad().getYear() <= 2015 
+                        ? new BigDecimal(PORCEN_MATERIALES_2015).setScale(BIG_SCALE, RoundingMode.HALF_DOWN)
+                        : new BigDecimal(PORCEN_MATERIALES_2016).setScale(BIG_SCALE, RoundingMode.HALF_DOWN);
+                materiales_tabulador = sueldo_tabulador.multiply(mat_factor);
+                materiales_diario = sueldo_diario.multiply(mat_factor);
+                materiales = sueldo.multiply(mat_factor);
             }
                     
             /* Estimulos Productividad */
@@ -546,34 +597,67 @@ public class CalculoREST {
             // Si incluye Catedreas Repatriadas
             
             // NOTA: la compensación garantiza de los MMS es parte del Sueldo.
-            
+
             /* Ajuste de Calendario */
             // Ajuste aplica para Aya, Cyt y MMS; no para Hon
+            Double dias_ajuste = 0.00;
             if (isAYA || isCYT || isMMS) {
                 // TODO Ajuste 5 o 6 aÃ±os Constante
-                // sueldo_diario * 5 /360
-                ajuste_calendario_diario = sueldo_diario.add(compensa_garantiza_diaria).multiply(DIAS_AJUSTE_5_6).divide(360);
-                
-                // Si es quincena de calculo semestral
-                if (false) {
-                    // 180 por semestre; proporcionales con Faltas, Permisos con goce, Asueto e Incapacidades
-                    // 180 por 2.5 o 3 si es bisiesto
-                    ajuste_calendario = ajuste_calendario_diario.multiply(180);
-                }
+                dias_ajuste = Year.isLeap(quincenaSingleton.getYear()) ? 6.0 : 5.0;
+                // sueldo_diario * 5 /360  TODO el ajuste incluye Compensacion???
+                ajuste_calendario_diario = sueldo_diario.add(compensa_garantiza_diaria).multiply(dias_ajuste).divide(360);
             }
+            
+            /* Prima Vacacional */
+            // por 360 dias tocan 24 dias para CYT y AYA (24 = 40% de 60 dias)
+            Double dias_prima_vacional = 0.00;
+            if (isMMS) {
+                //TODO 24 y 12.6 a constantes
+                dias_prima_vacional = 12.6;
+            } else {
+                dias_prima_vacional = 24.00;
+            }
+            prima_vacacional_diaria = sueldo_diario.add(compensa_garantiza_diaria).multiply(dias_prima_vacional).divide(360);
             
             /* Aguinaldo */ 
             // por 360 dias tocan 40 dias
             aguinaldo_diario = sueldo_diario.add(compensa_garantiza_diaria).multiply(40).divide(360);
             // TODO para honorarios el aguinaldo juega como variables para ene-feb
+
+            // Dias de Ajuste, PrimaVacacional y Aguinaldo no son cronologicos; son "fiscales" de 30 dias cada mes.
             
-            /* Prima Vacional */
-            // por 360 dias tocan 24 dias para CYT y AYA (24 = 40% de 60 dias)
-            if (isMMS) {
-                //TODO 24 y 12.6 a constantes
-                prima_vacacional_diaria = sueldo_diario.add(compensa_garantiza_diaria).multiply(12.6).divide(360);
-            } else {
-                prima_vacacional_diaria = sueldo_diario.add(compensa_garantiza_diaria).multiply(24).divide(360);
+            if ((nomina.getBaja() || quincenaSingleton.isSemestral())) {
+                LocalDate fAntiguedad = empleadoNomina.getFechaAntiguedad();
+                LocalDate fromDate = fAntiguedad.isBefore(quincenaSingleton.getFechaInicioSemestre()) ? quincenaSingleton.getFechaInicioSemestre() : fAntiguedad;
+                LocalDate toDate = nomina.getBaja() ? empleadoNomina.getFechaBaja() : quincenaSingleton.getFechaFin();
+                toDate = toDate.isBefore(quincenaSingleton.getFechaFinSemestre()) ? toDate : quincenaSingleton.getFechaFinSemestre();
+                long dias_completos_anuales = quincenaSingleton.diasFiscales(fromDate, toDate);// ChronoUnit.DAYS.between(fromDate, toDate);
+                
+                if (ajuste_calendario_diario.isPositive()) {
+                    ajuste_calendario = ajuste_calendario_diario.multiply(dias_completos_anuales);
+                }
+                if (prima_vacacional_diaria.isPositive()) {
+                    MonetaryAmount topePV = salario_minimo.multiply(15);
+                    MonetaryAmount prima_vacacional = prima_vacacional_diaria.multiply(dias_completos_anuales);
+                    if (prima_vacacional.isGreaterThan(topePV)) {
+                        prima_vacacional_exenta = topePV;
+                        prima_vacacional_gravable = prima_vacacional.subtract(topePV);
+                    } else {
+                        prima_vacacional_exenta = prima_vacacional;
+                    }
+                }
+                if (aguinaldo_diario.isPositive()) {
+                    MonetaryAmount topeAguin = salario_minimo.multiply(30.00);
+                    MonetaryAmount aguinaldo = aguinaldo_diario.multiply(dias_completos_anuales);
+                    if (aguinaldo_exento.isGreaterThan(topeAguin)) {
+                        aguinaldo_exento = topeAguin;
+                        aguinaldo_gravado = aguinaldo.subtract(topeAguin);
+                    } else {
+                        aguinaldo_exento = aguinaldo;
+                    }
+                }
+                double dias_vacaciones = dias_completos_anuales * 10.00 / 180.00;
+                vacaciones = sueldo_diario.add(compensa_garantiza_diaria).multiply(dias_vacaciones);
             }
             
             /* Prima Quinquenal */
@@ -596,6 +680,10 @@ public class CalculoREST {
                     prima_quinquenal =  Money.of(87.50, "MXN");   
                 }
                 if (quincenaSingleton.getYear() == 2016 && quincenaSingleton.getQuincena() == 3 && this.idEmpleado == 59) {
+                    // Nathanael
+                    prima_quinquenal =  Money.of(87.50, "MXN");   
+                }
+                if (quincenaSingleton.getYear() == 2016 && quincenaSingleton.getQuincena() == 4 && this.idEmpleado == 59) {
                     // Nathanael
                     prima_quinquenal =  Money.of(87.50, "MXN");   
                 }
@@ -630,7 +718,7 @@ public class CalculoREST {
             /* Tiempo Horas Extras */
             if (isAYA) {
                 // Jornada de 8 horas
-                MonetaryAmount sueldo_hora = sueldo_diario.divide(8.0); // Para el TE se usa el diario o el cotizado
+                MonetaryAmount sueldo_hora = sueldo_diario.divide(8.0); // TODO Para el TE se usa el diario o el cotizado ?
                 if (nomina.getHorasExtrasDobles() > 0) {
                     // grava el 50% del tiempo extra doble
                     tiempo_extra_doble_gravado = sueldo_hora.multiply(nomina.getHorasExtrasDobles()); 
@@ -657,12 +745,18 @@ public class CalculoREST {
             insertarCalculo(PRIMA_ANTIGUEDAD, prima_antiguedad);
             insertarCalculo(CARGA_ADMINISTRATIVA, carga_admin);
             insertarCalculo(INDEMNIZACION_CARGA_ADMVA, carga_admin_indem);
+            insertarCalculo(PRIMA_VACACIONAL_GRA, prima_vacacional_gravable);
+            insertarCalculo(PRIMA_VACACIONAL_EXE, prima_vacacional_exenta);
+            insertarCalculo(AGUINALDO_GRA, aguinaldo_gravado);
+            insertarCalculo(AGUINALDO_EXE, aguinaldo_exento);
+            insertarCalculo(VACACIONES, vacaciones); //TODO Vacaciones integra al variable del siguiente semestre??
             insertarCalculo(MATERIALES, materiales);
             insertarCalculo(ESTIMULOS_PRODUCTIVIDAD_CYT, estimulos_cyt);
             insertarCalculo(COMPENSA_GARANTIZADA, compensa_garantiza);
             insertarCalculo(FONDO_AHORRO_EXENTO, fondo_ahorro_exento);
             insertarCalculo(FONDO_AHORRO_GRAVADO, fondo_ahorro_gravado);
             insertarCalculo(FONDO_AHORRO, fondo_ahorro);
+            insertarCalculo(AJUSTE_CALENDARIO, ajuste_calendario);
             insertarCalculo(HORAS_EXTRAS_GRAVADO, tiempo_extra_doble_gravado);
             insertarCalculo(HORAS_EXTRAS_EXENTO, tiempo_extra_doble_exento);
             insertarCalculo(HORAS_EXTRAS_TRIPLE, tiempo_extra_triple_gravado);
@@ -691,7 +785,7 @@ public class CalculoREST {
                 salario_diario_fijo = salario_diario_fijo.add(movPagoIntegra.getCantidad());
             }
             //salario_diario_fijo = salario_diario_fijo.add(Money.of(new BigDecimal("1899.64"), MXN));//new BigDecimal("1778.10"), MXN));
-            
+
             // Ret. credito infonavit incluye Seguro de Vivivienda por 15 pesos. Se paga en la 1era quincena de cada bimestre.
             
             // TODO sacar las percepciones de pagos de integracion_variable para el siguiente bimestre
@@ -722,6 +816,11 @@ public class CalculoREST {
             insertarCalculo(SALARIO_DIARIO_COTIZADO, salario_diario_cotizado);
             insertarCalculo(SALARIO_DIARIO_COTIZADO_TOPADO, salario_diario_cotizado_topado);
 
+            insertarCalculo(PRIMA_ANTIGUEDAD_DIARIA, prima_antiguedad_diaria); //??
+            insertarCalculo(AGUINALDO_DIARIO, aguinaldo_diario); //??
+            insertarCalculo(AJUSTE_DIARIO, ajuste_calendario_diario); //??
+            insertarCalculo(PRIMA_VACACIONAL_DIARIO, prima_vacacional_diaria); //??
+            
             /* IMSS */
        //     Integer dias_reales_bimestre = quincena.getDiasBimestre(); 
             // TODO IMSS: donde uso los dias_reales_bimestre ?!?!
@@ -737,9 +836,6 @@ public class CalculoREST {
             // TODO para las repercuciones del Imss, los Dias Trabajados DEBEN ser Dias Cotizados
             
 
-            // TODO para Imss y repercuciones se usan los días Reales? se les quitan faltas e incapacidades?
-            Integer dias_imss = dias_reales_imss - faltas - incapacidadesHabiles - incapacidadesInhabiles;
-            
             MonetaryAmount excedente_3SM_diario_factor = salario_minimo.multiply(3);
             if (salario_diario_cotizado_topado.compareTo(excedente_3SM_diario_factor) > 0) {
                 excedente_3SM_diario_factor = salario_diario_cotizado_topado.subtract(excedente_3SM_diario_factor);
@@ -799,6 +895,10 @@ public class CalculoREST {
             base_gravable = base_gravable.add(apoyo_mto_vehicular);
             base_gravable = base_gravable.add(tiempo_extra_doble_gravado);
             base_gravable = base_gravable.add(tiempo_extra_triple_gravado);
+            base_gravable = base_gravable.add(ajuste_calendario);
+            base_gravable = base_gravable.add(prima_vacacional_gravable);
+            base_gravable = base_gravable.add(aguinaldo_gravado);
+            base_gravable = base_gravable.add(vacaciones);
             // gravar las percepciones de pagos que gravan (e.g. TODO Ningun pago Grava ??? ).
             for(Movimiento movPagoGrava : getPercepcionesCapturadasGravan(idEmpleado)) {
                 base_gravable = base_gravable.add(movPagoGrava.getCantidad());
@@ -808,6 +908,8 @@ public class CalculoREST {
             base_exenta = base_exenta.add(fondo_ahorro_exento);
             base_exenta = base_exenta.add(tiempo_extra_doble_exento);
             base_exenta = base_exenta.add(mondero_despensa); // Monedero excenta
+            base_exenta = base_exenta.add(prima_vacacional_exenta); // Monedero excenta
+            base_exenta = base_exenta.add(aguinaldo_exento); // Monedero excenta
 
             insertarCalculo(BASE_GRAVABLE, base_gravable);
             insertarCalculo(BASE_EXENTA, base_exenta);
@@ -817,6 +919,15 @@ public class CalculoREST {
                 impuesto_antes_subsidio_honorarios = calcularImpuesto(base_gravable);
             } else {
                 impuesto_antes_subsidio = calcularImpuesto(base_gravable);
+                if (idEmpleado == 151 && quincenaSingleton.getQuincena() == 5) {
+                    // Baja de Pablo Salinas
+                    impuesto_a_cargo = Money.of(188.70, MXN);    // TODO impuesto_despues_subsidio hacer tabla
+                    impuesto_a_cargo = impuesto_antes_subsidio.subtract(impuesto_a_cargo).abs(); 
+                    //TODO impuesto_a_cargo por supuesto no grava. Confirma si tampoco integra
+                    // TODO que pasa si el subsidio sale positivo
+                    impuesto_antes_subsidio = Money.of(BigDecimal.ZERO, MXN);
+                }
+                
             }
             /* Seguro de separacion indivudualizado - Después del ISR normal pq se "piramida" */
             if (isMMS) {
@@ -837,9 +948,11 @@ public class CalculoREST {
                 insertarCalculo(SEG_SEPARACION_IND_CIMAV, seg_sep_ind_cimav_emp);
                 insertarCalculo(SEG_SEPARACION_IND_EMPLEADO, seg_sep_ind_cimav_emp);
             }
+            
             insertarCalculo(ISR, impuesto_antes_subsidio);
             insertarCalculo(ISR_HONORARIOS, impuesto_antes_subsidio_honorarios);
-
+            
+            insertarCalculo(SUBSIDIO_EMPLEADO_EFECTIVO, impuesto_a_cargo);
             
             /** Calcular Pensión Alimenticia (después de calcular y persistir todos los movimientos(percep y deducc)) **/
             if (empleadoNomina.getPensionIdTipo() > PENSION_SIN) {
@@ -857,12 +970,14 @@ public class CalculoREST {
             
             
         } catch (NullPointerException | RollbackException ex) {
+            logger.log(Level.SEVERE, "CalculoREST.PrimerCalculo ::> " + ex.getMessage());
             return "-Unico";
         }
             
         String resultJSON = "\"PERCEPCION\": {";
             resultJSON = resultJSON + "\"" + SUELDO_ORDINARIO + "\": " + sueldo_ordinario.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + SUELDO_DIAS_DESCANSO + "\": " + sueldo_dias_descanso.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + SUBSIDIO_EMPLEADO_EFECTIVO + "\": " + impuesto_a_cargo.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + HONORARIOS_ASIMILABLES + "\": " + sueldo_honorarios.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + PRIMA_ANTIGUEDAD + "\": " + prima_antiguedad.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + CARGA_ADMINISTRATIVA + "\": " + carga_admin.getNumber().toString() + ",";
@@ -874,7 +989,15 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + APOYO_MANTENIMIENTO_VEHICULAR + "\": " + apoyo_mto_vehicular.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO_EXENTO + "\": " + fondo_ahorro_exento.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO_GRAVADO + "\": " + fondo_ahorro_gravado.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + AJUSTE_CALENDARIO + "\": " + ajuste_calendario.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + VACACIONES + "\": " + vacaciones.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + PRIMA_VACACIONAL_GRA + "\": " + prima_vacacional_gravable.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + PRIMA_VACACIONAL_EXE + "\": " + prima_vacacional_exenta.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + AGUINALDO_GRA + "\": " + aguinaldo_gravado.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + AGUINALDO_EXE + "\": " + aguinaldo_exento.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + HORAS_EXTRAS_GRAVADO + "\": " + tiempo_extra_doble_gravado.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + HORAS_EXTRAS_EXENTO + "\": " + tiempo_extra_doble_exento.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + HORAS_EXTRAS_TRIPLE + "\": " + tiempo_extra_triple_gravado.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + MONEDERO_DESPENSA + "\": " + mondero_despensa.getNumber().toString();
         resultJSON = resultJSON + " }";
         
@@ -902,6 +1025,10 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + "Compensa" + "\": " + compensa_garantiza.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Fondo ahorro" + "\": " + fondo_ahorro_gravado.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Estimulos" + "\": " + estimulos_cyt.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Ajuste" + "\": " + ajuste_calendario.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Vacaciones" + "\": " + vacaciones.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Prima vacional" + "\": " + prima_vacacional_gravable.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Aguinaldo" + "\": " + aguinaldo_gravado.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Tiempo Extra" + "\": " + tiempo_extra_doble_gravado.getNumber().toString();
 //            resultJSON = resultJSON + "\"" + "Monedero" + "\": " + mondero_despensa.getNumber().toString();
         resultJSON = resultJSON + " }";
@@ -910,6 +1037,8 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + "TOTAL" + "\": " + base_exenta.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Monedero despensa" + "\": " + mondero_despensa.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Fondo ahorro" + "\": " + fondo_ahorro_exento.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Prima vacional" + "\": " + prima_vacacional_exenta.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "Aguinaldo" + "\": " + aguinaldo_exento.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Tiempo Extra" + "\": " + tiempo_extra_doble_exento.getNumber().toString();
         resultJSON = resultJSON + " }";
         
@@ -935,6 +1064,7 @@ public class CalculoREST {
         resultJSON = resultJSON + ",\"SDI_VARIABLE_ACUMULADO\": {";
             resultJSON = resultJSON + "\"" + "integracion_variable (Total)" + "\": " + integracion_variable.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Indemnizacion por Carga" + "\": " + carga_admin_indem.getNumber().toString();
+            // TODO Vacaciones integranvarianb
             // TODO Falta acumular SDI Variable de Remanente y Otros (¿Otros conceptos no quincenales capturados suman al sdi acumulado?)
         resultJSON = resultJSON + " }";
         
@@ -1019,6 +1149,23 @@ public class CalculoREST {
         getEntityManager().persist(movimiento);
         
     }
+    
+//    private void insertIntegrado(String strConcepto, MonetaryAmount monto) {
+//        if (monto == null || monto.isZero()) {
+//            // insertar solo los mayores a cero
+//            return;
+//        }
+//        // obtener concepto
+//        Concepto concepto = finConceptoByCode(strConcepto);
+//        if (concepto == null) {
+//            throw new NullPointerException(strConcepto);
+//        }
+//        
+//        // interno
+//        Movimiento movimiento = new Movimiento(this.idEmpleado, concepto, monto, Money.of(0.00, "MXN"));
+//        // persistirlo
+//        getEntityManager().persist(movimiento);
+//    }
     
     public Concepto finConceptoByCode(String code) {
         Concepto result = hmapConceptos.get(code);

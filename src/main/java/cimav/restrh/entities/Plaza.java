@@ -13,8 +13,11 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlElement;
 
 /**
  *
@@ -46,8 +49,16 @@ public class Plaza extends BaseEntity implements Serializable {
     private String nivelCode;
     @Column(name = "id_grupo")
     private Integer idGrupo;
-    @Column(name = "id_departamento")
-    private Integer idDepartamento;
+    
+//    @Column(name = "id_departamento")
+//    private Integer idDepartamento;
+    
+    @XmlElement(name = "departamento")
+    @JoinColumn(name = "id_departamento", referencedColumnName = "id")
+    @ManyToOne
+    private Departamento departamento;
+    
+    
     @Column(name = "id_sede")
     private Integer idSede;
     @Column(name = "id_tipo_antiguedad")
@@ -108,12 +119,12 @@ public class Plaza extends BaseEntity implements Serializable {
         this.idGrupo = idGrupo;
     }
 
-    public Integer getIdDepartamento() {
-        return idDepartamento;
+    public Departamento getDepartamento() {
+        return departamento;
     }
 
-    public void setIdDepartamento(Integer idDepartamento) {
-        this.idDepartamento = idDepartamento;
+    public void setDepartamento(Departamento departamento) {
+        this.departamento = departamento;
     }
 
     public Integer getIdSede() {
