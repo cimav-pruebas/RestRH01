@@ -7,7 +7,7 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.EmpleadoNominaHisto;
 import cimav.restrh.entities.MovimientoHisto;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,13 +42,16 @@ public class EmpleadoNominaHistoREST extends AbstractFacade<EmpleadoNominaHisto>
     @Produces("application/json")
     public EmpleadoNominaHisto findHisto(@PathParam("id") Integer id, @PathParam("year") Integer year, @PathParam("quincena") Short quincena) {
         EmpleadoNominaHisto empleadoNominaHisto = super.find(id);
-        
+            if (empleadoNominaHisto == null) {
+                return null;
+            }
             //Collection<MovimientoHisto> movs = empleadoNominaHisto.getMovimientosHisto();
-            
+            if (empleadoNominaHisto.getMovimientosHisto() == null) {
+                empleadoNominaHisto.setMovimientosHisto(new ArrayList<>());
+            }
             Stream<MovimientoHisto> movs =  empleadoNominaHisto.getMovimientosHisto().stream()
                   .filter((MovimientoHisto m) -> Objects.equals(m.getQuincena(), quincena));
             empleadoNominaHisto.setMovimientosHisto(movs.collect(Collectors.toList()));   
-            
         
         return empleadoNominaHisto;
     }
