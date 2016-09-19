@@ -347,7 +347,7 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
 
                 movimientoHisto.setCantidad(movimiento.getCantidad());
                 movimientoHisto.setCantidadEmpresa(movimiento.getCantidadEmpresa());
-                movimientoHisto.setIdConcepto(movimiento.getConcepto().getId());
+                movimientoHisto.setConcepto(movimiento.getConcepto());
                 movimientoHisto.setIdEmpleado(movimiento.getIdEmpleado());
                 movimientoHisto.setNumQuincenas(movimiento.getNumQuincenas());
                 movimientoHisto.setPago(movimiento.getPago());

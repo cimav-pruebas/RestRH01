@@ -6,6 +6,7 @@
 package cimav.restrh.services;
 
 import cimav.restrh.entities.Movimiento;
+import cimav.restrh.entities.MovimientoHisto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -129,6 +130,20 @@ public class MovimientoFacadeREST extends AbstractFacade<Movimiento> {
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+
+    @GET
+    @Path("/histo_by_empleado/{id}/{quincena}")
+    @Produces("application/json")
+    public List<MovimientoHisto> findHistoByIdEmpleado(@PathParam("id") Integer idEmpleado, @PathParam("quincena") Short quincena) {
+        
+            String query = "SELECT mh FROM MovimientoHisto mh WHERE mh.idEmpleado = :id_empleado AND mh.quincena = :quincena";
+            List<MovimientoHisto>  result = getEntityManager().createQuery(query)
+                    .setParameter("id_empleado", idEmpleado)
+                    .setParameter("quincena", quincena)
+                    .getResultList();
+        
+        return result;
     }
     
 }

@@ -15,9 +15,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -32,7 +35,6 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "MovimientoHisto.findAll", query = "SELECT m FROM MovimientoHisto m"),
     @NamedQuery(name = "MovimientoHisto.findById", query = "SELECT m FROM MovimientoHisto m WHERE m.id = :id"),
     @NamedQuery(name = "MovimientoHisto.findByIdEmpleado", query = "SELECT m FROM MovimientoHisto m WHERE m.idEmpleado = :idEmpleado"),
-    @NamedQuery(name = "MovimientoHisto.findByIdConcepto", query = "SELECT m FROM MovimientoHisto m WHERE m.idConcepto = :idConcepto"),
     @NamedQuery(name = "MovimientoHisto.findByCantidad", query = "SELECT m FROM MovimientoHisto m WHERE m.cantidad = :cantidad"),
     @NamedQuery(name = "MovimientoHisto.findByNumQuincenas", query = "SELECT m FROM MovimientoHisto m WHERE m.numQuincenas = :numQuincenas"),
     @NamedQuery(name = "MovimientoHisto.findByPago", query = "SELECT m FROM MovimientoHisto m WHERE m.pago = :pago"),
@@ -50,11 +52,19 @@ public class MovimientoHisto implements Serializable {
     @Column(name = "id")
     private Integer id;
     
+    // No tiene Get/Set y No Insertable ni Updatable; es decir, es OnlyRead y sirve como mappedBy en EmpleadoNomina
+    @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne
+    private EmpleadoBase empleadoBase;
     @Column(name = "id_empleado")
     private Integer idEmpleado;
     
-    @Column(name = "id_concepto")
-    private Integer idConcepto;
+    //@Column(name = "id_concepto")
+    //private Integer idConcepto;
+    @XmlElement(name = "concepto")
+    @JoinColumn(name = "id_concepto", referencedColumnName = "id")
+    @ManyToOne
+    private Concepto concepto;
     
     @Column(name = "cantidad")
     @Convert(converter = MonetaryAmountConverter.class)
@@ -104,13 +114,13 @@ public class MovimientoHisto implements Serializable {
         this.idEmpleado = idEmpleado;
     }
 
-    public Integer getIdConcepto() {
-        return idConcepto;
-    }
-
-    public void setIdConcepto(Integer idConcepto) {
-        this.idConcepto = idConcepto;
-    }
+//    public Integer getIdConcepto() {
+//        return idConcepto;
+//    }
+//
+//    public void setIdConcepto(Integer idConcepto) {
+//        this.idConcepto = idConcepto;
+//    }
 
     public MonetaryAmount getCantidad() {
         return cantidad;
@@ -182,6 +192,14 @@ public class MovimientoHisto implements Serializable {
 
     public void setIdMovimiento(Integer idMovimiento) {
         this.idMovimiento = idMovimiento;
+    }
+
+    public Concepto getConcepto() {
+        return concepto;
+    }
+
+    public void setConcepto(Concepto concepto) {
+        this.concepto = concepto;
     }
 
     @Override

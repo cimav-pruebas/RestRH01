@@ -6,7 +6,6 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import javax.money.MonetaryAmount;
 import javax.persistence.Basic;
 import javax.persistence.Cacheable;
@@ -16,8 +15,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -54,6 +55,10 @@ public class NominaHisto implements Serializable {
     
     @Column(name = "id_empleado")
     private Integer idEmpleado;
+    // Conexion con el EmpleadoNomina
+    @JoinColumn(name = "id_empleado", referencedColumnName = "id", insertable = false, updatable = false)
+    @OneToOne
+    private EmpleadoNominaHisto empleadoNominaHisto; /* Read Only */
     
     @Column(name = "incapacidad_habiles")
     private Short incapacidadHabiles;
