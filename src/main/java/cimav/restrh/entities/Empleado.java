@@ -7,6 +7,7 @@ package cimav.restrh.entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -81,10 +82,12 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     private LocalDate fechaIngreso;
 
     public LocalDate getFechaIngreso() {
+        System.out.println("GETFi " + this.fechaIngreso) ;//
         return fechaIngreso;
     }
 
     public void setFechaIngreso(LocalDate fechaIngreso) {
+        System.out.println("SETFi " + this.fechaIngreso + " : " + fechaIngreso) ;//fechaIngreso.format(DateTimeFormatter.ISO_DATE));
         this.fechaIngreso = fechaIngreso;
     }
     

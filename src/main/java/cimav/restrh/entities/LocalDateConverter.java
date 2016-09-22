@@ -5,10 +5,8 @@
  */
 package cimav.restrh.entities;
 
-import java.time.Instant;
+import java.sql.Date;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
@@ -20,12 +18,14 @@ import javax.persistence.Converter;
 public class LocalDateConverter implements AttributeConverter<java.time.LocalDate, Date> {
     
     @Override
-    public Date convertToDatabaseColumn(LocalDate localDate) {
+    public Date convertToDatabaseColumn(LocalDate localDate) { 
         Date date = null;
         if (localDate != null) {
-            date = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            //date = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+            
+            date = java.sql.Date.valueOf(localDate);
         }
-        System.out.println(localDate + " >>>Local>>> " + date);
+        System.out.println(localDate + " >>>LocalToDate>>> " + date);
         return date;
     }
         
@@ -67,9 +67,11 @@ public class LocalDateConverter implements AttributeConverter<java.time.LocalDat
         
         LocalDate result = null;
         if (date != null) {
-            result = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+            //result = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+            
+            result = date.toLocalDate();
         }
-        System.out.println("Local>>> " + result);
+        System.out.println(date + " >>>DateToLocal>>> " + result);
         return result;
 //        LocalDate result = sqlDate == null ? null : sqlDate.toLocalDate();
 //        //System.out.println("DtoL " + sqlDate + ":" + result);
