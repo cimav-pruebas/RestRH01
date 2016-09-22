@@ -54,7 +54,7 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
     @EJB
     private NominaREST nominaREST;
     @EJB
-    private EmpleadoFacadeREST empleadoREST;
+    private EmpleadoREST empleadoREST;
     @EJB
     private EmpleadoTempoREST empleadoTempoREST;
     @EJB

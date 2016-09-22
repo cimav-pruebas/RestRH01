@@ -53,6 +53,7 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     private Integer idTipoAntiguedad;
     
     @Column(name = "fecha_antiguedad")
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaAntiguedad;
     
     @Column(name = "estimulos_productividad")
@@ -88,6 +89,7 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     private Boolean pensionIncluyeMonedero;
     
     @Column(name = "fecha_baja")
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaBaja;
     
 //    @PostLoad

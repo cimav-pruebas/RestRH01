@@ -5,13 +5,12 @@
  */
 package cimav.restrh.entities;
 
-import cimav.restrh.tools.HistoryEmpleadoEventListener;
 import java.io.Serializable;
 import java.time.LocalDate;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -26,7 +25,7 @@ import org.apache.commons.lang3.text.WordUtils;
  */
 @Entity
 @Cacheable(false)
-@EntityListeners(HistoryEmpleadoEventListener.class)
+//@EntityListeners(HistoryEmpleadoEventListener.class)
 @Table(name = "empleados", catalog = "rh_development", schema = "public")
 @XmlRootElement(name = "empleado")
 public class Empleado extends EmpleadoSuper implements Serializable {
@@ -78,12 +77,23 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     private Short idTipoContrato;
     
     @Column(name = "fecha_ingreso")
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaIngreso;
 
+    public LocalDate getFechaIngreso() {
+        return fechaIngreso;
+    }
+
+    public void setFechaIngreso(LocalDate fechaIngreso) {
+        this.fechaIngreso = fechaIngreso;
+    }
+    
     @Column(name = "fecha_inicio_contrato")
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaInicioContrato;
     
     @Column(name = "fecha_fin_contrato")
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaFinContrato;
     
     @Column(name = "id_tipo_sni")
@@ -95,7 +105,7 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     
     @Column(name = "fecha_sni")
     //@Temporal(TemporalType.DATE)
-//    @Convert(converter = LocalDateConverter.class)
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaSni;
       
     @XmlElement(name = "jefe")
@@ -105,7 +115,7 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     
     @Column(name = "fecha_nacimiento")
     //@Temporal(TemporalType.DATE)
-//    @Convert(converter = LocalDateConverter.class)
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaNacimiento;
 
     @Column(name = "id_sexo")
@@ -253,13 +263,6 @@ public class Empleado extends EmpleadoSuper implements Serializable {
         this.idTipoContrato = idTipoContrato;
     }
 
-    public LocalDate getFechaIngreso() {
-        return fechaIngreso;
-    }
-
-    public void setFechaIngreso(LocalDate fechaIngreso) {
-        this.fechaIngreso = fechaIngreso;
-    }
 
     public LocalDate getFechaInicioContrato() {
         return fechaInicioContrato;

@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  *
  * @author calderon
  */
-public class LocalDateAdapter extends XmlAdapter<Date, LocalDate>{
+public class LocalDateAdapter extends XmlAdapter<Date, LocalDate> {
 
     @Override
     public LocalDate unmarshal(Date date) throws Exception {
@@ -23,6 +23,7 @@ public class LocalDateAdapter extends XmlAdapter<Date, LocalDate>{
         if (date != null) {
             localDate = new java.sql.Date(date.getTime()).toLocalDate();
         } 
+        System.out.println("Xunmarshal " + date + ":" + localDate);
         return localDate;
     }
 
@@ -34,7 +35,8 @@ public class LocalDateAdapter extends XmlAdapter<Date, LocalDate>{
             LocalDateTime ldt = localDate.atTime(10, 10);
             date = Date.from(ldt.toInstant(ZoneOffset.UTC));
         }
+        System.out.println("Ymarshal " + localDate + ":" + date);
         return date;
     }
-    
+   
 }

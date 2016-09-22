@@ -220,6 +220,8 @@ public class QuincenaSingleton {
       System.out.println("date5: " + date5);        
         */
         
+        String superStupidIdea = "T04:10:00-06:00"; //TODO superStupidIdea = "T04:10:00-06:00" Vergonsoso
+        
         this.asJson = 
             "{ " + "\"quincena\": " + quincena + "," +
             "\t" + "\"mes\": " + mes + "," +

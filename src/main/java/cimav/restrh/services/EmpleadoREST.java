@@ -28,12 +28,12 @@ import javax.ws.rs.Produces;
 @Stateless
 @Path("empleado")
 @DeclareRoles(AbstractFacade.ADMIN_ROLE)
-public class EmpleadoFacadeREST extends AbstractFacade<Empleado> {
+public class EmpleadoREST extends AbstractFacade<Empleado> {
 
 //    @PersistenceContext(unitName = "PU_JPA")
 //    private EntityManager em;
 
-    public EmpleadoFacadeREST() {
+    public EmpleadoREST() {
         super(Empleado.class);
     }
 
