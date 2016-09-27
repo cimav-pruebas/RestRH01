@@ -294,7 +294,7 @@ public class CalculoREST {
         MonetaryAmount impuesto_a_cargo = Money.of(0.00, "MXN");
         
         MonetaryAmount salario_diario_fijo = Money.of(0.00, "MXN"); // Salario Diario Integrado (todas las percepciones fijas)
-        MonetaryAmount salario_diario_variable = Money.of(0.00, "MXN"); // Del Bimestre Anterior
+        MonetaryAmount salario_diario_variable_bimestre_anterior = Money.of(0.00, "MXN"); // Del Bimestre Anterior
         MonetaryAmount salario_diario_cotizado = Money.of(0.00, "MXN"); // Salario Diario de CotizaciÃ³n (SDI + todss las percepciones variables)
         MonetaryAmount salario_diario_cotizado_topado = Money.of(0.00, "MXN"); // Topado a 25 Salarios MÃ­nimos
         MonetaryAmount integracion_variable = Money.of(0.00, "MXN"); // Remanente, EstimulosAYA, Indemnizaion por Carga, Horas Triples, etc. para el proximo bimestre
@@ -794,12 +794,12 @@ public class CalculoREST {
             // integracion_variable = integracion_variable.add(carga_admin_indem); 
             
             // leer SDI Variable (Remanente CYT, Estimulo AYA, Bimestre Anterior)
-            salario_diario_variable = nomina.getSdiVariableBimestreAnterior();
-            if (salario_diario_variable == null) {
-                salario_diario_variable = Money.of(BigDecimal.ZERO, MXN);
+            salario_diario_variable_bimestre_anterior = nomina.getSdiVariableBimestreAnterior();
+            if (salario_diario_variable_bimestre_anterior == null) {
+                salario_diario_variable_bimestre_anterior = Money.of(BigDecimal.ZERO, MXN);
             }
             // cotizado = fijo + variables Â¿Equivalente al Mixto del Imss?
-            salario_diario_cotizado = salario_diario_fijo.add(salario_diario_variable);
+            salario_diario_cotizado = salario_diario_fijo.add(salario_diario_variable_bimestre_anterior);
             // cotizado se topa (no el fijo)
             MonetaryAmount topeSalarioDiarioCotizado = salario_minimo.multiply(SALARIO_DIARIO_TOPE);
             if (salario_diario_cotizado.compareTo(topeSalarioDiarioCotizado) > 0) {
@@ -812,7 +812,7 @@ public class CalculoREST {
             insertarCalculo(SUELDO_DIARIO, sueldo_diario); //??
             insertarCalculo(SUELDO_DIARIO, sueldo_honorarios_diario); //??
             insertarCalculo(SALARIO_DIARIO_FIJO, salario_diario_fijo);
-            insertarCalculo(SALARIO_DIARIO_VARIABLE, salario_diario_variable);
+            insertarCalculo(SALARIO_DIARIO_VARIABLE, salario_diario_variable_bimestre_anterior);
             insertarCalculo(SALARIO_DIARIO_COTIZADO, salario_diario_cotizado);
             insertarCalculo(SALARIO_DIARIO_COTIZADO_TOPADO, salario_diario_cotizado_topado);
 
@@ -1044,7 +1044,7 @@ public class CalculoREST {
         
         resultJSON = resultJSON + ",\"SDI\": {";
             resultJSON = resultJSON + "\"" + "FIJO" + "\": " + salario_diario_fijo.getNumber().toString() + ",";
-            resultJSON = resultJSON + "\"" + "VARIABLE" + "\": " + salario_diario_variable.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + "VARIABLE" + "\": " + salario_diario_variable_bimestre_anterior.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "COTIZADO" + "\": " + salario_diario_cotizado.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "COTIZADO_TOPADO" + "\": " + salario_diario_cotizado_topado.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + "Sueldo" + "\": " + sueldo_diario.getNumber().toString() + ",";
@@ -1354,6 +1354,7 @@ public class CalculoREST {
     //            pensionAlimenticia = new BigDecimal(str).setScale(5, RoundingMode.HALF_EVEN);
                 pensionAlimenticia = totPercepPension.subtract(totDeducPension).multiply(percen);
             }  else if (tipo == PENSION_PORCEN_SOBRE_CONCEPTOS_SELECCIONADOS) {
+                //totDeducPension = totDeducPension.subtract(Money.of(2286.30, MXN));
                 pensionAlimenticia = totPercepPension.subtract(totDeducPension).multiply(percen);
             }
 

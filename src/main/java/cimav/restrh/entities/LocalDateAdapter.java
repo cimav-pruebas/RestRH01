@@ -21,7 +21,7 @@ public class LocalDateAdapter extends XmlAdapter<Date, LocalDate> {
         if (date != null) {
             localDate = new java.sql.Date(date.getTime()).toLocalDate();
         } 
-        System.out.println("Xunmarshal " + date + ":" + localDate);
+        //System.out.println("Xunmarshal " + date + ":" + localDate);
         return localDate;
     }
 
@@ -35,7 +35,7 @@ public class LocalDateAdapter extends XmlAdapter<Date, LocalDate> {
             
             date = java.sql.Date.valueOf(localDate);
         }
-        System.out.println("Ymarshal " + localDate + ":" + date);
+        //System.out.println("Ymarshal " + localDate + ":" + date);
         return date;
     }
    

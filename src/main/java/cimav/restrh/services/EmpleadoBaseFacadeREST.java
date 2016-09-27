@@ -173,7 +173,7 @@ public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
             // Se calculan los aÃ±os en base al Ãºltimo dÃ­a de la quincena 
 
 
-           // localDateFinQuincena = localDateFinQuincena.plusDays(1); // TODO Plus Day Hell
+            localDateFinQuincena = localDateFinQuincena.plusDays(1); // TODO Plus Day Hell
             // requierse agregarse un día por: Period between(LocalDate startDateInclusive, LocalDate endDateExclusive)
             Period period = Period.between(localDateFechaAntiguedad, localDateFinQuincena);
             empBase.setPantYears(period.getYears());

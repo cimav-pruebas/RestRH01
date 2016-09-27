@@ -25,7 +25,7 @@ public class LocalDateConverter implements AttributeConverter<java.time.LocalDat
             
             date = java.sql.Date.valueOf(localDate);
         }
-        System.out.println(localDate + " >>>LocalToDate>>> " + date);
+        //System.out.println(localDate + " >>>LocalToDate>>> " + date);
         return date;
     }
         
@@ -71,7 +71,7 @@ public class LocalDateConverter implements AttributeConverter<java.time.LocalDat
             
             result = date.toLocalDate();
         }
-        System.out.println(date + " >>>DateToLocal>>> " + result);
+        //System.out.println(date + " >>>DateToLocal>>> " + result);
         return result;
 //        LocalDate result = sqlDate == null ? null : sqlDate.toLocalDate();
 //        //System.out.println("DtoL " + sqlDate + ":" + result);

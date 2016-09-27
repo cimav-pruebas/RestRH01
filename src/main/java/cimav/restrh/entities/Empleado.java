@@ -7,7 +7,6 @@ package cimav.restrh.entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -18,7 +17,6 @@ import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.apache.commons.lang3.text.WordUtils;
 
 /**
  *
@@ -82,12 +80,11 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     private LocalDate fechaIngreso;
 
     public LocalDate getFechaIngreso() {
-        System.out.println("GETFi " + this.fechaIngreso) ;//
         return fechaIngreso;
     }
 
     public void setFechaIngreso(LocalDate fechaIngreso) {
-        System.out.println("SETFi " + this.fechaIngreso + " : " + fechaIngreso) ;//fechaIngreso.format(DateTimeFormatter.ISO_DATE));
+//        System.out.println("SETFi " + this.fechaIngreso + " : " + fechaIngreso) ;//fechaIngreso.format(DateTimeFormatter.ISO_DATE));
         this.fechaIngreso = fechaIngreso;
     }
     
@@ -231,7 +228,7 @@ public class Empleado extends EmpleadoSuper implements Serializable {
     }
 
     public void setNombre(String nombre) {
-        this.nombre = WordUtils.capitalizeFully(nombre);
+        this.nombre = nombre.toUpperCase(); // WordUtils.capitalizeFully(nombre);
     }
 
     public Integer getIdClinica() {
