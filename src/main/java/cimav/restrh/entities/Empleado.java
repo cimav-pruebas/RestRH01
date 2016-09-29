@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity
 @Cacheable(false)
 //@EntityListeners(HistoryEmpleadoEventListener.class)
-@Table(name = "empleados", catalog = "rh_development", schema = "public")
+@Table(name = "empleados", schema = "public")
 @XmlRootElement(name = "empleado")
 public class Empleado extends EmpleadoSuper implements Serializable {
     

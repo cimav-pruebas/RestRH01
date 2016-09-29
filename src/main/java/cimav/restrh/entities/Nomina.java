@@ -36,7 +36,7 @@ import org.javamoney.moneta.Money;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "nomina", catalog = "rh_development", schema = "public")
+@Table(name = "nomina", schema = "public")
 @XmlRootElement(name = "nomina")
 public class Nomina implements Serializable {
     

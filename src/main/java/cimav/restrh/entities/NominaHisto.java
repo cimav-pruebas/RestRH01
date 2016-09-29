@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "nominahisto", catalog = "rh_development", schema = "public")
+@Table(name = "nominahisto", schema = "public")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "NominaHisto.findAll", query = "SELECT n FROM NominaHisto n"),

@@ -508,8 +508,11 @@ public class QuincenaREST extends AbstractFacade<Quincena> {
             return ex.getClass() + "\n" + ex.getCause() + "\n" + ex.getMessage();
         }
 
+        // Inicialzar quincena
+        quincenaInit();
+        
         // Verificar Empleados dados de Baja, etc.
-        return "{\"estado\":\"listo\"}";// quincenaSingleton.toJSON();
+        return quincenaSingleton.toJSON();
     }
 
 }

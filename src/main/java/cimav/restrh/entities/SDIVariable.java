@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity(name = "SDIVariable")
 @Cacheable(false)
-@Table(name = "sdivariable", catalog = "rh_development", schema = "public")
+@Table(name = "sdivariable", schema = "public")
 @XmlRootElement(name = "sdivariable")
 public class SDIVariable implements Serializable {
     

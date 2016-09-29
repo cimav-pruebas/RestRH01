@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "empleados", catalog = "rh_development", schema = "public")
+@Table(name = "empleados", schema = "public")
 @XmlRootElement(name = "empleado_base")
 public class EmpleadoBase extends EmpleadoSuper implements Serializable{
 

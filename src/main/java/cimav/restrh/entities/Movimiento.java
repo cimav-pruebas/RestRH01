@@ -31,7 +31,7 @@ import org.javamoney.moneta.Money;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "movimientos", catalog = "rh_development", schema = "public")
+@Table(name = "movimientos", schema = "public")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Movimiento.findBy_IdEmpleado_Concepto", query = "SELECT t FROM Movimiento t WHERE t.idEmpleado = :id_empleado AND t.concepto = :concepto")})

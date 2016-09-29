@@ -24,7 +24,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "quincenas", catalog = "rh_development", schema = "public")
+@Table(name = "quincenas", schema = "public")
 public class Quincena implements Serializable {
     
     @Id

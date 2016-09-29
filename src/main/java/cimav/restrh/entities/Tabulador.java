@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @Entity(name = "Tabulador")
 @Cacheable(false)
-@Table(name = "tabulador", catalog = "rh_development", schema = "public")
+@Table(name = "tabulador", schema = "public")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Tabulador.findAll", query = "SELECT t FROM Tabulador t"),

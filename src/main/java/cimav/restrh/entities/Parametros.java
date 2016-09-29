@@ -21,7 +21,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Cacheable(false)
-@Table(name = "parametros", catalog = "rh_development", schema = "public")
+@Table(name = "parametros", schema = "public")
 public class Parametros implements Serializable {
     
     private static final long serialVersionUID = 1L;
