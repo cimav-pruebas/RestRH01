@@ -100,6 +100,17 @@ public class EmpleadoREST extends AbstractFacade<Empleado> {
     }
     
     @GET
+    @Path("/cuenta/{cuenta}")
+    @Produces("application/json")
+    public Empleado findByCuenta(@PathParam("cuenta") String cuenta) {
+        
+            String query = "SELECT e FROM Empleado e WHERE e.cuentaCimav LIKE :cuenta";
+            Empleado  result = (Empleado) getEntityManager().createQuery(query).setParameter("cuenta", cuenta).getSingleResult();
+        
+        return result;
+    }
+    
+    @GET
     @Path("{from}/{to}")
     @Produces("application/json")
     public List<Empleado> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
