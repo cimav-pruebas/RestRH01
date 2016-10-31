@@ -50,6 +50,7 @@ public class ApplicationConfig extends Application {
         resources.add(cimav.restrh.services.ParametrosREST.class);
         resources.add(cimav.restrh.services.QuincenaREST.class);
         resources.add(cimav.restrh.services.Reportes.class);
+        resources.add(cimav.restrh.services.SolicitanteREST.class);
         resources.add(cimav.restrh.services.TabuladorFacadeREST.class);
         resources.add(cimav.restrh.services.TarifaAnualREST.class);
     }
