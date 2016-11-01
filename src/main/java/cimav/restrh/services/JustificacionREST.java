@@ -5,7 +5,7 @@
  */
 package cimav.restrh.services;
 
-import cimav.restrh.entities.Solicitante;
+import cimav.restrh.entities.Justificacion;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.annotation.security.PermitAll;
@@ -25,14 +25,14 @@ import javax.ws.rs.Produces;
  * @author calderon
  */
 @Stateless
-@Path("solicitante")
+@Path("justificacion")
 @PermitAll
-public class SolicitanteREST extends AbstractFacade<Solicitante>{
+public class JustificacionREST extends AbstractFacade<Justificacion>{
 
-    private final static Logger logger = Logger.getLogger(SolicitanteREST.class.getName() ); 
+    private final static Logger logger = Logger.getLogger(JustificacionREST.class.getName() ); 
 
-    public SolicitanteREST() {
-        super(Solicitante.class);
+    public JustificacionREST() {
+        super(Justificacion.class);
     }
     
     @Override
@@ -44,7 +44,7 @@ public class SolicitanteREST extends AbstractFacade<Solicitante>{
     @Consumes("application/json")
     @Produces("application/json")
     @Override
-    public Solicitante insert(Solicitante entity) {
+    public Justificacion insert(Justificacion entity) {
         super.insert(entity); // <-- regresa con el Id nuevo, code, consecutivo y resto de los campos
         return entity; 
     }
@@ -52,7 +52,7 @@ public class SolicitanteREST extends AbstractFacade<Solicitante>{
     @PUT
     @Path("{id}")
     @Consumes("application/json")
-    public void edit(@PathParam("id") Integer id, Solicitante entity) {
+    public void edit(@PathParam("id") Integer id, Justificacion entity) {
         super.edit(entity);
     }
 
@@ -65,14 +65,14 @@ public class SolicitanteREST extends AbstractFacade<Solicitante>{
     @GET
     @Path("{id}")
     @Produces("application/json")
-    public Solicitante find(@PathParam("id") Integer id) {
+    public Justificacion find(@PathParam("id") Integer id) {
         return super.find(id); 
     }
 
     @GET
     @Override
     @Produces("application/json")
-    public List<Solicitante> findAll() {
+    public List<Justificacion> findAll() {
         return super.findAll();
     }
 
