@@ -119,6 +119,7 @@ public class CalculoREST {
     private final String ISR                            = "00101";
     private final String ISR_HONORARIOS                 = "00103";
     private final String IMSS                           = "00106";
+    private final String RETENCION_CREDITO_INFONAVIT    = "00109";
     private final String FONDO_AHORRO                   = "00111";
     private final String APORTACION_FONDO_AHORRO        = "00112";
     private final String SEG_SEPARACION_IND_CIMAV       = "00114";
@@ -320,6 +321,7 @@ public class CalculoREST {
         MonetaryAmount seg_sep_ind_cimav_emp = Money.of(0.00, "MXN");
         MonetaryAmount seg_sep_ind_isr = Money.of(0.00, "MXN");
         
+        MonetaryAmount ret_credito_infonavit           = Money.of(0.00, "MXN");
         try {
             
             if (!quincenaSingleton.isLoaded()) {
@@ -967,6 +969,17 @@ public class CalculoREST {
                 insertarCalculo(PENSION_ALIMENTICIA_MON_DESP, pension_alimenticia_monedero);
             }
             
+            if (empleadoNomina.getRetCreditoInfonavitIdTipo() > 0) {
+                if (empleadoNomina.getRetCreditoInfonavitIdTipo() == 1) {
+                    // Veces salario mínimo
+                    ret_credito_infonavit = empleadoNomina.getRetCreditoInfonavitValor().multiply(salario_minimo.getNumber());
+                } else if (empleadoNomina.getRetCreditoInfonavitIdTipo() == 2) {
+                    // Cobro fijo por quincena
+                    ret_credito_infonavit = empleadoNomina.getRetCreditoInfonavitValor();
+                }
+                insertarCalculo(RETENCION_CREDITO_INFONAVIT, ret_credito_infonavit);
+            }
+            
             
         } catch (NullPointerException | RollbackException ex) {
             logger.log(Level.SEVERE, "CalculoREST.PrimerCalculo ::> " + ex.getMessage());
@@ -1005,6 +1018,7 @@ public class CalculoREST {
             resultJSON = resultJSON + "\"" + ISR_HONORARIOS + "\": " + impuesto_antes_subsidio_honorarios.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + IMSS + "\": " + imss_obrero.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString() + ",";
+            resultJSON = resultJSON + "\"" + RETENCION_CREDITO_INFONAVIT + "\": " + ret_credito_infonavit.getNumber().toString() + ",";
             resultJSON = resultJSON + "\"" + APORTACION_FONDO_AHORRO + "\": " + fondo_ahorro.getNumber().toString()+ ",";
             resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_CIMAV + "\": " + seg_sep_ind_cimav_emp.getNumber().toString()+ ",";
             resultJSON = resultJSON + "\"" + SEG_SEPARACION_IND_EMPLEADO + "\": " + seg_sep_ind_cimav_emp.getNumber().toString()+ ",";

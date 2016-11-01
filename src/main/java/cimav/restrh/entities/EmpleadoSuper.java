@@ -90,6 +90,12 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
     @Column(name = "fecha_baja")
     private LocalDate fechaBaja;
     
+    @Column(name = "ret_credito_infonavit_tipo")
+    private Integer retCreditoInfonavitIdTipo;
+    @Column(name = "ret_credito_infonavit_valor")
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount retCreditoInfonavitValor;
+    
 //    @PostLoad
 //    public void reduceJefe() {
 //        // TODO Buscar best approach de reducción profundidad de Entidad en EmpleadoOld.Jefe
@@ -277,5 +283,22 @@ public class EmpleadoSuper extends BaseEntity implements Serializable {
         this.fechaBaja = fechaBaja; //DateUtils.truncate(fechaBaja, Calendar.DAY_OF_MONTH);
     }
 
+    public MonetaryAmount getRetCreditoInfonavitValor() {
+        return retCreditoInfonavitValor;
+    }
+
+    public void setRetCreditoInfonavitValor(MonetaryAmount retCreditoInfonavitValor) {
+        this.retCreditoInfonavitValor = retCreditoInfonavitValor;
+    }
+
+    public Integer getRetCreditoInfonavitIdTipo() {
+        return retCreditoInfonavitIdTipo;
+    }
+
+    public void setRetCreditoInfonavitIdTipo(Integer retCreditoInfonavitIdTipo) {
+        this.retCreditoInfonavitIdTipo = retCreditoInfonavitIdTipo;
+    }
+
+    
 
 }

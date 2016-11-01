@@ -8,8 +8,10 @@ package cimav.restrh.entities;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
+import javax.money.MonetaryAmount;
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -79,6 +81,12 @@ public class Plaza extends BaseEntity implements Serializable {
     private LocalDate fechaBaja;
     @Column(name = "estimulos_productividad")
     private Double estimulosProductividad;
+    
+    @Column(name = "ret_credito_infonavit_tipo")
+    private Integer retCreditoInfonavitTipo;
+    @Column(name = "ret_credito_infonavit_valor")
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount retCreditoInfonavitValor;
     
     public Plaza() {
     }
@@ -183,6 +191,22 @@ public class Plaza extends BaseEntity implements Serializable {
         this.estimulosProductividad = estimulosProductividad;
     }
 
+    public Integer getRetCreditoInfonavitTipo() {
+        return retCreditoInfonavitTipo;
+    }
+
+    public void setRetCreditoInfonavitTipo(Integer retCreditoInfonavitTipo) {
+        this.retCreditoInfonavitTipo = retCreditoInfonavitTipo;
+    }
+
+    public MonetaryAmount getRetCreditoInfonavitValor() {
+        return retCreditoInfonavitValor;
+    }
+
+    public void setRetCreditoInfonavitValor(MonetaryAmount retCreditoInfonavitValor) {
+        this.retCreditoInfonavitValor = retCreditoInfonavitValor;
+    }
+    
     @Override
     public int hashCode() {
         int hash = 5;

@@ -7,6 +7,7 @@ package cimav.restrh.entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import javax.money.MonetaryAmount;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -404,4 +405,4 @@ public class Empleado extends EmpleadoSuper implements Serializable {
         this.pensionCuenta = pensionCuenta;
     }
 
-}
+    }
