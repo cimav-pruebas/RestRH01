@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -38,6 +39,16 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+    
+    @GET
+    @Path("by_id_empleado/{id_empleado}")
+    @Produces("application/json")
+    public Justificacion findByIdEmpleado(@PathParam("id_empleado") Integer idEmpleado) {
+        Query query = getEntityManager().createQuery("SELECT j FROM Justificacion AS j WHERE j.empleado.id = :id_empleado", Justificacion.class);
+        query.setParameter("id_empleado", idEmpleado);
+        Justificacion justificacion = (Justificacion) query.getSingleResult();
+        return justificacion;
     }
     
     @POST
