@@ -40,7 +40,7 @@ public class Justificacion implements Serializable {
     @Column(name = "id")
     private Integer id;
     
-    @XmlElement(name = "empleado")
+    //@XmlElement(name = "empleado")
     @JoinColumn(name = "id_empleado", referencedColumnName = "id")
     @ManyToOne
     private EmpleadoBase empleado;
