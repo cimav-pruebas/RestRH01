@@ -6,6 +6,7 @@
 package cimav.restrh.entities;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
 import javax.money.MonetaryAmount;
 import javax.persistence.Basic;
@@ -92,6 +93,43 @@ public class Justificacion implements Serializable {
     private String terminosEntrega;
     @Column(name = "plazoEntrega")
     private String plazoEntrega;
+
+
+    @Column(name = "rfc")
+    private String rfc;
+    @Column(name = "curp")
+    private String curp;
+    @Column(name = "telefono")
+    private String telefono;
+    @Column(name = "email")
+    private String correo;
+    @Column(name = "descripcion")
+    private String descripcion;
+    @Column(name = "domicilio")
+    private String domicilio;
+
+    @Column(name = "fecha_elaboracion")
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaElaboracion;
+    @Column(name = "fecha_Inicio")
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaInicio;
+    @Column(name = "fecha_termino")
+    @Convert(converter = LocalDateConverter.class)
+    private LocalDate fechaTermino;
+    
+    @Column(name = "monto_uno")
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount montoUno;
+    @Column(name = "monto_dos")
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount montoDos;
+    @Column(name = "monto_tres")
+    @Convert(converter = MonetaryAmountConverter.class)
+    private MonetaryAmount montoTres;
+    
+    @Column(name = "id_moneda")
+    private Short idMoneda;
     
     public Justificacion() {
     }
@@ -246,6 +284,111 @@ public class Justificacion implements Serializable {
 
     public void setSubTotal(MonetaryAmount subTotal) {
         this.subTotal = subTotal;
+    }
+
+    public String getRfc() {
+        return rfc;
+    }
+
+    public void setRfc(String rfc) {
+        this.rfc = rfc;
+    }
+
+    public String getCurp() {
+        return curp;
+    }
+
+    public void setCurp(String curp) {
+        this.curp = curp;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public LocalDate getFechaElaboracion() {
+        return fechaElaboracion;
+    }
+
+    public void setFechaElaboracion(LocalDate fechaElaboracion) {
+        this.fechaElaboracion = fechaElaboracion;
+    }
+
+    public LocalDate getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(LocalDate fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public LocalDate getFechaTermino() {
+        return fechaTermino;
+    }
+
+    public void setFechaTermino(LocalDate fechaTermino) {
+        this.fechaTermino = fechaTermino;
+    }
+
+    public MonetaryAmount getMontoUno() {
+        return montoUno;
+    }
+
+    public void setMontoUno(MonetaryAmount montoUno) {
+        this.montoUno = montoUno;
+    }
+
+    public MonetaryAmount getMontoDos() {
+        return montoDos;
+    }
+
+    public void setMontoDos(MonetaryAmount montoDos) {
+        this.montoDos = montoDos;
+    }
+
+    public MonetaryAmount getMontoTres() {
+        return montoTres;
+    }
+
+    public void setMontoTres(MonetaryAmount montoTres) {
+        this.montoTres = montoTres;
+    }
+
+    public String getDomicilio() {
+        return domicilio;
+    }
+
+    public void setDomicilio(String domicilio) {
+        this.domicilio = domicilio;
+    }
+
+    public Short getIdMoneda() {
+        return idMoneda;
+    }
+
+    public void setIdMoneda(Short idMoneda) {
+        this.idMoneda = idMoneda;
     }
 
     @Override
