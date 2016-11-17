@@ -969,13 +969,14 @@ public class CalculoREST {
                 insertarCalculo(PENSION_ALIMENTICIA_MON_DESP, pension_alimenticia_monedero);
             }
             
-            if (empleadoNomina.getRetCreditoInfonavitIdTipo() > 0) {
+            if (empleadoNomina.getRetCreditoInfonavitIdTipo() > 0 && empleadoNomina.getRetCreditoInfonavitValor().isPositive()) {
                 if (empleadoNomina.getRetCreditoInfonavitIdTipo() == 1) {
                     // Veces salario mínimo
-                    ret_credito_infonavit = empleadoNomina.getRetCreditoInfonavitValor().multiply(salario_minimo.getNumber());
+                    Double factor = empleadoNomina.getRetCreditoInfonavitValor().divide(2).getNumber().doubleValue();
+                    ret_credito_infonavit = salario_minimo.multiply(factor);
                 } else if (empleadoNomina.getRetCreditoInfonavitIdTipo() == 2) {
                     // Cobro fijo por quincena
-                    ret_credito_infonavit = empleadoNomina.getRetCreditoInfonavitValor();
+                    ret_credito_infonavit = empleadoNomina.getRetCreditoInfonavitValor().divide(2);
                 }
                 insertarCalculo(RETENCION_CREDITO_INFONAVIT, ret_credito_infonavit);
             }
