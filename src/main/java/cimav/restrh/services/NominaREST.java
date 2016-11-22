@@ -123,8 +123,9 @@ public class NominaREST extends AbstractFacade<Nomina>{
 
         nomina = new Nomina();
         nomina.setIdEmpleado(empNom.getId());
-        nomina.setDescanso(0);
-        nomina.setOrdinarios(0);
+        // TODO verificar bien la inicialización de los Ordinarios/Descanso/Asueto
+        nomina.setDescanso(quincenaSingleton.getDiasDescanso());  //0
+        nomina.setOrdinarios(quincenaSingleton.getDiasOrdinarios()); //0
         nomina.setDiasDescansoDeLaQuincena(quincenaSingleton.getDiasDescanso());
         //TODO FIX deberia ser en base a 15 y no ordinarios reales
         nomina.setDiasOrdinariosDeLaQuincena(quincenaSingleton.getDiasOrdinarios());

@@ -341,7 +341,12 @@ public class CalculoREST {
                 //todo throw new NullPointerException("EMPLEADO -- QUINCENAL");
                 // se tiene que haber executado antes (al inicio de quincena).
                 // http://localhost:8080/RestRH01/api/empleado_quincenal/init/155
-            } 
+            } else if (empleadoNomina.getNomina().getDiasOrdinariosDeLaQuincena() <= Nomina.DIAS_TRASIENTES_MAL_INICIALIZADOS ) {
+                // TODO Patch Corregir: cuando no es la 1era vez que se calcula, los dias trasientes siguen en cero
+                empleadoNomina.getNomina().setDiasDescansoDeLaQuincena(quincenaSingleton.getDiasDescanso());
+                empleadoNomina.getNomina().setDiasOrdinariosDeLaQuincena(quincenaSingleton.getDiasOrdinarios());
+                //empleadoNomina.getNomina().setDiasTrabajados(Nomina.DIAS_TRASIENTES_MAL_INICIALIZADOS);
+            }
             
             boolean isCYT = Objects.equals(EGrupo.CYT.getId(), empleadoNomina.getIdGrupo());
             boolean isAYA = Objects.equals(EGrupo.AYA.getId(), empleadoNomina.getIdGrupo());

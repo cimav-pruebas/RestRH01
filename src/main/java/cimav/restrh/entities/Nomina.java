@@ -97,9 +97,11 @@ public class Nomina implements Serializable {
     @Column(name = "baja")
     private Boolean baja;
     
+    public static Integer DIAS_TRASIENTES_MAL_INICIALIZADOS = -1;
+    
     public Nomina() {
-        this.diasDescansoDeLaQuincena = 4;
-        this.diasOrdinariosDeLaQuincena = 11;
+        this.diasDescansoDeLaQuincena = DIAS_TRASIENTES_MAL_INICIALIZADOS; 
+        this.diasOrdinariosDeLaQuincena = DIAS_TRASIENTES_MAL_INICIALIZADOS;
         this.horasExtrasDobles = 0.00;
         this.horasExtrasTriples = 0.00;
         this.sdiVariableBimestreAnterior = Money.of(BigDecimal.ZERO, CalculoREST.MXN);
@@ -149,7 +151,7 @@ public class Nomina implements Serializable {
 
     public Integer getOrdinarios() {
         this.ordinarios = diasOrdinariosDeLaQuincena - faltas - incapacidadHabiles;
-        return ordinarios;
+        return this.ordinarios;
     }
 
     public void setOrdinarios(Integer ordinarios) {
@@ -158,7 +160,7 @@ public class Nomina implements Serializable {
 
     public Integer getDescanso() {
         this.descanso = this.diasDescansoDeLaQuincena - incapacidadInhabiles;
-        return descanso;
+        return this.descanso;
     }
 
     public void setDescanso(Integer descanso) {
