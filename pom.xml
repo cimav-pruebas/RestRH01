@@ -85,6 +85,21 @@
             <version>3.3.2</version>
         </dependency>
         
+        <!-- https://mvnrepository.com/artifact/net.sf.jasperreports/jasperreports -->
+<dependency>
+    <groupId>net.sf.jasperreports</groupId>
+    <artifactId>jasperreports</artifactId>
+    <version>6.4.0</version>
+</dependency>
+        
+<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <version>9.4.1212.jre7</version>
+</dependency>
+        
+        
     </dependencies>
 
     <build>

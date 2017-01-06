@@ -7,7 +7,17 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.JustificacionRef;
 import cimav.restrh.entities.Justificacion;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -24,6 +34,20 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.StreamingOutput;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRResultSetDataSource;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 
 /**
  *
@@ -136,5 +160,80 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
         return String.valueOf(super.count());
     }
 
+    @GET
+    @Path("pdficar")
+    @QueryParam("id")
+    @Produces("application/pdf")
+    public StreamingOutput pdficar(@QueryParam("id")Integer id_param) {
+        Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> Uno ");
+        
+        return new StreamingOutput() {
+            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+                
+                Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> Dentro");
+                
+                try {
+                    HashMap hmParams = new HashMap();
+                    hmParams.put("id_justi", 18);
+                    hmParams.put("real_path", "/jasper/");
+                    
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> Before JR");
+                    
+                    JasperReport jasperReport = (JasperReport) JRLoader.loadObject(getClass().getResourceAsStream("/jasper/JustiRpt.jasper"));
+                    //JasperReport jasperReport = JasperCompileManager.compileReport(getClass().getResource("/jasper/JustiRpt.jrxml").getFile());
+                    
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> After JR");
+                    
+                    //JasperReport jasperReport=JasperCompileManager.compileReport("jasper/JustiRpt.jasper");
+                    
+                    Driver postgresDriver = new org.postgresql.Driver();
+                    DriverManager.registerDriver(postgresDriver);
+                    Connection connPostgres = DriverManager.getConnection("jdbc:postgresql://10.0.4.40:5432/rh_production", "rh_user", "rh_1ser");
+                    Statement stmtPostgres = connPostgres.createStatement();
+                    ResultSet rsPostgres= stmtPostgres.executeQuery(
+                            "select j.*, e1.nombre as nombre_solicitante, e2.nombre as nombre_elaboro, e3.nombre as nombre_autorizo, \n" +
+                            "case  when (bienoservicio = 0) then 'Bien' else 'Servicio' end as BienOServicio_txt,\n" +
+                            "case  when (id_moneda = 0) then 'MXN' else 'USD' end as moneda_txt\n" +
+                            "from justificaciones j \n" +
+                            "left join empleados e1 on j.id_empleado = e1.id\n" +
+                            "left join empleados e2 on j.id_empleado_elaboro = e2.id\n" +
+                            "left join empleados e3 on j.id_empleado_autorizo = e3.id\n" +
+                            "where j.id = " + id_param + " "
+                    );
+                    
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> En JDBC ");
+                    
+                    JRDataSource ds = new JRResultSetDataSource(rsPostgres);
+                    
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> DS Ok");
+                    
+                    JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, hmParams, ds);
+                    JRPdfExporter exporter = new JRPdfExporter();
+                    exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+                    exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+                    SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+                    configuration.setMetadataAuthor("GeneradorJustificaciones"); //Set your pdf configurations, 
+                    exporter.setConfiguration(configuration);
+                    exporter.exportReport();
+                    
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> END ");
+                    
+                    //            try {
+                    //                PDFGenerator generator = new PDFGenerator(getEntity());
+                    //                generator.generatePDF(output);
+                    //            } catch (Exception e) {
+                    //                throw new WebApplicationException(e);
+                    //            }
+                } catch (JRException ex) {
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SQLException ex) {
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        };
+        //return Response.ok().build();
+    }
     
 }
