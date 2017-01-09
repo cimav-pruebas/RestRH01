@@ -28,6 +28,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -162,9 +163,12 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
 
     @GET
     @Path("pdficar")
-    @QueryParam("id")
     @Produces("application/pdf")
-    public StreamingOutput pdficar(@QueryParam("id")Integer id_param) {
+    public StreamingOutput pdficar(
+            @DefaultValue("0") @QueryParam("id")Integer id_param, 
+            @DefaultValue("0") @QueryParam("tipo")Integer idTipo,
+            @DefaultValue("true") @QueryParam("esUnico")Boolean esUnico
+    ) {
         Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> Uno ");
         
         return new StreamingOutput() {
@@ -173,24 +177,14 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
                 Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> Dentro");
                 
                 try {
-                    HashMap hmParams = new HashMap();
-                    hmParams.put("id_justi", 18);
-                    hmParams.put("real_path", "/jasper/");
-                    
-                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> Before JR");
-                    
-                    JasperReport jasperReport = (JasperReport) JRLoader.loadObject(getClass().getResourceAsStream("/jasper/JustiRpt.jasper"));
-                    //JasperReport jasperReport = JasperCompileManager.compileReport(getClass().getResource("/jasper/JustiRpt.jrxml").getFile());
-                    
-                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> After JR");
-                    
-                    //JasperReport jasperReport=JasperCompileManager.compileReport("jasper/JustiRpt.jasper");
                     
                     Driver postgresDriver = new org.postgresql.Driver();
                     DriverManager.registerDriver(postgresDriver);
                     Connection connPostgres = DriverManager.getConnection("jdbc:postgresql://10.0.4.40:5432/rh_production", "rh_user", "rh_1ser");
                     Statement stmtPostgres = connPostgres.createStatement();
-                    ResultSet rsPostgres= stmtPostgres.executeQuery(
+                    
+                    stmtPostgres = connPostgres.createStatement();
+                    ResultSet rsPostgres = stmtPostgres.executeQuery(
                             "select j.*, e1.nombre as nombre_solicitante, e2.nombre as nombre_elaboro, e3.nombre as nombre_autorizo, \n" +
                             "case  when (bienoservicio = 0) then 'Bien' else 'Servicio' end as BienOServicio_txt,\n" +
                             "case  when (id_moneda = 0) then 'MXN' else 'USD' end as moneda_txt\n" +
@@ -200,12 +194,38 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
                             "left join empleados e3 on j.id_empleado_autorizo = e3.id\n" +
                             "where j.id = " + id_param + " "
                     );
+
+                    String tipo = "1";
+                    if (!esUnico) {
+                        switch (idTipo) {
+                            case 0: tipo = "17"; break;
+                            case 1: tipo = "1"; break;
+                            case 2: tipo = "15"; break;
+                            case 3: tipo = "17"; break;
+                            case 4: tipo = "3"; break;
+                        }
+                    }
+                    
+                    String rptJasperPath = "/jasper/JustiRpt" + tipo + ".jasper";
+                    String rptImagePath = "/jasper/f" + tipo + "-p";
+                                        
+                    HashMap hmParams = new HashMap();
+                    hmParams.put("id_justi", 18);
+                    hmParams.put("rptImagePath", rptImagePath);
+                    
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, ">>>> " + rptJasperPath);
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, ">>>> " + rptImagePath);
+                    
+                    JasperReport jasperReport = (JasperReport) JRLoader.loadObject(getClass().getResourceAsStream(rptJasperPath));
+                    //JasperReport jasperReport = JasperCompileManager.compileReport(getClass().getResource("/jasper/JustiRpt.jrxml").getFile());
+                    
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> After JR");
+                    
+                    //JasperReport jasperReport=JasperCompileManager.compileReport("jasper/JustiRpt.jasper");
                     
                     Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> En JDBC ");
-                    
+                                       
                     JRDataSource ds = new JRResultSetDataSource(rsPostgres);
-                    
-                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> DS Ok");
                     
                     JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, hmParams, ds);
                     JRPdfExporter exporter = new JRPdfExporter();
