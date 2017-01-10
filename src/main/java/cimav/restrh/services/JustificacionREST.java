@@ -7,15 +7,14 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.JustificacionRef;
 import cimav.restrh.entities.Justificacion;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,17 +37,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRResultSetDataSource;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.util.JRLoader;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 
 /**
  *
@@ -161,99 +149,58 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
         return String.valueOf(super.count());
     }
 
+    private static Font titBoldFont = new Font(Font.FontFamily.TIMES_ROMAN, 16,Font.STRIKETHRU);
+    
     @GET
     @Path("pdficar")
     @Produces("application/pdf")
-    public StreamingOutput pdficar(
-            @DefaultValue("0") @QueryParam("id")Integer id_param, 
-            @DefaultValue("0") @QueryParam("tipo")Integer idTipo,
-            @DefaultValue("true") @QueryParam("esUnico")Boolean esUnico
-    ) {
-        Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> Uno ");
-        
+    public StreamingOutput pdficar(@DefaultValue("0") @QueryParam("id")Integer id_param) {
         return new StreamingOutput() {
             public void write(OutputStream outputStream) throws IOException, WebApplicationException {
                 
-                Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> Dentro");
-                
                 try {
                     
-                    Driver postgresDriver = new org.postgresql.Driver();
-                    DriverManager.registerDriver(postgresDriver);
-                    Connection connPostgres = DriverManager.getConnection("jdbc:postgresql://10.0.4.40:5432/rh_production", "rh_user", "rh_1ser");
-                    Statement stmtPostgres = connPostgres.createStatement();
+                    Justificacion justi =  (Justificacion) JustificacionREST.this.find(id_param);
                     
-                    stmtPostgres = connPostgres.createStatement();
-                    ResultSet rsPostgres = stmtPostgres.executeQuery(
-                            "select j.*, e1.nombre as nombre_solicitante, e2.nombre as nombre_elaboro, e3.nombre as nombre_autorizo, \n" +
-                            "case  when (bienoservicio = 0) then 'Bien' else 'Servicio' end as BienOServicio_txt,\n" +
-                            "case  when (id_moneda = 0) then 'MXN' else 'USD' end as moneda_txt\n" +
-                            "from justificaciones j \n" +
-                            "left join empleados e1 on j.id_empleado = e1.id\n" +
-                            "left join empleados e2 on j.id_empleado_elaboro = e2.id\n" +
-                            "left join empleados e3 on j.id_empleado_autorizo = e3.id\n" +
-                            "where j.id = " + id_param + " "
-                    );
+                    //Create Document instance.
+                    Document document = new Document();
+                    PdfWriter.getInstance(document, outputStream);
+                    document.open();
 
-                    String tipo = "1";
-                    if (!esUnico) {
-                        switch (idTipo) {
-                            case 0: tipo = "17"; break;
-                            case 1: tipo = "1"; break;
-                            case 2: tipo = "15"; break;
-                            case 3: tipo = "17"; break;
-                            case 4: tipo = "3"; break;
-                        }
-                    }
+                    Paragraph parrafo = new Paragraph(
+                            "Centro de Investigación en Materiales Avanzados S. C.", 
+                            new Font(Font.FontFamily.TIMES_ROMAN, 14,Font.BOLD)); 
+                    parrafo.setAlignment(Element.ALIGN_CENTER); 
+                    document.add(parrafo); 
                     
-                    String rptJasperPath = "/jasper/JustiRpt" + tipo + ".jasper";
-                    String rptImagePath = "/jasper/f" + tipo + "-p";
-                                        
-                    HashMap hmParams = new HashMap();
-                    hmParams.put("id_justi", 18);
-                    hmParams.put("rptImagePath", rptImagePath);
+                    parrafo = new Paragraph(justi.getAny() + "JUSTIFICACIÓN PARA ACREDITAR Y FUNDAR PROCEDIMIENTOS DE "
+                            + "CONTRATACIÓN POR ADJUDICACIÓN DIRECTA, COMO EXCEPCIÓN AL DE" 
+                            + "LICITACIÓN PÚBLICA EN EL SUPUESTO DEL ARTICULO 41 FRACCION " + justi.getFraccion() + " DE LA" 
+                            + "LEY DE ADQUISICIONES, ARRENDAMIENTOS Y SERVICIOS DEL SECTOR" 
+                            + "PÚBLICO.",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 14,Font.NORMAL));
+                    parrafo.setSpacingAfter(20); 
+                    parrafo.setSpacingBefore(20); 
+                    parrafo.setLeading(16);
+                    parrafo.setAlignment(Element.ALIGN_JUSTIFIED); 
+                    document.add(parrafo);   
                     
-                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, ">>>> " + rptJasperPath);
-                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, ">>>> " + rptImagePath);
+                    parrafo = new Paragraph("COMITÉ DE ADQUISICIONES, ARRENDAMIENTOS Y SERVICIOS"); 
+                    parrafo.setAlignment(Element.ALIGN_CENTER);
+                    parrafo.setIndentationLeft(80); 
+                    parrafo.setIndentationRight(80);   
+                    document.add(parrafo); 
                     
-                    JasperReport jasperReport = (JasperReport) JRLoader.loadObject(getClass().getResourceAsStream(rptJasperPath));
-                    //JasperReport jasperReport = JasperCompileManager.compileReport(getClass().getResource("/jasper/JustiRpt.jrxml").getFile());
+                    document.close(); 
+                    outputStream.close(); 
                     
-                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> After JR");
-                    
-                    //JasperReport jasperReport=JasperCompileManager.compileReport("jasper/JustiRpt.jasper");
-                    
-                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> En JDBC ");
-                                       
-                    JRDataSource ds = new JRResultSetDataSource(rsPostgres);
-                    
-                    JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, hmParams, ds);
-                    JRPdfExporter exporter = new JRPdfExporter();
-                    exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-                    exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
-                    SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
-                    configuration.setMetadataAuthor("GeneradorJustificaciones"); //Set your pdf configurations, 
-                    exporter.setConfiguration(configuration);
-                    exporter.exportReport();
-                    
-                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, "DEBBUG::>> END ");
-                    
-                    //            try {
-                    //                PDFGenerator generator = new PDFGenerator(getEntity());
-                    //                generator.generatePDF(output);
-                    //            } catch (Exception e) {
-                    //                throw new WebApplicationException(e);
-                    //            }
-                } catch (JRException ex) {
-                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (SQLException ex) {
-                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (Exception ex) {
+                } catch (DocumentException ex) {
                     Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                
+                
             }
         };
-        //return Response.ok().build();
     }
     
 }

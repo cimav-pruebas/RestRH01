@@ -9,6 +9,7 @@ import java.io.Serializable;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -21,7 +22,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="Justificacion")
 public class Justificacion extends JustificacionRef implements Serializable {
     
+    @Transient
+    private String any;
+    
     public Justificacion() {
         super();
+        any = "Holas";
     }
+    
+    public String getFraccion() {
+        return "F:" + this.getIdTipo() + "" ;
+    }
+    
+    public String getAny() {
+        return any;
+    }
+    
 }
