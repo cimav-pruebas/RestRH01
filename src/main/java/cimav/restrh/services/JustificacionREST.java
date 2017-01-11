@@ -7,16 +7,9 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.JustificacionRef;
 import cimav.restrh.entities.Justificacion;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -149,15 +142,13 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
         return String.valueOf(super.count());
     }
 
-    private static Font titBoldFont = new Font(Font.FontFamily.TIMES_ROMAN, 16,Font.STRIKETHRU);
-    
     @GET
     @Path("pdficar")
     @Produces("application/pdf")
     public StreamingOutput pdficar(@DefaultValue("0") @QueryParam("id")Integer id_param) {
         return new StreamingOutput() {
             public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                
+                /*
                 try {
                     
                     Justificacion justi =  (Justificacion) JustificacionREST.this.find(id_param);
@@ -198,7 +189,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
                     Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 
-                
+                */
             }
         };
     }

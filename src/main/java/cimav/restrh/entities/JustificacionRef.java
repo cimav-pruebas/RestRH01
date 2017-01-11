@@ -18,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlElement;
 
 /**
@@ -56,8 +57,10 @@ public class JustificacionRef implements Serializable {
     @ManyToOne
     private EmpleadoBase autoriza;
 
-    @Column(name = "id_tipo")
-    private Short idTipo;
+    @XmlElement(name = "tipo")
+    @JoinColumn(name = "id_tipo", referencedColumnName = "id")
+    @ManyToOne
+    private JustificacionTipo justificacionTipo;
 
     @Column(name = "requisicion")
     private String requisicion;
@@ -167,14 +170,7 @@ public class JustificacionRef implements Serializable {
         this.autoriza = autoriza;
     }
 
-    public Short getIdTipo() {
-        return idTipo;
-    }
-
-    public void setIdTipo(Short idTipo) {
-        this.idTipo = idTipo;
-    }
-
+    
     public String getRequisicion() {
         return requisicion;
     }
@@ -392,6 +388,14 @@ public class JustificacionRef implements Serializable {
         this.idMoneda = idMoneda;
     }
 
+    public JustificacionTipo getJustificacionTipo() {
+        return justificacionTipo;
+    }
+
+    public void setJustificacionTipo(JustificacionTipo justificacionTipo) {
+        this.justificacionTipo = justificacionTipo;
+    }
+    
     @Override
     public int hashCode() {
         int hash = 5;
