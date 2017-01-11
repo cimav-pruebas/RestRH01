@@ -8,6 +8,7 @@ package cimav.restrh.entities;
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Cacheable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -22,30 +23,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "justificacionTipos", schema = "public")
 @XmlRootElement(name="JustificacionTipo")
 public class JustificacionTipo implements Serializable {
-//    ACCESORIOS(1, "Accesorios y Material de Laboratorio", 17),
-//    SUBCONTRATACION(2, "Subcontratación por Honorarios", 14),
-//    MANTENIMIENTO(3, "NowMantenimiento a equipos", 15),
-//    EQUIPIO(4, "Equipo especializado", 17),
-//    OTRO(5, "Otro", 3);
 
     @Id
     private Short id;
+    @Column(name = "code")
     private String code;
+    @Column(name = "fraccion")
     private Short fraccion;
 
     public JustificacionTipo() {
     }
-
-//    public static JustificacionTipo get(Short id) {
-//        JustificacionTipo result = JustificacionTipo.ACCESORIOS; // default
-//        for (JustificacionTipo value : JustificacionTipo.values()) {
-//            if (Objects.equals(value.getId(), id)) {
-//                result = value;
-//                break;
-//            }
-//        }
-//        return result;
-//    }
 
     public Short getId() {
         return id;
