@@ -7,9 +7,16 @@ package cimav.restrh.services;
 
 import cimav.restrh.entities.JustificacionRef;
 import cimav.restrh.entities.Justificacion;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -148,7 +155,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
     public StreamingOutput pdficar(@DefaultValue("0") @QueryParam("id")Integer id_param) {
         return new StreamingOutput() {
             public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                /*
+                
                 try {
                     
                     Justificacion justi =  (Justificacion) JustificacionREST.this.find(id_param);
@@ -164,9 +171,9 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
                     parrafo.setAlignment(Element.ALIGN_CENTER); 
                     document.add(parrafo); 
                     
-                    parrafo = new Paragraph(justi.getAny() + "JUSTIFICACIÓN PARA ACREDITAR Y FUNDAR PROCEDIMIENTOS DE "
+                    parrafo = new Paragraph("JUSTIFICACIÓN PARA ACREDITAR Y FUNDAR PROCEDIMIENTOS DE "
                             + "CONTRATACIÓN POR ADJUDICACIÓN DIRECTA, COMO EXCEPCIÓN AL DE" 
-                            + "LICITACIÓN PÚBLICA EN EL SUPUESTO DEL ARTICULO 41 FRACCION " + justi.getFraccion() + " DE LA" 
+                            + "LICITACIÓN PÚBLICA EN EL SUPUESTO DEL ARTICULO 41 FRACCION " + justi.getRomano() + " DE LA" 
                             + "LEY DE ADQUISICIONES, ARRENDAMIENTOS Y SERVICIOS DEL SECTOR" 
                             + "PÚBLICO.",
                             new Font(Font.FontFamily.TIMES_ROMAN, 14,Font.NORMAL));
@@ -189,7 +196,6 @@ public class JustificacionREST extends AbstractFacade<Justificacion>{
                     Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 
-                */
             }
         };
     }

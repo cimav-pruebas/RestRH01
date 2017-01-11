@@ -25,4 +25,16 @@ public class Justificacion extends JustificacionRef implements Serializable {
         super();
     }
     
+    public String getRomano() {
+        String result = "I";
+        switch(this.getJustificacionTipo().getId()) {
+            case 1: result = "XVII"; break;
+            case 2: result = "XIV"; break;
+            case 3: result = "XV"; break;
+            case 4: result = "XVII"; break;
+            case 5: result = "III"; break;
+        }
+        return result;
+    }
+    
 }
