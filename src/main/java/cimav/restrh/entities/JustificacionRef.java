@@ -134,6 +134,9 @@ public class JustificacionRef implements Serializable {
     @Column(name = "id_moneda")
     private Short idMoneda;
     
+    @Column(name = "es_unico")
+    private Boolean esUnico;    
+    
     public JustificacionRef() {
         super();
     }
@@ -394,6 +397,14 @@ public class JustificacionRef implements Serializable {
 
     public void setJustificacionTipo(JustificacionTipo justificacionTipo) {
         this.justificacionTipo = justificacionTipo;
+    }
+
+    public Boolean getEsUnico() {
+        return esUnico;
+    }
+
+    public void setEsUnico(Boolean esUnico) {
+        this.esUnico = esUnico;
     }
     
     @Override
