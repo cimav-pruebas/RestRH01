@@ -139,6 +139,8 @@ public class JustificacionRef implements Serializable {
     
     @Column(name = "plazo")
     private Short plazo;
+    @Column(name = "num_dias_plazo")
+    private Short numDiasPlazo;
     @Column(name = "num_pagos")
     private Short numPagos;
     @Column(name = "porcen_anticipo")
@@ -457,7 +459,14 @@ public class JustificacionRef implements Serializable {
     public void setAutorizaCargo(String autorizaCargo) {
         this.autorizaCargo = autorizaCargo;
     }
-    
+
+    public Short getNumDiasPlazo() {
+        return numDiasPlazo;
+    }
+
+    public void setNumDiasPlazo(Short numDiasPlazo) {
+        this.numDiasPlazo = numDiasPlazo;
+    }
     
     @Override
     public int hashCode() {
