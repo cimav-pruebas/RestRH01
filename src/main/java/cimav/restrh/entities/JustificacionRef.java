@@ -137,6 +137,17 @@ public class JustificacionRef implements Serializable {
     @Column(name = "es_unico")
     private Boolean esUnico;    
     
+    @Column(name = "plazo")
+    private Short plazo;
+    @Column(name = "num_pagos")
+    private Short numPagos;
+    @Column(name = "porcen_anticipo")
+    private Short porcenAnticipo;
+    @Column(name = "forma_pago")
+    private String formaPago;
+    @Column(name = "autoriza_cargo")
+    private String autorizaCargo;
+    
     public JustificacionRef() {
         super();
     }
@@ -406,6 +417,47 @@ public class JustificacionRef implements Serializable {
     public void setEsUnico(Boolean esUnico) {
         this.esUnico = esUnico;
     }
+
+    public Short getPlazo() {
+        return plazo;
+    }
+
+    public void setPlazo(Short plazo) {
+        this.plazo = plazo;
+    }
+
+    public Short getNumPagos() {
+        return numPagos;
+    }
+
+    public void setNumPagos(Short numPagos) {
+        this.numPagos = numPagos;
+    }
+
+    public Short getPorcenAnticipo() {
+        return porcenAnticipo;
+    }
+
+    public void setPorcenAnticipo(Short porcenAnticipo) {
+        this.porcenAnticipo = porcenAnticipo;
+    }
+
+    public String getFormaPago() {
+        return formaPago;
+    }
+
+    public void setFormaPago(String formaPago) {
+        this.formaPago = formaPago;
+    }
+
+    public String getAutorizaCargo() {
+        return autorizaCargo;
+    }
+
+    public void setAutorizaCargo(String autorizaCargo) {
+        this.autorizaCargo = autorizaCargo;
+    }
+    
     
     @Override
     public int hashCode() {
