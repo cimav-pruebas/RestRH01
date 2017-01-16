@@ -37,4 +37,7 @@ public class Justificacion extends JustificacionRef implements Serializable {
         return result;
     }
     
+    public String getBienServicioTxt(){
+        return this.getBienOServicio() == 0 ? "bienes" : "servicios"; 
+    }
 }
