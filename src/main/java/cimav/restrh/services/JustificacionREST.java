@@ -65,6 +65,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         return em;
     }
 
+    /*
     @GET
     @Path("one_by_id_empleado/{id_empleado}")
     @Produces("application/json")
@@ -80,13 +81,15 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
             return justificacion;
         }
     }
-
+*/
+    
     @GET
     @Path("all_by_id_empleado/{id_empleado}")
     @Produces("application/json")
     public List<Justificacion> findAllByIdEmpleado(@PathParam("id_empleado") Integer idEmpleado) {
 
-        TypedQuery<Justificacion> query = getEntityManager().createQuery("SELECT j FROM Justificacion AS j", Justificacion.class);
+        TypedQuery<Justificacion> query = getEntityManager().createQuery("SELECT j FROM Justificacion AS j WHERE j.empleado.id = :id_empleado", Justificacion.class);
+        query.setParameter("id_empleado", idEmpleado);
         List<Justificacion> results = query.getResultList();
         /*
         
@@ -109,8 +112,8 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         } catch (NoResultException nue) {
         }
          */
-        List<Justificacion> emps = super.findAll();
-        return emps;
+        //List<Justificacion> emps = super.findAll();
+        return results;
     }
 
     @POST
