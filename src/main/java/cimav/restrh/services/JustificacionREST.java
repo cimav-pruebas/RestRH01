@@ -396,10 +396,11 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     if (justi.getEsUnico()) {
                         PdfPCell cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormat(justi.getMontoUno()),
+                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno()),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
                         cell1.setBorder(PdfPCell.NO_BORDER);
                         cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
                         table.addCell(cell1);
                         table.addCell(cell2);
                         document.add(table);
@@ -418,24 +419,27 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     } else {
                         PdfPCell cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormat(justi.getMontoUno()),
+                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno()),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
                         cell1.setBorder(PdfPCell.NO_BORDER);
                         cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
                         table.addCell(cell1);
                         table.addCell(cell2);
                         cell1 = new PdfPCell(new Paragraph(justi.getProveedorDos().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell2 = new PdfPCell(new Paragraph(montoFormat(justi.getMontoDos()),
+                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoDos()),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
                         cell1.setBorder(PdfPCell.NO_BORDER);
                         cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
                         table.addCell(cell1);
                         table.addCell(cell2);
                         cell1 = new PdfPCell(new Paragraph(justi.getProveedorTres().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell2 = new PdfPCell(new Paragraph(montoFormat(justi.getMontoTres()),
+                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoTres()),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
                         cell1.setBorder(PdfPCell.NO_BORDER);
                         cell2.setBorder(PdfPCell.NO_BORDER);
                         table.addCell(cell1);
@@ -574,7 +578,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     DecimalFormat decimalFormat = new DecimalFormat("0.00");
-                    parrafo = new Paragraph("El monto estimado de la contratación es la cantidad de " + montoFormat(justi.getSubTotal())
+                    parrafo = new Paragraph("El monto estimado de la contratación es la cantidad de " + montoFormatComas(justi.getSubTotal())
                             + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal().getNumber()), true) + " "
                             + justi.getSubTotal().getCurrency().getCurrencyCode() + ") más IVA, mismo que "
                             + "resultó el más conveniente de acuerdo con la Investigación de Mercado"
@@ -597,7 +601,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     parrafo = new Paragraph("El monto total será pagado en " + justi.getNumPagos() + " pago/s de " + signoDivisa(justi.getSubTotal())
-                            + decimalFormat.format(justi.getSubTotal().divide(justi.getNumPagos()).getNumber())
+                            + String.format("%,.2f",(justi.getSubTotal().divide(justi.getNumPagos()).getNumber().doubleValue()))
                             + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal().divide(justi.getNumPagos()).getNumber()).toString(), true) + " "
                             + justi.getSubTotal().getCurrency().getCurrencyCode() + ") más IVA. Los pagos se realizarán previa verificación de la entrega y calidad de los "
                             + justi.getBienServicioTxt() + " así como previo envío en formatos .pdf y .xml del Comprobante Fiscal "
@@ -906,10 +910,9 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         }
         return moneda;
     }
-
-    public String montoFormat(MonetaryAmount monto) {
-        DecimalFormat formato = new DecimalFormat("0.00");
-        return monto.getCurrency().getCurrencyCode() + " " + signoDivisa(monto) + formato.format(monto.getNumber());
+    
+    public String montoFormatComas(MonetaryAmount monto) {
+        return monto.getCurrency().getCurrencyCode() + " " + signoDivisa(monto) + String.format("%,.2f", monto.getNumber().doubleValue());
     }
 
 }
