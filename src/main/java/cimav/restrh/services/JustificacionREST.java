@@ -14,6 +14,8 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -161,7 +163,6 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
     @Produces("application/pdf")
     public StreamingOutput pdficar(@DefaultValue("0") @QueryParam("id") Integer id_param) {
         Justificacion justi = (Justificacion) JustificacionREST.this.find(id_param);
-        
 
         HashMap<String, String> mapa = new HashMap();
         mapa.put("texto1_I", "No existan bienes o servicios alternativos o sustitutos técnicamente razonables, o bien, que en el "
@@ -245,7 +246,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "LICITACIÓN PÚBLICA EN EL SUPUESTO DEL ARTICULO 41 FRACCION " + justi.getRomano() + " DE LA "
                             + "LEY DE ADQUISICIONES, ARRENDAMIENTOS Y SERVICIOS DEL SECTOR "
                             + "PÚBLICO.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -260,30 +261,30 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setIndentationRight(80);
                     document.add(parrafo);
 
-                    parrafo = new Paragraph("PRESENTE:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                    parrafo = new Paragraph("P R E S E N T E:",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setIndentationLeft(30);
                     parrafo.setSpacingBefore(20);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("Oficio número: ",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setIndentationLeft(300);
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED_ALL);
                     parrafo.setLeading(15);
                     parrafo.setSpacingBefore(20);
 
                     Chunk frase = new Chunk(justi.getRequisicion() + "\n",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.add(frase);
                     frase = new Chunk("Asunto: Se emite justificación por la que se "
                             + "acredita y funda la contratación por adjudicación directa que se indica.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.add(frase);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -298,7 +299,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "licitación pública y celebrar la contratación a través del procedimiento de adjudicación directa en "
                             + "los términos establecidos en el artículo 41 Fracción " + justi.getRomano() + " de la Ley de Adquisiciones, "
                             + "Arrendamientos y Servicios del Sector Público, que a la letra menciona ",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -311,7 +312,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "servicios, sin sujetarse al procedimiento de licitación pública, a través de los "
                             + "procedimientos de invitación a cuando menos tres personas o de adjudicación directa, "
                             + "cuando:\n" + mapa.get("texto1_" + justi.getRomano()),
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -321,28 +322,28 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     parrafo = new Paragraph("Para tal efecto presento la siguiente información:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
-                    parrafo.setIndentationLeft(90);
+                    parrafo.setIndentationLeft(60);
                     parrafo.setLeading(15);
                     parrafo.setSpacingBefore(20);
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("I.- DESCRIPCIÓN DE LOS " + justi.getBienServicioTxt().toUpperCase(),
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setAlignment(Element.ALIGN_CENTER);
                     parrafo.setSpacingAfter(10);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("El/Los " + justi.getBienServicioTxt() + " que se pretende contratar, son los siguientes:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                     parrafo.setIndentationLeft(30);
                     document.add(parrafo);
 
                     parrafo = new Paragraph(justi.getDescripcion(),
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                     parrafo.setSpacingBefore(20);
                     parrafo.setLeading(15);
@@ -350,13 +351,13 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     parrafo = new Paragraph("II.- PLAZOS Y CONDICIONES DEL SUMINISTRO DE LOS " + justi.getBienServicioTxt().toUpperCase(),
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setAlignment(Element.ALIGN_CENTER);
                     parrafo.setSpacingBefore(20);
                     document.add(parrafo);
 
                     parrafo = new Paragraph(mapa.get("plazo_" + justi.getPlazo()),
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                     parrafo.setSpacingBefore(20);
                     parrafo.setLeading(15);
@@ -364,7 +365,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     parrafo = new Paragraph("III.- RESULTADO DE LA INVESTIGACIÓN DE MERCADO",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setAlignment(Element.ALIGN_CENTER);
                     parrafo.setSpacingBefore(20);
                     document.add(parrafo);
@@ -377,61 +378,87 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "posibilidad de cumplir con las necesidades de la contratación, conocer el precio prevaleciente al "
                             + "momento de llevar a cabo la Investigación de mercado así como en la información disponible "
                             + "en el Sistema informático denominado COMPRANET:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                     parrafo.setSpacingBefore(20);
+                    parrafo.setSpacingAfter(20);
                     parrafo.setLeading(15);
                     parrafo.setIndentationLeft(30);
                     document.add(parrafo);
 
+                    PdfPTable table = new PdfPTable(2); // 3 columns.
+
+                    table.setWidths(new int[]{100, 50});
+
                     if (justi.getEsUnico()) {
-                        parrafo = new Paragraph("",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                        PdfPCell cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormat(justi.getMontoUno()),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell1.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        table.addCell(cell1);
+                        table.addCell(cell2);
+                        document.add(table);
+                        parrafo = new Paragraph("Concluyendo que es la única oferta en cuanto a obtener las mejores condiciones, calidad, "
+                                + "precio, oportunidad y financiamiento, por ser el único proveedor que proporcione los " + justi.getBienServicioTxt()
+                                + " que se pretende contratar la de " + justi.getProveedorUno().toUpperCase() + ". La referida "
+                                + "Investigación de Mercado se acompaña a la presente justificación para determinar que el "
+                                + "procedimiento de contratación por adjudicación directa es el idóneo.",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                         parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                         parrafo.setSpacingBefore(20);
                         parrafo.setLeading(15);
                         parrafo.setIndentationLeft(30);
 
-                        frase = new Chunk("          " + justi.getProveedorUno().toUpperCase() + "          " + montoFormat(justi.getMontoUno()) + "\n\n",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
-                        parrafo.add(frase);
-                        frase = new Chunk("Concluyendo que es la única oferta en cuanto a obtener las mejores condiciones, calidad, "
-                                + "precio, oportunidad y financiamiento, por ser el único proveedor que proporcione los " + justi.getBienServicioTxt()
-                                + " que se pretende contratar la de " + justi.getProveedorUno().toUpperCase() + ". La referida "
-                                + "Investigación de Mercado se acompaña a la presente justificación para determinar que el "
-                                + "procedimiento de contratación por adjudicación directa es el idóneo.",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
-                        parrafo.add(frase);
                         document.add(parrafo);
                     } else {
-                        parrafo = new Paragraph(justi.getProveedorUno() + "          " + montoFormat(justi.getMontoUno()) + "\n"
-                                + justi.getProveedorDos() + "          "+montoFormat(justi.getMontoDos()) + "\n"
-                                + justi.getProveedorTres() + "          " + montoFormat(justi.getMontoTres()),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
-                        parrafo.setSpacingBefore(20);
-                        parrafo.setLeading(15);
-                        parrafo.setIndentationLeft(60);
-                        document.add(parrafo);
+                        PdfPCell cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormat(justi.getMontoUno()),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell1.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        table.addCell(cell1);
+                        table.addCell(cell2);
+                        cell1 = new PdfPCell(new Paragraph(justi.getProveedorDos().toUpperCase(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell2 = new PdfPCell(new Paragraph(montoFormat(justi.getMontoDos()),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell1.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        table.addCell(cell1);
+                        table.addCell(cell2);
+                        cell1 = new PdfPCell(new Paragraph(justi.getProveedorTres().toUpperCase(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell2 = new PdfPCell(new Paragraph(montoFormat(justi.getMontoTres()),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell1.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        table.addCell(cell1);
+                        table.addCell(cell2);
+                        document.add(table);
 
                         parrafo = new Paragraph("Siendo la oferta que presenta las mejores condiciones en cuanto a calidad, precio, oportunidad  "
                                 + "y financiamiento, la de " + justi.getProveedorUno().toUpperCase() + ". "
                                 + "La referida Investigación de Mercado se acompaña a la presente justificación para determinar  "
                                 + "que el procedimiento de contratación por adjudicación directa es el idóneo.",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                         parrafo.setSpacingBefore(20);
                         parrafo.setLeading(15);
+                        parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                         parrafo.setIndentationLeft(30);
                         document.add(parrafo);
                     }
 
                     parrafo = new Paragraph("IV.- PROCEDIMIENTO DE CONTRATACIÓN PROPUESTO",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setAlignment(Element.ALIGN_CENTER);
                     parrafo.setSpacingBefore(20);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -441,7 +468,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     frase = new Chunk("El procedimiento de contratación propuesto es el de adjudicación directa, en virtud de que en el "
                             + "presente caso la adjudicación se llevaría a cabo conforme la fracción " + justi.getRomano() + " del artículo 41 el cual "
                             + "menciona que este tipo de adjudicación se puede llevar a cabo siempre y cuando: \n",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -450,7 +477,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.add(frase);
 
                     frase = new Chunk(mapa.get("texto1_" + justi.getRomano()),
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -461,7 +488,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     frase = new Chunk(" Actualizándose el supuesto de excepción a la licitación pública "
                             + "establecido en la fracción " + justi.getRomano() + " del artículo 41 de la Ley de Adquisiciones, Arrendamientos y "
                             + "Servicios del Sector Público, en relación con lo establecido en el artículo 72 de su Reglamento.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -471,13 +498,13 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     parrafo = new Paragraph("IV.1.     MOTIVACIÓN Y FUNDAMENTACIÓN LEGAL:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setSpacingBefore(20);
                     parrafo.setIndentationLeft(30);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(60);
                     parrafo.setLeading(15);
@@ -485,11 +512,11 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
 
                     frase = new Chunk("A)",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.add(frase);
 
                     frase = new Chunk("  MOTIVOS: ",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.add(frase);
 
                     frase = new Chunk("La contratación de los " + justi.getBienServicioTxt() + " objeto de la presente justificación "
@@ -502,12 +529,12 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "así como de la Investigación de Mercado; "
                             + "por lo que resulta procedente la contratación bajo el procedimiento de adjudicación "
                             + "directa previsto en el artículo 26, fracción III de la Ley antes mencionada.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.add(frase);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(60);
                     parrafo.setLeading(15);
@@ -515,11 +542,11 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
 
                     frase = new Chunk("B)",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.add(frase);
 
                     frase = new Chunk("  FUNDAMENTOS: ",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.add(frase);
 
                     frase = new Chunk("La contratación se encuentra debidamente fundada en el artículo "
@@ -527,22 +554,22 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "fracción III, 40 y 41 fracción " + justi.getRomano() + " de la Ley de Adquisiciones, Arrendamientos y "
                             + "Servicios del Sector Público; así como en los artículos 71 y 72 del Reglamento de la "
                             + "Ley de Adquisiciones, Arrendamientos y Servicios del Sector Público.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.add(frase);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("V.- MONTO ESTIMADO Y FORMA DE PAGO PROPUESTO:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setAlignment(Element.ALIGN_CENTER);
                     parrafo.setSpacingBefore(20);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("V.1.      MONTO ESTIMADO:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setSpacingBefore(20);
                     parrafo.setIndentationLeft(30);
                     document.add(parrafo);
-                    
+
                     DecimalFormat decimalFormat = new DecimalFormat("0.00");
                     parrafo = new Paragraph("El monto estimado de la contratación es la cantidad de " + montoFormat(justi.getSubTotal())
                             + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal().getNumber()), true) + " "
@@ -552,7 +579,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "de contratación, la existencia de oferta de los " + justi.getBienServicioTxt() + " en la cantidad, "
                             + "calidad y oportunidad requeridos en los términos del artículo 28 del Reglamento de la Ley de "
                             + "Adquisiciones, Arrendamientos y Servicios del Sector Público.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -561,12 +588,11 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     parrafo = new Paragraph("V.1.      FORMA DE PAGO PROPUESTA:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setSpacingBefore(20);
                     parrafo.setIndentationLeft(30);
                     document.add(parrafo);
-                    
-                    
+
                     parrafo = new Paragraph("El monto total será pagado en " + justi.getNumPagos() + " pago/s de " + signoDivisa(justi.getSubTotal())
                             + decimalFormat.format(justi.getSubTotal().divide(justi.getNumPagos()).getNumber())
                             + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal().divide(justi.getNumPagos()).getNumber()).toString(), true) + " "
@@ -574,7 +600,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + justi.getBienServicioTxt() + " así como previo envío en formatos .pdf y .xml del Comprobante Fiscal "
                             + "Digital por Internet (CFDI) correspondiente que reúna los requisitos fiscales respectivos. Los "
                             + "pagos se efectuarán mediante " + justi.getFormaPago(),
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -583,15 +609,15 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     parrafo = new Paragraph("VI.- PERSONA PROPUESTA PARA LA ADJUDICACIÓN DIRECTA:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setAlignment(Element.ALIGN_CENTER);
                     parrafo.setSpacingBefore(20);
                     document.add(parrafo);
 
-                    parrafo = new Paragraph("Por lo anteriormente expuesto y fundado, se propone a "+justi.getProveedorUno().toUpperCase()
-                            + ", con domicilio ubicado en " + justi.getDomicilio()+", Registro Federal de Contribuyentes: "
-                            + justi.getRfc() +", correo electrónico: " + justi.getCorreo() + " y número telefónico "+justi.getTelefono(),
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                    parrafo = new Paragraph("Por lo anteriormente expuesto y fundado, se propone a " + justi.getProveedorUno().toUpperCase()
+                            + ", con domicilio ubicado en " + justi.getDomicilio() + ", Registro Federal de Contribuyentes: "
+                            + justi.getRfc() + ", correo electrónico: " + justi.getCorreo() + " y número telefónico " + justi.getTelefono(),
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -601,9 +627,10 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
 
                     parrafo = new Paragraph("VII.- ACREDITAMIENTO DEL O LOS CRITERIOS EN LOS QUE SE FUNDA Y MOTIVA LA "
                             + "SELECCIÓN DEL PROCEDIMIENTO DE EXCEPCIÓN A LA LICITACIÓN PÚBLICA:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setAlignment(Element.ALIGN_CENTER);
                     parrafo.setLeading(15);
+                    parrafo.setIndentationLeft(30);
                     parrafo.setSpacingBefore(20);
                     document.add(parrafo);
 
@@ -617,7 +644,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "así como con la Investigación de Mercado.\n\n"
                             + "El acreditamiento del o los criterios en los que se funda la excepción de licitación pública, son "
                             + "los siguientes:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -626,7 +653,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     parrafo = new Paragraph("",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -634,7 +661,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
 
                     frase = new Chunk(" -  Economía\n",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.add(frase);
                     frase = new Chunk("Con la Investigación de Mercado se establecieron precios y demás condiciones de calidad, "
                             + "financiamiento y oportunidad, respecto de los " + justi.getBienServicioTxt() + " requeridos, con lo cual "
@@ -651,12 +678,12 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "Manual Administrativo de Aplicación General en Materia de Adquisiciones, Arrendamientos y "
                             + "Servicios del Sector Público, publicado en el Diario Oficial de la Federación el 21 de noviembre "
                             + "de 2012.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.add(frase);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -664,7 +691,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
 
                     frase = new Chunk(" -  Eficacia\n",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.add(frase);
                     frase = new Chunk("Con el procedimiento de contratación por adjudicación directa, se logrará obtener con "
                             + "oportunidad los " + justi.getBienServicioTxt() + " atendiendo a las características requeridas en "
@@ -679,12 +706,12 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "Manual Administrativo de Aplicación General en Materia de Adquisiciones, Arrendamientos y "
                             + "Servicios del Sector Público, publicado en el Diario Oficial de la Federación el 21 de noviembre "
                             + "de 2012.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.add(frase);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -692,7 +719,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
 
                     frase = new Chunk(" -  Eficiencia\n",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.add(frase);
                     frase = new Chunk("Con el procedimiento de adjudicación directa, a diferencia del procedimiento de licitación "
                             + "pública, se logra el uso racional de recursos con los que cuenta la Entidad para realizar la "
@@ -706,12 +733,12 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "Manual Administrativo de Aplicación General en Materia de Adquisiciones, Arrendamientos y "
                             + "Servicios del Sector Público, publicado en el Diario Oficial de la Federación el 21 de noviembre "
                             + "de 2012.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.add(frase);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -719,7 +746,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
 
                     frase = new Chunk(" -  Imparcialidad\n",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.add(frase);
                     frase = new Chunk("El tipo de adjudicación que se propone, se llevó a cabo sin prejuicios ni situaciones que "
                             + "pudieran afectar la imparcialidad, y sin que medie algún interés personal de los servidores "
@@ -732,12 +759,12 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "Manual Administrativo de Aplicación General en Materia de Adquisiciones, Arrendamientos y "
                             + "Servicios del Sector Público, publicado en el Diario Oficial de la Federación el 21 de noviembre "
                             + "de 2012.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.add(frase);
                     document.add(parrafo);
 
                     parrafo = new Paragraph("",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);
@@ -745,7 +772,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
 
                     frase = new Chunk(" -  Honradez\n",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.add(frase);
                     frase = new Chunk("La selección del procedimiento de adjudicación directa tiene como único fin contratar bajo "
                             + "las mejores condiciones los " + justi.getBienServicioTxt() + " requeridos, actuando con rectitud, "
@@ -759,13 +786,13 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "Manual Administrativo de Aplicación General en Materia de Adquisiciones, Arrendamientos y "
                             + "Servicios del Sector Público, publicado en el Diario Oficial de la Federación el 21 de noviembre "
                             + "de 2012.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.add(frase);
                     document.add(parrafo);
 
                     if (justi.getEsUnico()) {
                         parrafo = new Paragraph("",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                         parrafo.setSpacingAfter(20);
                         parrafo.setIndentationLeft(30);
                         parrafo.setLeading(15);
@@ -773,15 +800,15 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
 
                         frase = new Chunk(" -  Transparencia\n",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                         parrafo.add(frase);
                         frase = new Chunk(mapa.get("transparencia_unico"),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                         parrafo.add(frase);
                         document.add(parrafo);
                     } else {
                         parrafo = new Paragraph("",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                         parrafo.setSpacingAfter(20);
                         parrafo.setIndentationLeft(30);
                         parrafo.setLeading(15);
@@ -789,16 +816,16 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
 
                         frase = new Chunk(" -  Transparencia\n",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                         parrafo.add(frase);
                         frase = new Chunk(mapa.get("transparencia_no_unico"),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                         parrafo.add(frase);
                         document.add(parrafo);
                     }
 
                     parrafo = new Paragraph("VIII.- LUGAR Y FECHA DE EMISIÓN:",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setAlignment(Element.ALIGN_CENTER);
                     parrafo.setLeading(15);
                     parrafo.setSpacingBefore(20);
@@ -807,7 +834,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo = new Paragraph("En la Ciudad de Chihuahua, Estado de Chihuahua a los " + justi.getFechaElaboracion().getDayOfMonth()
                             + " días del mes de " + justi.getFechaElaboracion().getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES")) + " de "
                             + justi.getFechaElaboracion().getYear() + ", se emite la presente justificación para los efectos legales a que haya lugar.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                     parrafo.setLeading(15);
                     parrafo.setIndentationLeft(30);
@@ -819,7 +846,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "presente como “ANEXO DOS”, la Requisición o Solicitud de Contratación (Requisición) A la "
                             + "cual se deberá anexar, mediante sello del departamento de Presupuesto, la Constancia con la "
                             + "que se acredita la existencia de recursos para iniciar el procedimiento de contratación.",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.NORMAL));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                     parrafo.setLeading(15);
                     parrafo.setIndentationLeft(30);
@@ -837,14 +864,14 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     }
 
                     parrafo = new Paragraph("ATENTAMENTE",
-                            new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setAlignment(Element.ALIGN_CENTER);
                     parrafo.setLeading(15);
                     parrafo.setSpacingBefore(60);
                     document.add(parrafo);
 
                     parrafo = new Paragraph(justi.getAutoriza().getName() + "\n" + justi.getAutorizaCargo().toUpperCase(),
-                            new Font(Font.FontFamily.TIMES_ROMAN, 13, Font.BOLD));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
                     parrafo.setAlignment(Element.ALIGN_CENTER);
                     parrafo.setLeading(15);
                     parrafo.setSpacingBefore(60);
@@ -876,11 +903,10 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         }
         return moneda;
     }
-    
+
     public String montoFormat(MonetaryAmount monto) {
         DecimalFormat formato = new DecimalFormat("0.00");
-        return monto.getCurrency().getCurrencyCode() +" "+signoDivisa(monto)+formato.format(monto.getNumber());
+        return monto.getCurrency().getCurrencyCode() + " " + signoDivisa(monto) + formato.format(monto.getNumber());
     }
 
-   
 }
