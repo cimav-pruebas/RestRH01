@@ -16,6 +16,7 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,6 +35,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -45,6 +47,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
 /**
@@ -164,9 +169,11 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
     @GET
     @Path("pdficar")
     @Produces("application/pdf")
-    public StreamingOutput pdficar(@DefaultValue("0") @QueryParam("id") Integer id_param) {
+    public Response pdficar(@DefaultValue("0") @QueryParam("id") Integer id_param) {
         Justificacion justi = (Justificacion) JustificacionREST.this.find(id_param);
 
+    // <editor-fold defaultstate="collapsed" desc="Constantes de texto">            
+        
         HashMap<String, String> mapa = new HashMap();
         mapa.put("texto1_I", "No existan bienes o servicios alternativos o sustitutos técnicamente razonables, o bien, que en el "
                 + "mercado sólo existe un posible oferente, o se trate de una persona que posee la titularidad o el "
@@ -228,14 +235,24 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                 + "Servicios del Sector Público, publicado en el Diario Oficial de la Federación el 21 de noviembre "
                 + "de 2012.");
 
-        return new StreamingOutput() {
+    // </editor-fold>
+
+        
+        
+        StreamingOutput streamingOutput = new StreamingOutput() {
             public void write(OutputStream outputStream) throws IOException, WebApplicationException {
 
                 try {
-
+                    
                     //Create Document instance.
                     Document document = new Document();
                     PdfWriter.getInstance(document, outputStream);
+                    
+                    document.addAuthor("Generador adquisiciones | " + justi.getEmpleado().getCuentaCimav());
+                    String fileName1 =  (justi.getRequisicion() + "-" + justi.getEmpleado().getCuentaCimav() ).replace(" ", "");
+                    document.addTitle("Justificación: " + fileName1);
+                    document.addSubject("Justificación de Requisición");
+                    
                     document.open();
 
                     Paragraph parrafo = new Paragraph(
@@ -893,8 +910,16 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
 
             }
         };
+        
+        ResponseBuilder response = Response.ok(streamingOutput);
+        String fileName =  ("inline; filename=" + justi.getRequisicion() + "-" + justi.getEmpleado().getCuentaCimav() + ".pdf").replace(" ", "");
+        response.header("Content-Disposition", fileName);
+        
+        return response.build();
     }
 
+    //@Context private HttpServletResponse response;
+    
     public char signoDivisa(MonetaryAmount monto) {
         char moneda = '$';
         switch (monto.getCurrency().getCurrencyCode()) {
