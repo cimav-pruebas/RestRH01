@@ -199,7 +199,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                 + ". Las condiciones en las que se "
                 + "entregarán los " + justi.getBienServicioTxt() + " son las siguientes:\n\n " + justi.getCondicionesPago());
         mapa.put("plazo_2", "El plazo en que se requiere el suministro de los " + justi.getBienServicioTxt() + ", corresponde a los " + justi.getNumDiasPlazo()
-                + " despues de la elabora...-----------"
+                + " después de la elaboración de este documento."
                 + ". Las condiciones en las que se "
                 + "entregarán los " + justi.getBienServicioTxt() + " son las siguientes:\n\n " + justi.getCondicionesPago());
         mapa.put("nota_1", "Asimismo se hace constar mediante el sello y firma del responsable del área de "
@@ -312,7 +312,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                             + "de los criterios, razones, fundamentos y motivos para no llevar a cabo el procedimiento de "
                             + "licitación pública y celebrar la contratación a través del procedimiento de adjudicación directa en "
                             + "los términos establecidos en el artículo 41 Fracción " + justi.getRomano() + " de la Ley de Adquisiciones, "
-                            + "Arrendamientos y Servicios del Sector Público, que a la letra menciona ",
+                            + "Arrendamientos y Servicios del Sector Público",
                             new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
@@ -321,6 +321,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                     parrafo.add(frase);
 
+                    /*
                     frase = new Chunk("“Las dependencias y "
                             + "entidades, bajo su responsabilidad, podrán contratar adquisiciones, arrendamientos y "
                             + "servicios, sin sujetarse al procedimiento de licitación pública, a través de los "
@@ -332,7 +333,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setLeading(15);
                     parrafo.setSpacingBefore(20);
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
-                    parrafo.add(frase);
+                    parrafo.add(frase); */
                     document.add(parrafo);
 
                     parrafo = new Paragraph("Para tal efecto presento la siguiente información:",
