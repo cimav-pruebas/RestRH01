@@ -539,7 +539,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.add(frase);
 
                     frase = new Chunk("La contratación de los " + justi.getBienServicioTxt() + " objeto de la presente justificación "
-                            + "es necesaria para satisfacer los requerimientos del " + justi.getProyecto() + ". Por lo anterior, la "
+                            + "es necesaria para satisfacer los requerimientos del proyecto:" + justi.getProyecto() + ". Por lo anterior, la "
                             + "contratación propuesta se adecúa al supuesto de excepción establecido en la Ley "
                             + "de Adquisiciones, Arrendamientos y Servicios del Sector Público en su artículo 41, "
                             + "fracción " + justi.getRomano() + "; además de que se reúnen los requisitos previstos en el artículo 72 del "
@@ -612,8 +612,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setIndentationLeft(30);
                     document.add(parrafo);
 
-                    parrafo = new Paragraph("El monto total será pagado en " + justi.getNumPagos() + " pago/s de " + signoDivisa(justi)
-                            + decimalFormat.format(justi.getSubTotal()/(justi.getNumPagos()))
+                    parrafo = new Paragraph("El monto total será pagado en " + justi.getNumPagos() + " pago/s de " + montoFormatComas(justi.getSubTotal()/justi.getNumPagos(), justi)
                             + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal()/(justi.getNumPagos())).toString(), true) + " "
                             + codigoDivisa(justi) + ") más IVA. Los pagos se realizarán previa verificación de la entrega y calidad de los "
                             + justi.getBienServicioTxt() + " así como previo envío en formatos .pdf y .xml del Comprobante Fiscal "
