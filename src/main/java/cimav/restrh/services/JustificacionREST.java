@@ -230,8 +230,6 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                 + "de 2012.");
 
     // </editor-fold>
-
-        
         
         StreamingOutput streamingOutput = new StreamingOutput() {
             public void write(OutputStream outputStream) throws IOException, WebApplicationException {

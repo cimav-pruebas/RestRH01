@@ -369,6 +369,7 @@ public class JustificacionRef implements Serializable {
     }
 
     public Short getNumPagos() {
+        if (numPagos <= 0) numPagos = 1;
         return numPagos;
     }
 
@@ -409,6 +410,7 @@ public class JustificacionRef implements Serializable {
     }
 
     public Double getSubTotal() {
+        if (subTotal < 0.00) subTotal = 0.00;
         return subTotal;
     }
 
@@ -417,6 +419,7 @@ public class JustificacionRef implements Serializable {
     }
 
     public Double getIva() {
+        if (iva < 0.00) iva = 0.00;
         return iva;
     }
 
@@ -425,6 +428,7 @@ public class JustificacionRef implements Serializable {
     }
 
     public Double getImporte() {
+        if (importe < 0.00) importe = 0.00;
         return importe;
     }
 
@@ -433,6 +437,7 @@ public class JustificacionRef implements Serializable {
     }
 
     public Double getMontoUno() {
+        if (montoUno < 0.00) montoUno = 0.00;
         return montoUno;
     }
 
@@ -445,6 +450,7 @@ public class JustificacionRef implements Serializable {
     }
 
     public void setMontoDos(Double montoDos) {
+        if (montoDos < 0.00) montoDos = 0.00;
         this.montoDos = montoDos;
     }
 
@@ -453,6 +459,7 @@ public class JustificacionRef implements Serializable {
     }
 
     public void setMontoTres(Double montoTres) {
+        if (montoTres < 0.00) montoTres = 0.00;
         this.montoTres = montoTres;
     }
     
