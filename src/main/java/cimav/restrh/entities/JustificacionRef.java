@@ -8,7 +8,6 @@ package cimav.restrh.entities;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
-import javax.money.MonetaryAmount;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -18,7 +17,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlElement;
 
 /**
@@ -78,13 +76,13 @@ public class JustificacionRef implements Serializable {
     
     @Column(name = "subtotal")
     @Convert(converter = MonetaryAmountConverter.class)
-    private MonetaryAmount subTotal;
+    private Double subTotal;
     @Column(name = "iva")
     @Convert(converter = MonetaryAmountConverter.class)
-    private MonetaryAmount iva;
+    private Double iva;
     @Column(name = "importe")
     @Convert(converter = MonetaryAmountConverter.class)
-    private MonetaryAmount importe;
+    private Double importe;
     
     @Column(name = "condicionespago")
     private String condicionesPago;
@@ -123,13 +121,13 @@ public class JustificacionRef implements Serializable {
     
     @Column(name = "monto_uno")
     @Convert(converter = MonetaryAmountConverter.class)
-    private MonetaryAmount montoUno;
+    private Double montoUno;
     @Column(name = "monto_dos")
     @Convert(converter = MonetaryAmountConverter.class)
-    private MonetaryAmount montoDos;
+    private Double montoDos;
     @Column(name = "monto_tres")
     @Convert(converter = MonetaryAmountConverter.class)
-    private MonetaryAmount montoTres;
+    private Double montoTres;
     
     @Column(name = "id_moneda")
     private Short idMoneda;
@@ -235,22 +233,6 @@ public class JustificacionRef implements Serializable {
         this.bienOServicio = bienOServicio;
     }
 
-    public MonetaryAmount getIva() {
-        return iva;
-    }
-
-    public void setIva(MonetaryAmount iva) {
-        this.iva = iva;
-    }
-
-    public MonetaryAmount getImporte() {
-        return importe;
-    }
-
-    public void setImporte(MonetaryAmount importe) {
-        this.importe = importe;
-    }
-
     public String getCondicionesPago() {
         return condicionesPago;
     }
@@ -289,14 +271,6 @@ public class JustificacionRef implements Serializable {
 
     public void setPlazoEntrega(String plazoEntrega) {
         this.plazoEntrega = plazoEntrega;
-    }
-
-    public MonetaryAmount getSubTotal() {
-        return subTotal;
-    }
-
-    public void setSubTotal(MonetaryAmount subTotal) {
-        this.subTotal = subTotal;
     }
 
     public String getRfc() {
@@ -362,30 +336,6 @@ public class JustificacionRef implements Serializable {
 
     public void setFechaTermino(LocalDate fechaTermino) {
         this.fechaTermino = fechaTermino;
-    }
-
-    public MonetaryAmount getMontoUno() {
-        return montoUno;
-    }
-
-    public void setMontoUno(MonetaryAmount montoUno) {
-        this.montoUno = montoUno;
-    }
-
-    public MonetaryAmount getMontoDos() {
-        return montoDos;
-    }
-
-    public void setMontoDos(MonetaryAmount montoDos) {
-        this.montoDos = montoDos;
-    }
-
-    public MonetaryAmount getMontoTres() {
-        return montoTres;
-    }
-
-    public void setMontoTres(MonetaryAmount montoTres) {
-        this.montoTres = montoTres;
     }
 
     public String getDomicilio() {
@@ -466,6 +416,54 @@ public class JustificacionRef implements Serializable {
 
     public void setNumDiasPlazo(Short numDiasPlazo) {
         this.numDiasPlazo = numDiasPlazo;
+    }
+
+    public Double getSubTotal() {
+        return subTotal;
+    }
+
+    public void setSubTotal(Double subTotal) {
+        this.subTotal = subTotal;
+    }
+
+    public Double getIva() {
+        return iva;
+    }
+
+    public void setIva(Double iva) {
+        this.iva = iva;
+    }
+
+    public Double getImporte() {
+        return importe;
+    }
+
+    public void setImporte(Double importe) {
+        this.importe = importe;
+    }
+
+    public Double getMontoUno() {
+        return montoUno;
+    }
+
+    public void setMontoUno(Double montoUno) {
+        this.montoUno = montoUno;
+    }
+
+    public Double getMontoDos() {
+        return montoDos;
+    }
+
+    public void setMontoDos(Double montoDos) {
+        this.montoDos = montoDos;
+    }
+
+    public Double getMontoTres() {
+        return montoTres;
+    }
+
+    public void setMontoTres(Double montoTres) {
+        this.montoTres = montoTres;
     }
     
     @Override

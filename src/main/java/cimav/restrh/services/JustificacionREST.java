@@ -243,7 +243,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     PdfWriter.getInstance(document, outputStream);
                     
                     document.addAuthor("Generador adquisiciones | " + justi.getEmpleado().getCuentaCimav());
-                    String fileName1 =  (justi.getRequisicion() + "-" + justi.getEmpleado().getCuentaCimav() ).replace(" ", "");
+                    String fileName1 =  (justi.getRequisicion() + "-" + justi.getEmpleado().getCuentaCimav() ).replace(" ", "").replace(",", "");
                     document.addTitle("Justificación: " + fileName1);
                     document.addSubject("Justificación de Requisición");
                     
@@ -907,7 +907,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         };
         
         ResponseBuilder response = Response.ok(streamingOutput);
-        String fileName =  ("inline; filename=" + justi.getRequisicion() + "-" + justi.getEmpleado().getCuentaCimav() + ".pdf").replace(" ", "");
+        String fileName =  ("inline; filename=" + justi.getRequisicion() + "-" + justi.getEmpleado().getCuentaCimav() + ".pdf").replace(" ", "").replace(",", "-");
         response.header("Content-Disposition", fileName);
         
         return response.build();
