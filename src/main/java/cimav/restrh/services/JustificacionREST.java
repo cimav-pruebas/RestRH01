@@ -613,13 +613,13 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     parrafo = new Paragraph("El monto total será pagado en " + justi.getNumPagos() + " pago/s de " + signoDivisa(justi)
-                            + String.format("%,.2f",(justi.getSubTotal()/justi.getNumPagos())
+                            + decimalFormat.format(justi.getSubTotal()/(justi.getNumPagos()))
                             + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal()/(justi.getNumPagos())).toString(), true) + " "
                             + codigoDivisa(justi) + ") más IVA. Los pagos se realizarán previa verificación de la entrega y calidad de los "
                             + justi.getBienServicioTxt() + " así como previo envío en formatos .pdf y .xml del Comprobante Fiscal "
                             + "Digital por Internet (CFDI) correspondiente que reúna los requisitos fiscales respectivos. Los "
                             + "pagos se efectuarán mediante " + justi.getFormaPago(),
-                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL)));
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
                     parrafo.setLeading(15);

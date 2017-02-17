@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -75,13 +74,10 @@ public class JustificacionRef implements Serializable {
     private Short bienOServicio;
     
     @Column(name = "subtotal")
-    @Convert(converter = MonetaryAmountConverter.class)
     private Double subTotal;
     @Column(name = "iva")
-    @Convert(converter = MonetaryAmountConverter.class)
     private Double iva;
     @Column(name = "importe")
-    @Convert(converter = MonetaryAmountConverter.class)
     private Double importe;
     
     @Column(name = "condicionespago")
@@ -110,23 +106,17 @@ public class JustificacionRef implements Serializable {
     private String domicilio;
 
     @Column(name = "fecha_elaboracion")
-    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaElaboracion;
     @Column(name = "fecha_Inicio")
-    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaInicio;
     @Column(name = "fecha_termino")
-    @Convert(converter = LocalDateConverter.class)
     private LocalDate fechaTermino;
     
     @Column(name = "monto_uno")
-    @Convert(converter = MonetaryAmountConverter.class)
     private Double montoUno;
     @Column(name = "monto_dos")
-    @Convert(converter = MonetaryAmountConverter.class)
     private Double montoDos;
     @Column(name = "monto_tres")
-    @Convert(converter = MonetaryAmountConverter.class)
     private Double montoTres;
     
     @Column(name = "id_moneda")
