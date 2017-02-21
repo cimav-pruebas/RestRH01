@@ -914,15 +914,18 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
 
     //@Context private HttpServletResponse response;
     
-    public char signoDivisa(Justificacion justi) {
-        char moneda = '$';
+    public String signoDivisa(Justificacion justi) {
+        String moneda = "$";
         switch (justi.getIdMoneda()) {
             case 0:
             case 1:
-                moneda = '$';
+                moneda = "$";
                 break;
             case 2:
-                moneda = '€';
+                moneda = "€";
+                break;
+            case 3:
+                moneda = "CHF";
                 break;
         }
         return moneda;
@@ -932,11 +935,16 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         String codigo = "MXN";
         switch (justi.getIdMoneda()) {
             case 0:
+                codigo = "MXN";
+                break;
             case 1:
                 codigo = "USD";
                 break;
             case 2:
                 codigo = "EUR";
+                break;
+            case 3:
+                codigo = "CHF";
                 break;
         }
         return codigo;
