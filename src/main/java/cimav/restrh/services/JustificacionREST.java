@@ -539,7 +539,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     frase = new Chunk("La contratación de los " + justi.getBienServicioTxt() + " objeto de la presente justificación "
                             + "es necesaria para satisfacer los requerimientos del proyecto identificado por: " + justi.getProyecto() + ".  "
                             + justi.getRazonCompra() + "."+
-                            ".\nPor lo anterior, la "
+                            " \nPor lo anterior, la "
                             + "contratación propuesta se adecúa al supuesto de excepción establecido en la Ley "
                             + "de Adquisiciones, Arrendamientos y Servicios del Sector Público en su artículo 41, "
                             + "fracción " + justi.getRomano() + "; además de que se reúnen los requisitos previstos en el artículo 72 del "
