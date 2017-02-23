@@ -428,9 +428,9 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         document.add(parrafo);
                     } else {
                         PdfPCell cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
                         PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno(),justi),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
                         cell1.setBorder(PdfPCell.NO_BORDER);
                         cell2.setBorder(PdfPCell.NO_BORDER);
                         cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -605,6 +605,53 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setSpacingBefore(20);
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                     document.add(parrafo);
+                    
+                    table = new PdfPTable(3); // 3 columns.
+
+                    table.setWidths(new int[]{30,10,10});
+                        PdfPCell cell1 = new PdfPCell(new Paragraph("Subtotal:",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getSubTotal(),justi),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        PdfPCell cell0 = new PdfPCell(new Paragraph("",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell0.setBorder(PdfPCell.NO_BORDER);
+                        table.addCell(cell0);
+                        cell1.setBorder(PdfPCell.NO_BORDER);
+                        cell1.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                        table.addCell(cell1);
+                        table.addCell(cell2);
+                        cell1 = new PdfPCell(new Paragraph("Iva:",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getIva(),justi),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell0 = new PdfPCell(new Paragraph("",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell0.setBorder(PdfPCell.NO_BORDER);
+                        table.addCell(cell0);
+                        cell1.setBorder(PdfPCell.NO_BORDER);
+                        cell1.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                        table.addCell(cell1);
+                        table.addCell(cell2);
+                        cell1 = new PdfPCell(new Paragraph("Total:",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getImporte(),justi),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                        cell0 = new PdfPCell(new Paragraph("",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell0.setBorder(PdfPCell.NO_BORDER);
+                        table.addCell(cell0);
+                        cell1.setBorder(PdfPCell.NO_BORDER);
+                        cell1.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                        table.addCell(cell1);
+                        table.addCell(cell2);
+                        document.add(table);
 
                     parrafo = new Paragraph("V.1.      FORMA DE PAGO PROPUESTA:",
                             new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
