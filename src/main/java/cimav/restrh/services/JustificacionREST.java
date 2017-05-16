@@ -82,8 +82,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
             return justificacion;
         }
     }
-*/
-    
+     */
     @GET
     @Path("all_by_id_empleado/{id_empleado}")
     @Produces("application/json")
@@ -166,8 +165,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
     public Response pdficar(@DefaultValue("0") @QueryParam("id") Integer id_param) {
         Justificacion justi = (Justificacion) JustificacionREST.this.find(id_param);
 
-    // <editor-fold defaultstate="collapsed" desc="Constantes de texto">            
-        
+        // <editor-fold defaultstate="collapsed" desc="Constantes de texto">            
         HashMap<String, String> mapa = new HashMap();
         mapa.put("texto1_I", "No existan bienes o servicios alternativos o sustitutos técnicamente razonables, o bien, que en el "
                 + "mercado sólo existe un posible oferente, o se trate de una persona que posee la titularidad o el "
@@ -229,22 +227,25 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                 + "Servicios del Sector Público, publicado en el Diario Oficial de la Federación el 21 de noviembre "
                 + "de 2012.");
 
-    // </editor-fold>
-        
+        // </editor-fold>
         StreamingOutput streamingOutput = new StreamingOutput() {
             public void write(OutputStream outputStream) throws IOException, WebApplicationException {
 
                 try {
-                    
+                    String masIva = "";
+                    if (justi.getIva() != 0) {
+                        masIva = " más IVA";
+                    }
+
                     //Create Document instance.
                     Document document = new Document();
                     PdfWriter.getInstance(document, outputStream);
-                    
+
                     document.addAuthor("Generador adquisiciones | " + justi.getEmpleado().getCuentaCimav());
-                    String fileName1 =  (justi.getRequisicion() + "-" + justi.getEmpleado().getCuentaCimav() ).replace(" ", "").replace(",", "");
+                    String fileName1 = (justi.getRequisicion() + "-" + justi.getEmpleado().getCuentaCimav()).replace(" ", "").replace(",", "");
                     document.addTitle("Justificación: " + fileName1);
                     document.addSubject("Justificación de Requisición");
-                    
+
                     document.open();
 
                     Paragraph parrafo = new Paragraph(
@@ -406,7 +407,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     if (justi.getEsUnico()) {
                         PdfPCell cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno(),justi),
+                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno(), justi),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
                         cell1.setBorder(PdfPCell.NO_BORDER);
                         cell2.setBorder(PdfPCell.NO_BORDER);
@@ -429,7 +430,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     } else {
                         PdfPCell cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
-                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno(),justi),
+                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno(), justi),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
                         cell1.setBorder(PdfPCell.NO_BORDER);
                         cell2.setBorder(PdfPCell.NO_BORDER);
@@ -438,7 +439,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         table.addCell(cell2);
                         cell1 = new PdfPCell(new Paragraph(justi.getProveedorDos().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoDos(),justi),
+                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoDos(), justi),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
                         cell1.setBorder(PdfPCell.NO_BORDER);
                         cell2.setBorder(PdfPCell.NO_BORDER);
@@ -447,7 +448,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         table.addCell(cell2);
                         cell1 = new PdfPCell(new Paragraph(justi.getProveedorTres().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoTres(),justi),
+                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoTres(), justi),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
                         cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
                         cell1.setBorder(PdfPCell.NO_BORDER);
@@ -538,8 +539,8 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
 
                     frase = new Chunk("La contratación de los " + justi.getBienServicioTxt() + " objeto de la presente justificación "
                             + "es necesaria para satisfacer los requerimientos del proyecto identificado por: " + justi.getProyecto() + ".  "
-                            + justi.getRazonCompra() + "."+
-                            " \nPor lo anterior, la "
+                            + justi.getRazonCompra() + "."
+                            + " \nPor lo anterior, la "
                             + "contratación propuesta se adecúa al supuesto de excepción establecido en la Ley "
                             + "de Adquisiciones, Arrendamientos y Servicios del Sector Público en su artículo 41, "
                             + "fracción " + justi.getRomano() + "; además de que se reúnen los requisitos previstos en el artículo 72 del "
@@ -590,9 +591,9 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.add(parrafo);
 
                     DecimalFormat decimalFormat = new DecimalFormat("0.00");
-                    parrafo = new Paragraph("El monto estimado de la contratación es la cantidad de " + montoFormatComas(justi.getSubTotal(),justi)
+                    parrafo = new Paragraph("El monto estimado de la contratación es la cantidad de " + montoFormatComas(justi.getSubTotal(), justi)
                             + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal()), true) + " "
-                            + codigoDivisa(justi) + ") más IVA, mismo que "
+                            + codigoDivisa(justi) + ")" + masIva + ", mismo que "
                             + "resultó el más conveniente de acuerdo con la Investigación de Mercado"
                             + ", mediante la cual se verificó previo al inicio del procedimiento "
                             + "de contratación, la existencia de oferta de los " + justi.getBienServicioTxt() + " en la cantidad, "
@@ -605,53 +606,53 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setSpacingBefore(20);
                     parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                     document.add(parrafo);
-                    
+
                     table = new PdfPTable(3); // 3 columns.
 
-                    table.setWidths(new int[]{30,10,10});
-                        PdfPCell cell1 = new PdfPCell(new Paragraph("Subtotal:",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getSubTotal(),justi),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        PdfPCell cell0 = new PdfPCell(new Paragraph("",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell0.setBorder(PdfPCell.NO_BORDER);
-                        table.addCell(cell0);
-                        cell1.setBorder(PdfPCell.NO_BORDER);
-                        cell1.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                        cell2.setBorder(PdfPCell.NO_BORDER);
-                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                        table.addCell(cell1);
-                        table.addCell(cell2);
-                        cell1 = new PdfPCell(new Paragraph("Iva:",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getIva(),justi),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell0 = new PdfPCell(new Paragraph("",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell0.setBorder(PdfPCell.NO_BORDER);
-                        table.addCell(cell0);
-                        cell1.setBorder(PdfPCell.NO_BORDER);
-                        cell1.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                        cell2.setBorder(PdfPCell.NO_BORDER);
-                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                        table.addCell(cell1);
-                        table.addCell(cell2);
-                        cell1 = new PdfPCell(new Paragraph("Total:",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
-                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getImporte(),justi),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
-                        cell0 = new PdfPCell(new Paragraph("",
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell0.setBorder(PdfPCell.NO_BORDER);
-                        table.addCell(cell0);
-                        cell1.setBorder(PdfPCell.NO_BORDER);
-                        cell1.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                        cell2.setBorder(PdfPCell.NO_BORDER);
-                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                        table.addCell(cell1);
-                        table.addCell(cell2);
-                        document.add(table);
+                    table.setWidths(new int[]{30, 10, 10});
+                    PdfPCell cell1 = new PdfPCell(new Paragraph("Subtotal:",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                    PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getSubTotal(), justi),
+                            new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                    PdfPCell cell0 = new PdfPCell(new Paragraph("",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                    cell0.setBorder(PdfPCell.NO_BORDER);
+                    table.addCell(cell0);
+                    cell1.setBorder(PdfPCell.NO_BORDER);
+                    cell1.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                    cell2.setBorder(PdfPCell.NO_BORDER);
+                    cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                    table.addCell(cell1);
+                    table.addCell(cell2);
+                    cell1 = new PdfPCell(new Paragraph("Iva:",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                    cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getIva(), justi),
+                            new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                    cell0 = new PdfPCell(new Paragraph("",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                    cell0.setBorder(PdfPCell.NO_BORDER);
+                    table.addCell(cell0);
+                    cell1.setBorder(PdfPCell.NO_BORDER);
+                    cell1.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                    cell2.setBorder(PdfPCell.NO_BORDER);
+                    cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                    table.addCell(cell1);
+                    table.addCell(cell2);
+                    cell1 = new PdfPCell(new Paragraph("Total:",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                    cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getImporte(), justi),
+                            new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                    cell0 = new PdfPCell(new Paragraph("",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                    cell0.setBorder(PdfPCell.NO_BORDER);
+                    table.addCell(cell0);
+                    cell1.setBorder(PdfPCell.NO_BORDER);
+                    cell1.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                    cell2.setBorder(PdfPCell.NO_BORDER);
+                    cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                    table.addCell(cell1);
+                    table.addCell(cell2);
+                    document.add(table);
 
                     parrafo = new Paragraph("V.1.      FORMA DE PAGO PROPUESTA:",
                             new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD));
@@ -659,9 +660,9 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     parrafo.setIndentationLeft(30);
                     document.add(parrafo);
 
-                    parrafo = new Paragraph("El monto total será pagado en " + justi.getNumPagos() + " pago/s de " + montoFormatComas(justi.getSubTotal()/justi.getNumPagos(), justi)
-                            + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal()/(justi.getNumPagos())).toString(), true) + " "
-                            + codigoDivisa(justi) + ") más IVA. Los pagos se realizarán previa verificación de la entrega y calidad de los "
+                    parrafo = new Paragraph("El monto total será pagado en " + justi.getNumPagos() + " pago/s de " + montoFormatComas(justi.getSubTotal() / justi.getNumPagos(), justi)
+                            + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal() / (justi.getNumPagos())).toString(), true) + " "
+                            + codigoDivisa(justi) + ")"+masIva+". Los pagos se realizarán previa verificación de la entrega y calidad de los "
                             + justi.getBienServicioTxt() + " así como previo envío en formatos .pdf y .xml del Comprobante Fiscal "
                             + "Digital por Internet (CFDI) correspondiente que reúna los requisitos fiscales respectivos. Los "
                             + "pagos se efectuarán mediante " + justi.getFormaPago(),
@@ -951,16 +952,15 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
 
             }
         };
-        
+
         ResponseBuilder response = Response.ok(streamingOutput);
-        String fileName =  ("inline; filename=" + justi.getRequisicion() + "-" + justi.getEmpleado().getCuentaCimav() + ".pdf").replace(" ", "").replace(",", "-");
+        String fileName = ("inline; filename=" + justi.getRequisicion() + "-" + justi.getEmpleado().getCuentaCimav() + ".pdf").replace(" ", "").replace(",", "-");
         response.header("Content-Disposition", fileName);
-        
+
         return response.build();
     }
 
     //@Context private HttpServletResponse response;
-    
     public String signoDivisa(Justificacion justi) {
         String moneda = "$";
         switch (justi.getIdMoneda()) {
@@ -977,7 +977,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         }
         return moneda;
     }
-    
+
     public String codigoDivisa(Justificacion justi) {
         String codigo = "MXN";
         switch (justi.getIdMoneda()) {
@@ -996,7 +996,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         }
         return codigo;
     }
-    
+
     public String montoFormatComas(Double monto, Justificacion justi) {
         return codigoDivisa(justi) + " " + signoDivisa(justi) + String.format("%,.2f", monto);
     }
