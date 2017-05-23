@@ -5,6 +5,7 @@
  */
 package cimav.restrh.services;
 
+import cimav.restrh.entities.Asistente;
 import cimav.restrh.entities.JustificacionRef;
 import cimav.restrh.entities.Justificacion;
 import cimav.restrh.tools.Numero_a_Letra;
@@ -21,6 +22,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -83,14 +87,50 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         }
     }
      */
+    
     @GET
     @Path("all_by_id_empleado/{id_empleado}")
     @Produces("application/json")
     public List<Justificacion> findAllByIdEmpleado(@PathParam("id_empleado") Integer idEmpleado) {
 
+        
+        List<Justificacion> results = new ArrayList<Justificacion>();
+        
+        // Asistentes
+        TypedQuery<Asistente> q = getEntityManager().createQuery("SELECT a FROM Asistente AS a WHERE a.idAsistente = :id_asistente", Asistente.class);
+        q.setParameter("id_asistente", idEmpleado);   
+        List<Asistente> asis = q.getResultList();
+        if (asis.size() >0) {
+            // Por asistente
+            for(Asistente a:asis) {
+                int idEmpleadoAsistido = a.getIdEmpleado();
+                TypedQuery<Justificacion> query = getEntityManager().createQuery("SELECT j FROM Justificacion AS j WHERE j.empleado.id = :id_empleado", Justificacion.class);
+                query.setParameter("id_empleado", idEmpleadoAsistido);
+                results.addAll(query.getResultList());
+                Logger.getLogger(JustificacionREST.class.getName()).log(Level.INFO, ">>>> " + idEmpleadoAsistido);
+            }
+        }
+
+        // Individual
+        TypedQuery<Justificacion> query = getEntityManager().createQuery("SELECT j FROM Justificacion AS j WHERE j.empleado.id = :id_empleado", Justificacion.class);
+        query.setParameter("id_empleado", idEmpleado);
+        results.addAll(query.getResultList());
+        
+        Collections.sort(results, 
+            new Comparator<Justificacion>() { 
+                @Override public int compare(Justificacion  j1, Justificacion  j2) { 
+                    return  j1.getEmpleado().getId().compareTo(j2.getEmpleado().getId()); 
+                }
+            }
+        );
+        
+        /*        
+        /*
         TypedQuery<Justificacion> query = getEntityManager().createQuery("SELECT j FROM Justificacion AS j WHERE j.empleado.id = :id_empleado", Justificacion.class);
         query.setParameter("id_empleado", idEmpleado);
         List<Justificacion> results = query.getResultList();
+        */
+        
         /*
         
         CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
