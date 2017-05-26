@@ -59,6 +59,11 @@ public class JustificacionRef implements Serializable {
     @ManyToOne
     private JustificacionTipo justificacionTipo;
 
+    @XmlElement(name = "moneda")
+    @JoinColumn(name = "id_moneda", referencedColumnName = "id")
+    @ManyToOne
+    private Moneda moneda;
+    
     @Column(name = "requisicion")
     private String requisicion;
     @Column(name = "proyecto")
@@ -119,8 +124,8 @@ public class JustificacionRef implements Serializable {
     @Column(name = "monto_tres")
     private Double montoTres;
     
-    @Column(name = "id_moneda")
-    private Short idMoneda;
+//    @Column(name = "id_moneda")
+//    private Short idMoneda;
     
     @Column(name = "es_unico")
     private Boolean esUnico;    
@@ -336,14 +341,6 @@ public class JustificacionRef implements Serializable {
         this.domicilio = domicilio;
     }
 
-    public Short getIdMoneda() {
-        return idMoneda;
-    }
-
-    public void setIdMoneda(Short idMoneda) {
-        this.idMoneda = idMoneda;
-    }
-
     public JustificacionTipo getJustificacionTipo() {
         return justificacionTipo;
     }
@@ -352,6 +349,14 @@ public class JustificacionRef implements Serializable {
         this.justificacionTipo = justificacionTipo;
     }
 
+    public Moneda getMoneda() {
+        return moneda;
+    }
+
+    public void setMoneda(Moneda moneda) {
+        this.moneda = moneda;
+    }
+    
     public Boolean getEsUnico() {
         return esUnico;
     }

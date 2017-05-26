@@ -47,6 +47,7 @@ public class ApplicationConfig extends Application {
         resources.add(cimav.restrh.services.IncidenciaFacadeREST.class);
         resources.add(cimav.restrh.services.JustificacionREST.class);
         resources.add(cimav.restrh.services.JustificacionTipoREST.class);
+        resources.add(cimav.restrh.services.MonedaREST.class);
         resources.add(cimav.restrh.services.MovimientoFacadeREST.class);
         resources.add(cimav.restrh.services.NominaREST.class);
         resources.add(cimav.restrh.services.ParametrosREST.class);

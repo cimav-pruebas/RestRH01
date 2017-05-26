@@ -111,6 +111,8 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
             }
         }
 
+        
+        
         // Individual
         TypedQuery<Justificacion> query = getEntityManager().createQuery("SELECT j FROM Justificacion AS j WHERE j.empleado.id = :id_empleado", Justificacion.class);
         query.setParameter("id_empleado", idEmpleado);
@@ -1003,6 +1005,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
     //@Context private HttpServletResponse response;
     public String signoDivisa(Justificacion justi) {
         String moneda = "$";
+        /*
         switch (justi.getIdMoneda()) {
             case 0:
             case 1:
@@ -1015,11 +1018,13 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                 moneda = "CHF";
                 break;
         }
+        */
         return moneda;
     }
 
     public String codigoDivisa(Justificacion justi) {
         String codigo = "MXN";
+        /*
         switch (justi.getIdMoneda()) {
             case 0:
                 codigo = "MXN";
@@ -1034,6 +1039,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                 codigo = "CHF";
                 break;
         }
+*/
         return codigo;
     }
 
