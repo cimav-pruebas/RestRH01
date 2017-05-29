@@ -236,6 +236,10 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     if (justi.getIva() != 0) {
                         masIva = " más IVA";
                     }
+                     String datosBanco = "";
+                    if (justi.getDatosBanco() != null) {
+                        datosBanco = ", datos bancarios: "+justi.getDatosBanco();
+                    }
 
                     //Create Document instance.
                     Document document = new Document();
@@ -682,7 +686,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
 
                     parrafo = new Paragraph("Por lo anteriormente expuesto y fundado, se propone a " + justi.getProveedorUno().toUpperCase()
                             + ", con domicilio ubicado en " + justi.getDomicilio() + ", Registro Federal de Contribuyentes: "
-                            + justi.getRfc() + ", correo electrónico: " + justi.getCorreo() + " y número telefónico " + justi.getTelefono(),
+                            + justi.getRfc() + ", correo electrónico: " + justi.getCorreo() + " y número telefónico " + justi.getTelefono() + datosBanco,
                             new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                     parrafo.setSpacingAfter(20);
                     parrafo.setIndentationLeft(30);
