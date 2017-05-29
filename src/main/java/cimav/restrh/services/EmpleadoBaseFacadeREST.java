@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -34,7 +35,8 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("empleado_base")
-@DeclareRoles(AbstractFacade.ADMIN_ROLE)
+//@DeclareRoles(AbstractFacade.ADMIN_ROLE)
+@PermitAll
 public class EmpleadoBaseFacadeREST extends AbstractFacade<EmpleadoBase>{
  
     private final static Logger logger = Logger.getLogger(EmpleadoBaseFacadeREST.class.getName() ); 

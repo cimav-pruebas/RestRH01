@@ -9,6 +9,7 @@ import cimav.restrh.entities.Empleado;
 import cimav.restrh.entities.EmpleadoBase;
 import java.util.List;
 import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -27,7 +28,8 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("empleado")
-@DeclareRoles(AbstractFacade.ADMIN_ROLE)
+//@DeclareRoles(AbstractFacade.ADMIN_ROLE)
+@PermitAll
 public class EmpleadoREST extends AbstractFacade<Empleado> {
 
 //    @PersistenceContext(unitName = "PU_JPA")

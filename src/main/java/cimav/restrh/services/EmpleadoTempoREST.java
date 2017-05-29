@@ -8,6 +8,7 @@ package cimav.restrh.services;
 import cimav.restrh.entities.EmpleadoTempo;
 import java.util.List;
 import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -25,7 +26,8 @@ import javax.ws.rs.Produces;
  */
 @Stateless
 @Path("empleado_tempo")
-@DeclareRoles(AbstractFacade.ADMIN_ROLE)
+//@DeclareRoles(AbstractFacade.ADMIN_ROLE)
+@PermitAll
 public class EmpleadoTempoREST extends AbstractFacade<EmpleadoTempo> {
     
     public EmpleadoTempoREST() {
