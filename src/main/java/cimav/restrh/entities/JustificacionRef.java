@@ -143,6 +143,9 @@ public class JustificacionRef implements Serializable {
     @Column(name = "autoriza_cargo")
     private String autorizaCargo;
     
+    @Column(name = "motivo_seleccion")
+    private String motivoSeleccion;
+    
     public JustificacionRef() {
         super();
     }
@@ -466,6 +469,14 @@ public class JustificacionRef implements Serializable {
     public void setMontoTres(Double montoTres) {
         if (montoTres < 0.00) montoTres = 0.00;
         this.montoTres = montoTres;
+    }
+
+    public String getMotivoSeleccion() {
+        return motivoSeleccion;
+    }
+
+    public void setMotivoSeleccion(String motivoSeleccion) {
+        this.motivoSeleccion = motivoSeleccion;
     }
     
     @Override

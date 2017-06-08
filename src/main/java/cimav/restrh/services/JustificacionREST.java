@@ -447,9 +447,20 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     table.setWidths(new int[]{100, 50});
 
                     if (justi.getEsUnico()) {
-                        PdfPCell cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
+                        
+                        PdfPCell cell1 = new PdfPCell(new Paragraph("PROVEEDOR",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                        PdfPCell cell2 = new PdfPCell(new Paragraph("IMPORTE SIN IVA",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                        cell1.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                        table.addCell(cell1);
+                        table.addCell(cell2);
+                        
+                        cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno(), justi),
+                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno(), justi),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
                         cell1.setBorder(PdfPCell.NO_BORDER);
                         cell2.setBorder(PdfPCell.NO_BORDER);
@@ -457,7 +468,16 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         table.addCell(cell1);
                         table.addCell(cell2);
                         document.add(table);
-                        parrafo = new Paragraph("Concluyendo que es la única oferta en cuanto a obtener las mejores condiciones, calidad, "
+                        
+                        parrafo = new Paragraph(justi.getMotivoSeleccion().toUpperCase(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
+                        parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
+                        parrafo.setSpacingBefore(20);
+                        parrafo.setLeading(15);
+                        parrafo.setIndentationLeft(30);
+                        document.add(parrafo);
+                        
+                        parrafo = new Paragraph("Concluyendo que en conjunto es la única oferta en cuanto a obtener las mejores condiciones, calidad, "
                                 + "precio, oportunidad y financiamiento, por ser el único proveedor que proporcione los " + justi.getBienServicioTxt()
                                 + " que se pretende contratar la de " + justi.getProveedorUno().toUpperCase() + ". La referida "
                                 + "Investigación de Mercado se acompaña a la presente justificación para determinar que el "
@@ -467,18 +487,29 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         parrafo.setSpacingBefore(20);
                         parrafo.setLeading(15);
                         parrafo.setIndentationLeft(30);
-
                         document.add(parrafo);
+                        
                     } else {
-                        PdfPCell cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
+                        PdfPCell cell1 = new PdfPCell(new Paragraph("PROVEEDOR",
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
-                        PdfPCell cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno(), justi),
+                        PdfPCell cell2 = new PdfPCell(new Paragraph("IMPORTE SIN IVA",
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
                         cell1.setBorder(PdfPCell.NO_BORDER);
                         cell2.setBorder(PdfPCell.NO_BORDER);
                         cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
                         table.addCell(cell1);
                         table.addCell(cell2);
+                        
+                        cell1 = new PdfPCell(new Paragraph(justi.getProveedorUno().toUpperCase(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoUno(), justi),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                        cell1.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                        table.addCell(cell1);
+                        table.addCell(cell2);
+
                         cell1 = new PdfPCell(new Paragraph(justi.getProveedorDos().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
                         cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoDos(), justi),
@@ -488,6 +519,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
                         table.addCell(cell1);
                         table.addCell(cell2);
+                        
                         cell1 = new PdfPCell(new Paragraph(justi.getProveedorTres().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
                         cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoTres(), justi),
@@ -497,9 +529,18 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         cell2.setBorder(PdfPCell.NO_BORDER);
                         table.addCell(cell1);
                         table.addCell(cell2);
+                        
                         document.add(table);
 
-                        parrafo = new Paragraph("Siendo la oferta que presenta las mejores condiciones en cuanto a calidad, precio, oportunidad  "
+                        parrafo = new Paragraph(justi.getMotivoSeleccion().toUpperCase(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
+                        parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
+                        parrafo.setSpacingBefore(20);
+                        parrafo.setLeading(15);
+                        parrafo.setIndentationLeft(30);
+                        document.add(parrafo);
+                        
+                        parrafo = new Paragraph("Siendo la oferta que en conjunto presenta las mejores condiciones en cuanto a calidad, precio, oportunidad  "
                                 + "y financiamiento, la de " + justi.getProveedorUno().toUpperCase() + ". "
                                 + "La referida Investigación de Mercado se acompaña a la presente justificación para determinar  "
                                 + "que el procedimiento de contratación por adjudicación directa es el idóneo.",
@@ -635,7 +676,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     DecimalFormat decimalFormat = new DecimalFormat("0.00");
                     parrafo = new Paragraph("El monto estimado de la contratación es la cantidad de " + montoFormatComas(justi.getSubTotal(), justi)
                             + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal()), true) + " "
-                            + codigoDivisa(justi) + ")" + masIva + ", mismo que "
+                            + /*codigoDivisa(justi)*/ justi.getMoneda().getCode()  + ")" + masIva + ", mismo que "
                             + "resultó el más conveniente de acuerdo con la Investigación de Mercado"
                             + ", mediante la cual se verificó previo al inicio del procedimiento "
                             + "de contratación, la existencia de oferta de los " + justi.getBienServicioTxt() + " en la cantidad, "
@@ -704,7 +745,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
 
                     parrafo = new Paragraph("El monto total será pagado en " + justi.getNumPagos() + " pago/s de " + montoFormatComas(justi.getSubTotal() / justi.getNumPagos(), justi)
                             + " (" + new Numero_a_Letra().Convertir(decimalFormat.format(justi.getSubTotal() / (justi.getNumPagos())).toString(), true) + " "
-                            + codigoDivisa(justi) + ")"+masIva+". Los pagos se realizarán previa verificación de la entrega y calidad de los "
+                            + /*codigoDivisa(justi)*/ justi.getMoneda().getCode() + ")"+masIva+". Los pagos se realizarán previa verificación de la entrega y calidad de los "
                             + justi.getBienServicioTxt() + " así como previo envío en formatos .pdf y .xml del Comprobante Fiscal "
                             + "Digital por Internet (CFDI) correspondiente que reúna los requisitos fiscales respectivos. Los "
                             + "pagos se efectuarán mediante " + justi.getFormaPago(),
@@ -1002,11 +1043,11 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         return response.build();
     }
 
+/*    
     //@Context private HttpServletResponse response;
-    public String signoDivisa(Justificacion justi) {
+    public String signoDivisa_(Justificacion justi) {
         String moneda = "$";
-        /*
-        switch (justi.getIdMoneda()) {
+        switch (justi.getMoneda().getId()) {
             case 0:
             case 1:
                 moneda = "$";
@@ -1018,14 +1059,13 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                 moneda = "CHF";
                 break;
         }
-        */
         return moneda;
     }
-
-    public String codigoDivisa(Justificacion justi) {
+*/
+    /*
+    public String codigoDivisa_(Justificacion justi) {
         String codigo = "MXN";
-        /*
-        switch (justi.getIdMoneda()) {
+        switch (justi.getMoneda().getId()) {
             case 0:
                 codigo = "MXN";
                 break;
@@ -1039,12 +1079,11 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                 codigo = "CHF";
                 break;
         }
-*/
         return codigo;
     }
-
+*/
     public String montoFormatComas(Double monto, Justificacion justi) {
-        return codigoDivisa(justi) + " " + signoDivisa(justi) + String.format("%,.2f", monto);
+        return /*codigoDivisa(justi)*/ justi.getMoneda().getCode() + " " + /*signoDivisa(justi)*/ justi.getMoneda().getSimbolo() + String.format("%,.2f", monto);
     }
 
 }
