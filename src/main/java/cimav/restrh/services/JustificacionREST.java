@@ -207,6 +207,11 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
     public Response pdficar(@DefaultValue("0") @QueryParam("id") Integer id_param) {
         Justificacion justi = (Justificacion) JustificacionREST.this.find(id_param);
 
+        String diasCorresponde = "corresponde a " + justi.getNumDiasPlazo() + " días"; 
+        if(justi.getNumDiasPlazo() == 1) {
+            diasCorresponde = "corresponde a un día";
+        }        
+        
         // <editor-fold defaultstate="collapsed" desc="Constantes de texto">            
         HashMap<String, String> mapa = new HashMap();
         mapa.put("texto1_I", "No existan bienes o servicios alternativos o sustitutos técnicamente razonables, o bien, que en el "
@@ -238,7 +243,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                 + justi.getFechaTermino().getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES")) + " de " + justi.getFechaTermino().getYear()
                 + ". Las condiciones en las que se "
                 + "entregarán los " + justi.getBienServicioTxt() + " son las siguientes:\n\n " + justi.getCondicionesPago());
-        mapa.put("plazo_2", "El plazo en que se requiere el suministro de los " + justi.getBienServicioTxt() + ", corresponde a los " + justi.getNumDiasPlazo()
+        mapa.put("plazo_2", "El plazo en que se requiere el suministro de los " + justi.getBienServicioTxt() + ", " + diasCorresponde  
                 + " después de la elaboración de este documento."
                 + ". Las condiciones en las que se "
                 + "entregarán los " + justi.getBienServicioTxt() + " son las siguientes:\n\n " + justi.getCondicionesPago());
@@ -473,6 +478,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         table.addCell(cell2);
                         document.add(table);
                         
+                        /* Si es único, no lleva motivo de selección
                         parrafo = new Paragraph(justi.getMotivoSeleccion().toUpperCase(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                         parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
@@ -480,6 +486,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         parrafo.setLeading(15);
                         parrafo.setIndentationLeft(30);
                         document.add(parrafo);
+                        */
                         
                         parrafo = new Paragraph("Concluyendo que en conjunto es la única oferta en cuanto a obtener las mejores condiciones, calidad, "
                                 + "precio, oportunidad y financiamiento, por ser el único proveedor que proporcione los " + justi.getBienServicioTxt()
@@ -524,15 +531,17 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         table.addCell(cell1);
                         table.addCell(cell2);
                         
-                        cell1 = new PdfPCell(new Paragraph(justi.getProveedorTres().toUpperCase(),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoTres(), justi),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                        cell1.setBorder(PdfPCell.NO_BORDER);
-                        cell2.setBorder(PdfPCell.NO_BORDER);
-                        table.addCell(cell1);
-                        table.addCell(cell2);
+                        if (justi.getProveedorTres() !=null && justi.getProveedorTres().trim().length() >0) {
+                            cell1 = new PdfPCell(new Paragraph(justi.getProveedorTres().toUpperCase(),
+                                    new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                            cell2 = new PdfPCell(new Paragraph(montoFormatComas(justi.getMontoTres(), justi),
+                                    new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                            cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                            cell1.setBorder(PdfPCell.NO_BORDER);
+                            cell2.setBorder(PdfPCell.NO_BORDER);
+                            table.addCell(cell1);
+                            table.addCell(cell2);
+                        }    
                         
                         document.add(table);
 
