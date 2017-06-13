@@ -245,7 +245,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                 + "entregarán los " + justi.getBienServicioTxt() + " son las siguientes:\n\n " + justi.getCondicionesPago());
         mapa.put("plazo_2", "El plazo en que se requiere el suministro de los " + justi.getBienServicioTxt() + ", " + diasCorresponde  
                 + " después de la elaboración de este documento."
-                + ". Las condiciones en las que se "
+                + " Las condiciones en las que se "
                 + "entregarán los " + justi.getBienServicioTxt() + " son las siguientes:\n\n " + justi.getCondicionesPago());
         mapa.put("nota_1", "Asimismo se hace constar mediante el sello y firma del responsable del área de "
                 + "Almacén, la No Existencia de Bienes o Nivel de Inventario que demuestra que se "
@@ -545,7 +545,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         
                         document.add(table);
 
-                        parrafo = new Paragraph(justi.getMotivoSeleccion().toUpperCase(),
+                        parrafo = new Paragraph(justi.getMotivoSeleccion(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                         parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
                         parrafo.setSpacingBefore(20);
