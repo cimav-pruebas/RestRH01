@@ -146,6 +146,9 @@ public class JustificacionRef implements Serializable {
     @Column(name = "motivo_seleccion")
     private String motivoSeleccion;
     
+    @Column(name = "pais_origen_id")
+    private Short paisOrigenId;
+    
     public JustificacionRef() {
         super();
     }
@@ -477,6 +480,14 @@ public class JustificacionRef implements Serializable {
 
     public void setMotivoSeleccion(String motivoSeleccion) {
         this.motivoSeleccion = motivoSeleccion;
+    }
+
+    public Short getPaisOrigenId() {
+        return paisOrigenId;
+    }
+
+    public void setPaisOrigenId(Short paisOrigenId) {
+        this.paisOrigenId = paisOrigenId;
     }
     
     @Override

@@ -1099,4 +1099,236 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         return /*codigoDivisa(justi)*/ justi.getMoneda().getCode() + " " + /*signoDivisa(justi)*/ justi.getMoneda().getSimbolo() + String.format("%,.2f", monto);
     }
 
+@GET
+    @Path("tabla_mercado")
+    @Produces("application/pdf")
+    public Response segundo(@DefaultValue ("0") @QueryParam("id") Integer id_param) {
+        Justificacion justif = (Justificacion) JustificacionREST.this.find(id_param);
+        
+        
+                   
+            StreamingOutput streamingOutput = new StreamingOutput() {
+                public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+
+                try {
+                    //Create Document instance.
+                    Document document = new Document();
+                    PdfWriter.getInstance(document, outputStream);
+
+                    document.addAuthor("Generador adquisiciones | " + justif.getEmpleado().getCuentaCimav());
+                    String fileName1 = (justif.getRequisicion() + "-" + justif.getEmpleado().getCuentaCimav()).replace(" ", "").replace(",", "");
+                    document.addTitle("Justificación: " + fileName1);
+                    document.addSubject("Justificación de Requisición");
+
+                    document.open();
+                    Paragraph parrafo = new Paragraph();
+                    //Tabla del Justificador
+
+                    PdfPTable table = new PdfPTable(3); // 3 columns.
+
+                    table.setWidths(new int[]{30, 50, 100});
+
+                        PdfPCell cell0 = new PdfPCell(new Paragraph("Fecha:",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        PdfPCell cell1 = new PdfPCell(new Paragraph(justif.getFechaInicio().getDayOfMonth() + " de "
+                                + justif.getFechaInicio().getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES"))
+                                +" de " + justif.getFechaInicio().getYear(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        PdfPCell cell2 = new PdfPCell(new Paragraph("",
+                                new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                        cell0.setBorder(PdfPCell.BOX);
+                        cell1.setBorder(PdfPCell.BOX);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        table.addCell(cell0);
+                        table.addCell(cell1);                        
+                        table.addCell(cell2);
+                        
+                        cell0 = new PdfPCell(new Paragraph("No. de Requisición:",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell1 = new PdfPCell(new Paragraph(justif.getRequisicion(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell2 = new PdfPCell(new Paragraph("",
+                                new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                        cell0.setBorder(PdfPCell.BOX);
+                        cell1.setBorder(PdfPCell.BOX);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        table.addCell(cell0);
+                        table.addCell(cell1);                        
+                        table.addCell(cell2);
+                        
+                        cell0 = new PdfPCell(new Paragraph("Procedimiento:",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell1 = new PdfPCell(new Paragraph("Adjudicación Directa",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell2 = new PdfPCell(new Paragraph("",
+                                new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                        cell0.setBorder(PdfPCell.BOX);
+                        cell1.setBorder(PdfPCell.BOX);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        table.addCell(cell0);
+                        table.addCell(cell1);                        
+                        table.addCell(cell2);
+                        
+                        cell0 = new PdfPCell(new Paragraph("Origen de los bienes:",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell1 = new PdfPCell(new Paragraph(justif.getPaisOrigen(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell2 = new PdfPCell(new Paragraph("",
+                                new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                        cell0.setBorder(PdfPCell.BOX);
+                        cell1.setBorder(PdfPCell.BOX);
+                        cell2.setBorder(PdfPCell.NO_BORDER);
+                        cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        table.addCell(cell0);
+                        table.addCell(cell1);                        
+                        table.addCell(cell2);
+                        
+                        document.add(table);
+                        
+                        parrafo = new Paragraph("",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
+                        parrafo.setSpacingAfter(20);
+                        parrafo.setIndentationLeft(30);
+                        parrafo.setLeading(15);
+                        parrafo.setSpacingBefore(20);
+                        parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
+                        document.add(parrafo);
+                        
+                        
+                        table = new PdfPTable(5);// 5 columns.
+                        table.setWidthPercentage(90); //table size %
+
+                    table.setWidths(new int[]{'a', 'a', 'a', 'a', 'a'});
+
+                    
+                        
+                        cell0 = new PdfPCell(new Paragraph("PARTIDA",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                        cell1 = new PdfPCell(new Paragraph("DESCIPCIMAV",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                        cell2 = new PdfPCell(new Paragraph("PROVEEDOR No. 1",
+                                new Font(Font.FontFamily.TIMES_ROMAN,10, Font.BOLD)));
+                        PdfPCell cell3 = new PdfPCell(new Paragraph("PROVEEDOR No.2",
+                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.BOLD)));
+                        PdfPCell cell4 = new PdfPCell(new Paragraph("PROVEEDOR No.3",
+                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.BOLD)));
+                        cell0.setBorder(PdfPCell.BOX);
+                        cell1.setBorder(PdfPCell.BOX);
+                        cell2.setBorder(PdfPCell.BOX);
+                        cell3.setBorder(PdfPCell.BOX);
+                        cell4.setBorder(PdfPCell.BOX);
+                        cell0.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell2.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell3.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell4.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        table.addCell(cell0);
+                        table.addCell(cell1);                        
+                        table.addCell(cell2);
+                        table.addCell(cell3);                        
+                        table.addCell(cell4); 
+                        
+                        cell0 = new PdfPCell(new Paragraph("Partida #1",
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD)));
+                        cell1 = new PdfPCell(new Paragraph(justif.getDescripcion(),
+                                new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
+                        cell0.setBorder(PdfPCell.BOX);
+                        cell1.setBorder(PdfPCell.BOX);
+                        cell0.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell0.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                        cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell1.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                        cell0.setRowspan(2);
+                        cell1.setRowspan(2);
+                        table.addCell(cell0);
+                        table.addCell(cell1);
+                        
+                        cell2 = new PdfPCell(new Paragraph(justif.getProveedorUno(),
+                                new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                        cell3 = new PdfPCell(new Paragraph(justif.getProveedorDos(),
+                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                        cell4 = new PdfPCell(new Paragraph(justif.getProveedorTres(),
+                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                        cell2.setBorder(PdfPCell.BOX);
+                        cell3.setBorder(PdfPCell.BOX);
+                        cell4.setBorder(PdfPCell.BOX);                        
+                        cell2.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell3.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell4.setHorizontalAlignment(Element.ALIGN_CENTER);                         
+                        table.addCell(cell2);
+                        table.addCell(cell3);                        
+                        table.addCell(cell4); 
+                        
+                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoUno(), justif),
+                                new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                        cell3 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoDos(), justif),
+                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                        cell4 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoTres(), justif),
+                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                        cell2.setBorder(PdfPCell.BOX);
+                        cell3.setBorder(PdfPCell.BOX);
+                        cell4.setBorder(PdfPCell.BOX);                        
+                        cell2.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell2.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                        cell3.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell3.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                        cell4.setHorizontalAlignment(Element.ALIGN_CENTER);  
+                        cell4.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                        table.addCell(cell2);
+                        table.addCell(cell3);                        
+                        table.addCell(cell4);                          
+                        document.add(table);
+                        
+                        parrafo = new Paragraph("Tal como lo establece el artículo 29 "
+                                + "del Reglamento de la Ley de Adquisiciones, "
+                                + "Arrendamientos y Servicios del Sector Público,"
+                                + " la investigación de mercado arrojo los siguientes resultados:\n",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
+                        parrafo.setSpacingAfter(20);
+                        parrafo.setIndentationLeft(30);
+                        parrafo.setLeading(15);
+                        parrafo.setSpacingBefore(10);
+                        parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
+                        document.add(parrafo);
+                        
+                        parrafo = new Paragraph("·Fracción I, determinamos la existencia de oferta de los bienes requeridos.\n"
+                                + "·Fracción II, verificamos existencias de los mismos con los proveedores que nos proporcionaron cotización formal.\n"
+                                + "·Fracción III, conocimos los precios que prevalecían en el mercado nacional.\n",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
+                        
+                        parrafo.setIndentationLeft(50);
+                        parrafo.setLeading(15);
+                        parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
+                        document.add(parrafo);
+                        
+                        parrafo = new Paragraph("A través de la investigación de mercado realizada, "
+                                + "concluimos que la mejor opción de compra es la oferta del proveedor" + " " +
+                                justif.getProveedorUno(),
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
+                        parrafo.setSpacingAfter(10);
+                        parrafo.setIndentationLeft(30);
+                        parrafo.setLeading(15);
+                        parrafo.setSpacingBefore(20);
+                        parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
+                        document.add(parrafo);
+                    
+                    document.close();
+                    outputStream.close();
+
+                } catch (DocumentException ex) {
+                    Logger.getLogger(JustificacionREST.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+            };
+        ResponseBuilder response = Response.ok(streamingOutput);
+        String fileName = ("inline; filename=" + justif.getRequisicion() + "-" + justif.getEmpleado().getCuentaCimav() + ".pdf").replace(" ", "").replace(",", "-");
+        response.header("Content-Disposition", fileName);
+
+        return response.build();
+    }
+    
 }

@@ -10,16 +10,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 //import org.apache.commons.beanutils.PropertyUtils;
+/*
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
 import org.eclipse.persistence.queries.UpdateObjectQuery;
 import org.eclipse.persistence.sessions.changesets.ChangeRecord;
-
+*/
 /**
  *
  * @author calderon
  */
-public class HistoryEmpleadoEventListener extends DescriptorEventAdapter {
+public class HistoryEmpleadoEventListener { /*extends DescriptorEventAdapter {
 
     @Override
     public void postUpdate(DescriptorEvent event) {
@@ -59,6 +60,7 @@ public class HistoryEmpleadoEventListener extends DescriptorEventAdapter {
         }
 */
         
-    }
+ /*   } */
     
 }
+

@@ -46,4 +46,13 @@ public class Justificacion extends JustificacionRef implements Serializable {
     public String getBienServicioTxt(){
         return this.getBienOServicio() == 0 ? "bienes" : "servicios"; 
     }
+    
+    public String getPaisOrigen() {
+        switch(this.getPaisOrigenId()) {
+            case 2: return "Mercado Internacional - Estados Unidos";
+            case 3: return "Mercado Internacional - Europa";
+        }
+        return "Mercado Nacional - México";
+    }
+    
 }
