@@ -1109,10 +1109,10 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
     @GET
     @Path("tabla_mercado_by_requi/{requisicion}")
     @Produces("application/pdf")
-    public Response tablaMercadoPorRequisicion(@DefaultValue ("99999999") @QueryParam("requisicion") String requi_param) {
+    public Response tablaMercadoPorRequisicion(@DefaultValue ("91919191") @PathParam("requisicion") String requisicion) {
         
-        TypedQuery<Justificacion> query = getEntityManager().createQuery("SELECT j FROM Justificacion AS j WHERE j.requisicion = :requi_param", Justificacion.class);
-        query.setParameter("requi_param", requi_param);
+        TypedQuery<Justificacion> query = getEntityManager().createQuery("SELECT j FROM Justificacion AS j WHERE j.requisicion = :requisicion", Justificacion.class);
+        query.setParameter("requisicion", requisicion);
         Justificacion justificacion = query.getSingleResult();
         if (justificacion != null) {
             return this.tablaMercado(justificacion.getId());
