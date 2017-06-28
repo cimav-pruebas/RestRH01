@@ -1099,13 +1099,29 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
         return /*codigoDivisa(justi)*/ justi.getMoneda().getCode() + " " + /*signoDivisa(justi)*/ justi.getMoneda().getSimbolo() + String.format("%,.2f", monto);
     }
 
-@GET
+    @GET
     @Path("tabla_mercado")
     @Produces("application/pdf")
-    public Response segundo(@DefaultValue ("0") @QueryParam("id") Integer id_param) {
+    public Response tablaMercadoPorId(@DefaultValue ("0") @QueryParam("id") Integer id_param) {
+        return this.tablaMercado(id_param);
+    }
+    
+    @GET
+    @Path("tabla_mercado_by_requi/{requisicion}")
+    @Produces("application/pdf")
+    public Response tablaMercadoPorRequisicion(@DefaultValue ("99999999") @QueryParam("requisicion") String requi_param) {
+        
+        TypedQuery<Justificacion> query = getEntityManager().createQuery("SELECT j FROM Justificacion AS j WHERE j.requisicion = :requi_param", Justificacion.class);
+        query.setParameter("requi_param", requi_param);
+        Justificacion justificacion = query.getSingleResult();
+        if (justificacion != null) {
+            return this.tablaMercado(justificacion.getId());
+        }
+        return  Response.ok().build();       
+    }
+    
+    private Response tablaMercado(Integer id_param) {
         Justificacion justif = (Justificacion) JustificacionREST.this.find(id_param);
-        
-        
                    
             StreamingOutput streamingOutput = new StreamingOutput() {
                 public void write(OutputStream outputStream) throws IOException, WebApplicationException {
@@ -1180,7 +1196,7 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         
                         cell0 = new PdfPCell(new Paragraph("Origen de los bienes:",
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
-                        cell1 = new PdfPCell(new Paragraph(justif.getPaisOrigen(),
+                        cell1 = new PdfPCell(new Paragraph(justif.esNacional(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)));
                         cell2 = new PdfPCell(new Paragraph("",
                                 new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));

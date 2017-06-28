@@ -149,6 +149,9 @@ public class JustificacionRef implements Serializable {
     @Column(name = "pais_origen_id")
     private Short paisOrigenId;
     
+    @Column(name = "esnacional")
+    private Boolean esNacional;    
+    
     public JustificacionRef() {
         super();
     }
@@ -369,6 +372,14 @@ public class JustificacionRef implements Serializable {
 
     public void setEsUnico(Boolean esUnico) {
         this.esUnico = esUnico;
+    }
+
+    public Boolean getEsNacional() {
+        return esNacional;
+    }
+
+    public void setEsNacional(Boolean esNacional) {
+        this.esNacional = esNacional;
     }
 
     public Short getPlazo() {

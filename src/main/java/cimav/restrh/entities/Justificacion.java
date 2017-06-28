@@ -55,4 +55,8 @@ public class Justificacion extends JustificacionRef implements Serializable {
         return "Mercado Nacional - México";
     }
     
+    public String esNacional() {
+        return this.getEsNacional() ? "Mercado Nacional" : "Mercado Internacional";
+    }
+    
 }
