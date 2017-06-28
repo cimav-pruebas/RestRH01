@@ -1121,8 +1121,14 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                     document.addSubject("Justificación de Requisición");
 
                     document.open();
-                    Paragraph parrafo = new Paragraph();
-                    //Tabla del Justificador
+
+                    //Titulo del documento
+                    Paragraph parrafo = new Paragraph(
+                            "Centro de Investigación en Materiales Avanzados S. C.",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 17, Font.BOLD));
+                    parrafo.setAlignment(Element.ALIGN_CENTER);
+                    parrafo.setSpacingAfter(20);
+                    document.add(parrafo);
 
                     PdfPTable table = new PdfPTable(3); // 3 columns.
 
@@ -1262,25 +1268,82 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         table.addCell(cell3);                        
                         table.addCell(cell4); 
                         
-                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoUno(), justif),
-                                new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
-                        cell3 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoDos(), justif),
-                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
-                        cell4 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoTres(), justif),
-                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
-                        cell2.setBorder(PdfPCell.BOX);
-                        cell3.setBorder(PdfPCell.BOX);
-                        cell4.setBorder(PdfPCell.BOX);                        
-                        cell2.setHorizontalAlignment(Element.ALIGN_CENTER);
-                        cell2.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                        cell3.setHorizontalAlignment(Element.ALIGN_CENTER);
-                        cell3.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                        cell4.setHorizontalAlignment(Element.ALIGN_CENTER);  
-                        cell4.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                        table.addCell(cell2);
-                        table.addCell(cell3);                        
-                        table.addCell(cell4);                          
-                        document.add(table);
+                        if(justif.getMontoUno()<=1&&justif.getMontoDos()<=1&&justif.getMontoTres()<=1){
+                            cell2 = new PdfPCell(new Paragraph("NO APLICA",
+                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                            cell3 = new PdfPCell(new Paragraph("NO APLICA",
+                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                            cell4 = new PdfPCell(new Paragraph("NO APLICA",
+                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                                        
+                        }else if(justif.getMontoUno()<=1&&justif.getMontoDos()<=1){
+                            cell2 = new PdfPCell(new Paragraph("NO APLICA",
+                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                            cell3 = new PdfPCell(new Paragraph("NO APLICA",
+                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                            cell4 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoTres(), justif),
+                                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                            
+                        }else if(justif.getMontoUno()<=1&&justif.getMontoTres()<=1){                            
+                            cell2 = new PdfPCell(new Paragraph("NO APLICA",
+                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                            cell3 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoDos(), justif),
+                                        new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                            cell4 = new PdfPCell(new Paragraph("NO APLICA",
+                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                            
+                        }else if(justif.getMontoDos()<=1&&justif.getMontoTres()<=1){
+                            cell2 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoUno(), justif),
+                                            new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                            cell3 = new PdfPCell(new Paragraph("NO APLICA",
+                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                            cell4 = new PdfPCell(new Paragraph("NO APLICA",
+                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                            
+                        }else if(justif.getMontoUno()<=1){
+                                    cell2 = new PdfPCell(new Paragraph("NO APLICA",
+                                            new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                                    cell3 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoDos(), justif),
+                                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                                    cell4 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoTres(), justif),
+                                            new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                         
+                        }else if(justif.getMontoDos()<=1){
+                                    cell2 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoUno(), justif),
+                                            new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                                    cell3 = new PdfPCell(new Paragraph("NO APLICA",
+                                            new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                                    cell4 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoTres(), justif),
+                                            new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                         
+                        }else if(justif.getMontoTres()<=1){
+                                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoUno(), justif),
+                                                new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                                        cell3 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoDos(), justif),
+                                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                                        cell4 = new PdfPCell(new Paragraph("NO APLICA",
+                                            new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                        }else{
+                                            cell2 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoUno(), justif),
+                                                new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
+                                            cell3 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoDos(), justif),
+                                                new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
+                                            cell4 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoTres(), justif),
+                                                    new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));                                           
+                        }
+                            cell2.setBorder(PdfPCell.BOX);
+                            cell3.setBorder(PdfPCell.BOX);
+                            cell4.setBorder(PdfPCell.BOX);                        
+                            cell2.setHorizontalAlignment(Element.ALIGN_CENTER);
+                            cell2.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                            cell3.setHorizontalAlignment(Element.ALIGN_CENTER);
+                            cell3.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                            cell4.setHorizontalAlignment(Element.ALIGN_CENTER);  
+                            cell4.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                            table.addCell(cell2);
+                            table.addCell(cell3);                        
+                            table.addCell(cell4);                          
+                            document.add(table);
                         
                         parrafo = new Paragraph("Tal como lo establece el artículo 29 "
                                 + "del Reglamento de la Ley de Adquisiciones, "
