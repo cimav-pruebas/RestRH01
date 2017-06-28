@@ -545,6 +545,12 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         
                         document.add(table);
 
+                        parrafo = new Paragraph("Motivo de la selección:",
+                            new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
+                        parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
+                        parrafo.setIndentationLeft(30);
+                        document.add(parrafo);
+                        
                         parrafo = new Paragraph(justi.getMotivoSeleccion(),
                                 new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                         parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
