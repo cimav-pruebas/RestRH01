@@ -545,17 +545,9 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                         
                         document.add(table);
 
-                        parrafo = new Paragraph("Motivo de la selección:",
+                        parrafo = new Paragraph("Motivo de la selección: " + justi.getMotivoSeleccion(),
                             new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
                         parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
-                        parrafo.setIndentationLeft(30);
-                        document.add(parrafo);
-                        
-                        parrafo = new Paragraph(justi.getMotivoSeleccion(),
-                                new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL));
-                        parrafo.setAlignment(Element.ALIGN_JUSTIFIED);
-                        parrafo.setSpacingBefore(20);
-                        parrafo.setLeading(15);
                         parrafo.setIndentationLeft(30);
                         document.add(parrafo);
                         
@@ -1331,7 +1323,8 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                                             new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
                          
                         }else if(justif.getMontoDos()<=1){
-                                    cell2 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoUno(), justif),
+                                    cell2 = new PdfPCell(new Paragraph("Subtotal: "+justif.getSubTotal()+"\n"
+                                            + "IVA: " + justif.getIva()+"\n" + "Total:"+"\n"+ montoFormatComas(justif.getImporte(), justif),
                                             new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
                                     cell3 = new PdfPCell(new Paragraph("NO APLICA",
                                             new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
@@ -1339,14 +1332,16 @@ public class JustificacionREST extends AbstractFacade<Justificacion> {
                                             new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
                          
                         }else if(justif.getMontoTres()<=1){
-                                        cell2 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoUno(), justif),
+                                        cell2 = new PdfPCell(new Paragraph("Subtotal: "+justif.getSubTotal()+"\n"
+                                            + "IVA: " + justif.getIva()+"\n" + "Total:"+"\n"+ montoFormatComas(justif.getImporte(), justif),
                                                 new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
                                         cell3 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoDos(), justif),
                                                 new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
                                         cell4 = new PdfPCell(new Paragraph("NO APLICA",
                                             new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
                         }else{
-                                            cell2 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoUno(), justif),
+                                            cell2 = new PdfPCell(new Paragraph("Subtotal: "+justif.getSubTotal()+"\n"
+                                            + "IVA: " + justif.getIva()+"\n" + "Total:"+"\n"+ montoFormatComas(justif.getImporte(), justif),
                                                 new Font(Font.FontFamily.TIMES_ROMAN,10, Font.NORMAL)));
                                             cell3 = new PdfPCell(new Paragraph(montoFormatComas(justif.getMontoDos(), justif),
                                                 new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL)));
